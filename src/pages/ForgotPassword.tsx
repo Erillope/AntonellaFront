@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from 'react-hook-form';
-import "../styles/Login.css";
+import "../styles/login.css";
 import { TextField, Button, InputAdornment } from "@mui/material";
 import { Link } from "react-router-dom";
 import { AuthUserApi } from '../api/user_api';
