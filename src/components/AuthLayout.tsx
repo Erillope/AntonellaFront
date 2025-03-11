@@ -7,7 +7,7 @@ export const AuthLayout = () => {
     return (
         <div className="container">
             <div className='left'>
-                <img src={icon} width="150" height="100"/>
+                <img src={icon} width="100%" height="15%" style={{float: "left"}}/>
             </div>
             <div className="right">
                 <img src={logo} className="logo" />

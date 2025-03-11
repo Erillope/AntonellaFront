@@ -20,11 +20,12 @@
     top: 0;
     width: 40%;
     height: 100%;
+    overflow-y: auto;
     background-color: #EBB7C9;
 }
 
 .left {
-    position: absolute;
+    position: relative;
     left: 0;
     top: 0;
 }

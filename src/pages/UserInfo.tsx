@@ -136,11 +136,11 @@ export const UserInfo = () => {
 
     return (
         <div style={{ paddingLeft: "100px", paddingRight: "100px" }}>
-            <p style={{ fontSize: 15, fontWeight: "bold" }}>Aquí podrá visualizar o editar los datos del usuario {user?.name}. Recuerde que puede descartar los cambios en cualquier momento antes de presionar el boton "Guardar".</p>
+            <p style={{fontWeight: "bold" }}>Aquí podrá visualizar o editar los datos del usuario {user?.name}. Recuerde que puede descartar los cambios en cualquier momento antes de presionar el boton "Guardar".</p>
 
-            <form style={{ paddingTop: "20px", display: 'flex', flexDirection: 'column', justifyContent: "flex-start", rowGap: "30px" }}
+            <form style={{ paddingTop: "20px", display: 'flex', flexDirection: 'column', justifyContent: "flex-start", rowGap: "20px" }}
                 onSubmit={handleSubmit(updateUser)}>
-                <div style={{ display: 'flex', flexWrap: "wrap", justifyContent: 'flex-start', rowGap: "30px" }}>
+                <div style={{ display: 'flex', flexWrap: "wrap", justifyContent: 'flex-start', rowGap: "20px" }}>
                     <div style={{ flex: "1 0 50%" }}>
                         <TextField
                             label="Celular"
@@ -222,7 +222,7 @@ export const UserInfo = () => {
                         </FormControl>
                     </div>
                 </div>
-                <div style={{ width: "50%", display: 'flex', flexDirection: 'column', rowGap: "30px", justifyContent: "center", alignItems: 'center' }}>
+                <div style={{ width: "50%", display: 'flex', flexDirection: 'column', rowGap: "10px", justifyContent: "center", alignItems: 'center' }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs} >
                         <Controller
                             name="birthdate"

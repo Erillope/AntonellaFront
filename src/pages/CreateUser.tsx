@@ -102,7 +102,7 @@ export const CreateUser = () => {
 
     return (
         <div style={{ paddingLeft: "100px", paddingRight: "100px" }}>
-            <p style={{ fontSize: 15, fontWeight: "bold" }}>Por favor, complete los campos a continuación para registrar un nuevo usuario. Asegúrese de proporcionar información precisa para garantizar un proceso exitoso.</p>
+            <p style={{ fontWeight: "bold" }}>Por favor, complete los campos a continuación para registrar un nuevo usuario. Asegúrese de proporcionar información precisa para garantizar un proceso exitoso.</p>
 
             <form style={{ paddingTop: "20px", display: 'flex', flexDirection: 'column', justifyContent: "flex-start", rowGap: "30px" }} ref={formRef}
                 onSubmit={handleSubmit(createUser)}>

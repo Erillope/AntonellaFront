@@ -58,7 +58,7 @@ export const ForgotPassword = () => {
 
     return (
         <form onSubmit={handleSubmit(sendResetPasswordLink)} className="column" style={{ width: '100%' }}>
-            <p style={{ fontWeight: 'bold', fontSize: '20px', textAlign: 'center', maxWidth: '400px' }}>Ingrese su correo electrónico asocidado a tu cuenta Antonella</p>
+            <p style={{ fontWeight: 'bold', fontSize: '15px', textAlign: 'center', maxWidth: '400px' }}>Ingrese su correo electrónico asocidado a tu cuenta Antonella</p>
             <div style={{ paddingBottom: '20px', display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
                 <TextField
                     label="Email"
@@ -80,7 +80,7 @@ export const ForgotPassword = () => {
                     }}
                 />
                 <div >
-                    <Link to="/login/" style={{ fontSize: '13px' }}
+                    <Link to="/login/"
                         className="link">¿Ya tienes una cuenta? Inicia seción aquí</Link>;
                 </div>
             </div>

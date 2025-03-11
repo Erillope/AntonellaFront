@@ -51,7 +51,7 @@ const Login = () => {
 
   return (
     <form onSubmit={handleSubmit(signIn)} className="column" style={{ width: '100%' }}>
-      <div style={{ paddingBottom: '20px', display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
+      <div style={{ paddingBottom: '50px', display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }}>
         <TextField
           label="Celular"
           variant="outlined"
@@ -94,8 +94,8 @@ const Login = () => {
           }}
         />
         <div style={{ width: '60%', position: 'relative' }}>
-          <Link to="/password/reset/" style={{ position: 'absolute', right: 0, fontSize: '13px' }}
-            className="link">¿Has olvidado tu contraseña?</Link>;
+          <Link to="/password/reset/" style={{ position: 'absolute', right: 0 }}
+            className="link">¿Has olvidado tu contraseña?</Link>
         </div>
       </div>
 
