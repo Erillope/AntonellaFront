@@ -1,0 +1,67 @@
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('../assets/antonella_local.jpg');
+}
+
+.right {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    right: 0;
+    top: 0;
+    width: 40%;
+    height: 100%;
+    background-color: #EBB7C9;
+}
+
+.left {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.logo {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    width: 90%;
+    height: 30%;
+}
+
+.input {
+    width: 60%;
+    background-color: #ffffff;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.login-button {
+    background-color: #C9285D !important;
+    color: white !important;
+    padding-top: 10px !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+}
+
+.login-button:hover {
+    background-color: #AF234A !important;
+}
+
+.link {
+    color: #AF234A;
+    text-decoration: none;
+}

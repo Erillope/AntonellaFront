@@ -1,0 +1,30 @@
+.homeLayoutContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    background-color: #f5f5f5;
+    gap: 10px;
+    row-gap: 30px;
+    box-sizing: border-box;
+}
+
+.topCanvas {
+    background-color: #AF234A;
+    width: 100%;
+    height: 12%;
+}
+
+.viewContainer {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    column-gap: 50px;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+}

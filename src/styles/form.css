@@ -1,0 +1,23 @@
+.submit-button {
+    background-color: #3DC94B !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+}
+
+.submit-button:hover {
+    background-color: #2FAA38 !important;
+}
+
+.submit-button2 {
+    background-color: #16417C !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+}
+
+.submit-button2:hover {
+    background-color: #26518f !important;
+}
