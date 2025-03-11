@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 
 export const UserInfo = () => {
     const navigate = useNavigate();
-    const { register, control, handleSubmit, formState: { errors }, getValues, setValue } = useForm();
+    const { control, handleSubmit, formState: { errors }, getValues, setValue } = useForm();
     const [user, setUser] = useState<User>();
     const { userId } = useParams();
     const authApi = new AuthUserApi();
@@ -29,6 +29,10 @@ export const UserInfo = () => {
     const [birthdateError, setBirthdateError] = useState('');
     const [selectedGender, setSelectedGender] = useState('');
     const [birthdate, setBirthdate] = useState(new Date());
+
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -45,7 +49,6 @@ export const UserInfo = () => {
         if (user) {
             discartChanges();
         }
-        discartChanges();
     }, [user]);
 
     const updateUser = async () => {
@@ -85,9 +88,9 @@ export const UserInfo = () => {
     }
 
     const discartChanges = () => {
-        setValue('phoneNumber', user?.phoneNumber);
-        setValue('email', user?.email);
-        setValue('name', user?.name);
+        setPhoneNumber(user?.phoneNumber ?? "");
+        setEmail(user?.email ?? "");
+        setName(user?.name ?? "");
         setValue('birthdate', dayjs(user?.birthdate));
         setValue('gender', user?.gender ?? "")
         setSelectedGender(user?.gender ?? "");
@@ -97,9 +100,9 @@ export const UserInfo = () => {
     const getUserData = (): UpdateUserProps => {
         return {
             id: user?.id ?? "",
-            phoneNumber: getValues('phoneNumber'),
-            email: getValues('email'),
-            name: getValues('name'),
+            phoneNumber: phoneNumber,
+            email: email,
+            name: name,
             gender: selectedGender,
             birthdate: birthdate,
             status: active ? "ENABLE" : "DISABLE"
@@ -143,9 +146,10 @@ export const UserInfo = () => {
                             label="Celular"
                             variant="outlined"
                             margin="normal"
-                            {...register('phoneNumber', { required: 'El cecular es obligatorio' })}
-                            error={!!errors.phoneNumber || !!(phoneNumberError.length > 0)}
-                            helperText={typeof errors.phoneNumber?.message === 'string' ? errors.phoneNumber.message : phoneNumberError}
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            error={!!(phoneNumberError.length > 0) || phoneNumber.length == 0}
+                            helperText={phoneNumber.length == 0 ?  "El celular es obligatorio": phoneNumberError}
                             inputMode="numeric"
                             style={{ width: "80%" }}
                             slotProps={{
@@ -165,9 +169,10 @@ export const UserInfo = () => {
                             label="Email"
                             variant="outlined"
                             margin="normal"
-                            {...register('email', { required: 'El email es obligatorio' })}
-                            error={!!errors.email || !!(emailError.length > 0)}
-                            helperText={typeof errors.email?.message === 'string' ? errors.email.message : emailError}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            error={!!(emailError.length > 0) || email.length == 0}
+                            helperText={email.length == 0 ? "El email es obligatorio": emailError}
                             style={{ width: "80%" }}
                             slotProps={{
                                 input: {
@@ -186,9 +191,10 @@ export const UserInfo = () => {
                             label="Nombre"
                             variant="outlined"
                             margin="normal"
-                            {...register('name', { required: 'El nombre es obligatorio' })}
-                            error={!!errors.name || !!(nameError.length > 0)}
-                            helperText={typeof errors.name?.message === 'string' ? errors.name.message : nameError}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            error={!!(nameError.length > 0) || name.length == 0}
+                            helperText={name.length == 0 ? "El nombre es obligatorio": nameError}
                             style={{ width: "80%" }}
                         />
                     </div>

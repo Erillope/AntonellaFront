@@ -7,10 +7,10 @@ import { ResetPassword } from "./pages/ResetPassword";
 import { Home } from "./pages/Home";
 import { HomeLayout } from "./components/HomeLayout";
 import { LoginRoute } from "./components/loginRoute";
-import { CreateUser } from "./components/CreateUser";
+import { CreateUser } from "./pages/CreateUser";
 import { SearchUser } from "./pages/SearchUser";
 import { AuthLayout } from "./components/AuthLayout";
-import { UserInfo } from "./components/UserInfo";
+import { UserInfo } from "./pages/UserInfo";
 
 function App() {
 
