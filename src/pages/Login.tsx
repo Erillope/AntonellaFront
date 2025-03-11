@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from 'react-hook-form';
 import { AuthUserApi, User } from '../api/user_api'
-import "../styles/Login.css";
+import "../styles/login.css";
 import { TextField, Button, InputAdornment, IconButton } from "@mui/material";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
