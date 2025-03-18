@@ -55,10 +55,9 @@ export const CreateUser = () => {
     const createUser = async () => {
         const userData = getUserData();
         if (verifyRoles() || verifyPhoto()) return;
-        const user = await authApi.createUser(userData);
+        await authApi.createUser(userData);
         if (verifyErrors(userData.email, userData.phoneNumber, userData.employeeData?.dni)) return;
         showSuccessMessage();
-        console.log(user);
     }
 
     const getUserData = (): CreateUserProps => {
@@ -68,7 +67,7 @@ export const CreateUser = () => {
             name: getValues('name'),
             gender: selectedGender,
             birthdate: birthdate??new Date(),
-            employeeData: {
+            employeeData: userType === 'Empleado' ? undefined : {
                 dni: getValues('dni'),
                 address: getValues('address'),
                 photo: photo.split(',')[1],
@@ -85,6 +84,7 @@ export const CreateUser = () => {
     }
 
     const verifyRoles = (): boolean => {
+        if(userType==='Empleado'){return false}
         if (selectedRoles.length === 0) {
             Swal.fire({
                 title: "Roles no seleccionados",
@@ -98,6 +98,7 @@ export const CreateUser = () => {
     }
 
     const verifyPhoto = (): boolean => {
+        if(userType==='Empleado'){return false}
         if (photo === '') {
             Swal.fire({
                 title: "Foto no seleccionada",

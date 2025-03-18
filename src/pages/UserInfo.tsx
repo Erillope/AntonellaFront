@@ -111,6 +111,7 @@ export const UserInfo = () => {
     }
 
     const verifyRoles = (): boolean => {
+        if (!!!user?.dni){return false}
         if (selectedRoles.length === 0) {
             Swal.fire({
                 title: "Roles no seleccionados",
@@ -124,6 +125,7 @@ export const UserInfo = () => {
     }
 
     const verifyPhoto = (): boolean => {
+        if (!!!user?.dni){return false}
         if (photo === '') {
             Swal.fire({
                 title: "Foto no seleccionada",
@@ -404,9 +406,8 @@ export const UserInfo = () => {
                     <div style={{ width: '50%', display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center", gap: "20px" }}>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "80%" }}>
                             <FormControlLabel
-                                control={<Switch checked={active} onChange={(e) => {
-                                    setActive(e.target.checked)
-                                }} />}
+                                control={<Switch checked={active} onChange={(e) => setActive(e.target.checked)
+                                } disabled={!!user?.roles?.includes('super_admin') ? true : !editable} />}
                                 label={active ? "Activo" : "Inactivo"}
                             />
                             <p>Fecha de creación: {user ? toDateString(user.createdDate) : ''}</p>
