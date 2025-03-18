@@ -407,7 +407,7 @@ export const UserInfo = () => {
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", width: "80%" }}>
                             <FormControlLabel
                                 control={<Switch checked={active} onChange={(e) => setActive(e.target.checked)
-                                } disabled={true} />}
+                                } disabled={!!user?.roles?.includes('super_admin') ? true : !editable} />}
                                 label={active ? "Activo" : "Inactivo"}
                             />
                             <p>Fecha de creación: {user ? toDateString(user.createdDate) : ''}</p>
