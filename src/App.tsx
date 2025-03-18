@@ -11,6 +11,9 @@ import { CreateUser } from "./pages/CreateUser";
 import { SearchUser } from "./pages/SearchUser";
 import { AuthLayout } from "./components/AuthLayout";
 import { UserInfo } from "./pages/UserInfo";
+import { CreateRole } from "./pages/CreateRole";
+import { SearchRole } from "./pages/SearchRole";
+import { RoleInfo } from "./pages/RoleInfo";
 
 function App() {
 
@@ -33,6 +36,9 @@ function App() {
             <Route path="user/create/" element={<CreateUser/>}/>
             <Route path="user/search/" element={<SearchUser/>}/>
             <Route path="user/search/:userId" element={<UserInfo/>}/>
+            <Route path="role/create/" element={<CreateRole/>}/>
+            <Route path="role/search/" element={<SearchRole/>}/>
+            <Route path="role/search/:roleId" element={<RoleInfo/>}/>
           </Route>
         </Route>
 

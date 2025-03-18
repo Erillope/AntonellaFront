@@ -2,6 +2,7 @@ import axios from "axios";
 import { API_URL } from "./config";
 import { AbsctractApi } from "./abstract_api";
 import Cookies from "js-cookie";
+import { toDate, toDateString } from "./date";
 
 const userApiUrl = API_URL + "user/";
 
@@ -26,6 +27,12 @@ export interface CreateUserProps {
     name: string;
     gender: string;
     birthdate: Date;
+    employeeData?: {
+        dni: string;
+        address: string;
+        photo: string;
+        roles: string[];
+    }
 }
 
 export interface FilterUserProps {
@@ -44,7 +51,12 @@ export interface UpdateUserProps {
     gender?: string;
     birthdate?: Date;
     status?: string;
+    dni?: string;
+    address?: string;
+    photo?: string;
+    roles?: string[];
 }
+
 export class AuthUserApi extends AbsctractApi {
     protected errors: { [key: string]: string }= {
         'PHONE_NUMBER_NOT_REGISTERED': 'ModelNotFoundException',
@@ -58,6 +70,8 @@ export class AuthUserApi extends AbsctractApi {
         'INVALID_NAME': 'InvalidUserNameException',
         'INVALID_BIRTHDATE': 'InvalidUserBirthdateException',
         'USER_NOT_FOUND': 'ModelNotFoundException',
+        'DNI_ALREADY_REGISTERED': 'UserAlreadyExistsException',
+        'INVALID_DNI': 'InvalidDniException',
     };
 
     async signIn(phoneNumber: string, password: string): Promise<User | undefined> {
@@ -121,7 +135,22 @@ export class AuthUserApi extends AbsctractApi {
         catch (error) {
             this.catchError(error);
         }
-    } 
+    }
+    
+    getLoggedUser(): User | undefined {
+        const userData = JSON.parse(Cookies.get("user") ?? "");
+        if (userData === null) return undefined;
+        if (userData.id === undefined) return undefined;
+        return userData;
+    }
+
+    isLoggedUserAdmin(): boolean {
+        const user = this.getLoggedUser();
+        if (user) {
+            return user.roles?.includes("ADMIN") ?? false;
+        }
+        return false;
+    }
 
     async isValidUserCookie(): Promise<boolean> {
         if (Cookies.get("user") === undefined) return false;
@@ -155,6 +184,17 @@ export class AuthUserApi extends AbsctractApi {
         }
     }
 
+    async getUsersByRole(role: string): Promise<User[]> {
+        try {
+            const response = await axios.get(userApiUrl+"role/", {params: {'role': role}});
+            return response.data.data.map((user: any) => this.map(user));
+        }
+        catch (error) {
+            this.catchError(error);
+            return [];
+        }
+    }
+
     private map(data: any): User {
         return {
             id: data.id,
@@ -166,8 +206,8 @@ export class AuthUserApi extends AbsctractApi {
             name: data.name,
             status: data.status,
             gender: data.gender,
-            birthdate: new Date(data.birthdate),
-            createdDate: new Date(data.created_date),
+            birthdate: toDate(data.birthdate),
+            createdDate: toDate(data.created_date),
             roles: data.roles
         }
     }
@@ -177,8 +217,9 @@ export class AuthUserApi extends AbsctractApi {
             'phone_number': data.phoneNumber,
             'email': data.email,
             'name': data.name,
-            'birthdate': data.birthdate.toISOString().split('T')[0],
-            'gender': data.gender
+            'birthdate': toDateString(data.birthdate),
+            'gender': data.gender,
+            "employee_data": data.employeeData
         }
     }
 
@@ -199,8 +240,12 @@ export class AuthUserApi extends AbsctractApi {
             'email': data.email,
             'name': data.name,
             'gendre': data.gender,
-            'birthdate': data.birthdate,
-            'status': data.status
+            'birthdate': data.birthdate? toDateString(data.birthdate): undefined,
+            'status': data.status,
+            'dni': data.dni,
+            'address': data.address,
+            'photo': data.photo,
+            'roles': data.roles
         }
     }
 }

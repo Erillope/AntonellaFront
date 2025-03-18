@@ -2,6 +2,16 @@
   font-size: 12px;
 }
 
+.MuiInputBase-root.Mui-disabled {
+  background-color: white !important; /* Fondo blanco */
+  border-color: black !important; /* Borde negro */
+}
+
+.MuiInputBase-input.Mui-disabled {
+  -webkit-text-fill-color: black !important; /* Texto negro */
+  opacity: 1 !important;
+}
+
 :root {
   background-color: #EBB7C9;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -16,6 +26,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
 }
 
 a {

@@ -21,3 +21,15 @@
 .submit-button2:hover {
     background-color: #26518f !important;
 }
+
+.delete{
+    background-color: #DC3545 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+}
+
+.delete:hover{
+    background-color: #C82333 !important;
+}

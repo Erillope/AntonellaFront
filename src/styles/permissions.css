@@ -1,0 +1,65 @@
+.not-selected{
+    background-color: rgb(100, 100, 100) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+}
+
+.not-selected:hover{
+    background-color: rgb(150, 150, 150) !important;
+}
+
+.view-permission{
+    background-color: #3DC94B !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+}
+
+.view-permission:hover{
+    background-color: #2FAA38 !important;
+}
+
+.create-permission {
+    background-color: #16417C !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+}
+
+.create-permission:hover {
+    background-color: #26518f !important;
+}
+
+.edit-permission {
+    background-color: #FFC107 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+}
+
+.edit-permission:hover {
+    background-color: #FFA000 !important;
+}
+
+.delete-permission {
+    background-color: #DC3545 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+}
+
+.delete-permission:hover {
+    background-color: #C82333 !important;
+}
+
+.movil-permission{
+    background-color: #C9285D !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+}
+
+.movil-permission:hover{
+    background-color: #AF234A !important;
+}

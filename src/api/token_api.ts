@@ -1,6 +1,7 @@
 import axios from "axios";
 import { API_URL } from "./config";
 import { AbsctractApi } from "./abstract_api";
+import { toDate } from "./date";
 
 const tokenApiUrl = API_URL + "token/";
 
@@ -35,8 +36,8 @@ export class TokenApi extends AbsctractApi {
         return {
             id: data.id,
             userId: data.user_id,
-            createdAt: new Date(data.created_at),
-            expiredAt: new Date(data.expired_at)
+            createdAt: toDate(data.created_at),
+            expiredAt: toDate(data.expired_at)
         }
     }
 }
