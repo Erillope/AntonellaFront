@@ -7,22 +7,27 @@ interface PasswordInputFieldProps {
     register: ReturnType<typeof useForm>["register"];
     errors: FieldErrors;
     passwordError: string;
+    name?: string;
+    requiredErrorText?: string;
+    labelText?: string;
 }
 
 
-export const PasswordInputField: React.FC<PasswordInputFieldProps> = ({ register, errors, passwordError }) => {
+export const PasswordInputField: React.FC<PasswordInputFieldProps> = ({ register, errors,
+    passwordError, name, requiredErrorText, labelText}) => {
     const [showPassword, setShowPassword] = useState(false);
+    const fieldName = name??'password';
 
     return (
         <TextField
-            label="Contraseña"
+            label={labelText??'Contraseña'}
             type={showPassword ? "text" : "password"}
             variant="outlined"
             margin="normal"
             className="input"
-            {...register('password', { required: 'La contraseña es obligatoria' })}
-            error={!!errors.password || !!(passwordError.length > 0)}
-            helperText={typeof errors.password?.message === 'string' ? errors.password.message : passwordError}
+            {...register(fieldName, { required: requiredErrorText??'La contraseña es obligatoria' })}
+            error={!!errors[fieldName] || !!(passwordError.length > 0)}
+            helperText={typeof errors[fieldName]?.message === 'string' ? errors[fieldName].message : passwordError}
             slotProps={{
                 input: {
                     endAdornment: (

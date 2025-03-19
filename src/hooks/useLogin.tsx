@@ -13,9 +13,17 @@ export const useLogin = (action: () => void) => {
         Cookies.set('user', JSON.stringify(user), { expires: 1 });
     }
 
-    const verifyErrors = (authApi: AuthUserApi,
-        setPhoneNumberError: (msg: string) => void,
-        setPasswordError: (msg: string) => void): boolean => {
+    const signIn = async () => {
+        const phoneNumber = getValues('phoneNumber');
+        const password = getValues('password');
+        const user = await authApi.signIn(phoneNumber, password);
+        if (verifyErrors()) return;
+        if (!user) return;
+        setCookie(user);
+        action();
+    }
+
+    const verifyErrors = (): boolean => {
     
         setPhoneNumberError("");
         setPasswordError("");
@@ -30,16 +38,6 @@ export const useLogin = (action: () => void) => {
         }
         return false;
     };
-
-    const signIn = async () => {
-        const phoneNumber = getValues('phoneNumber');
-        const password = getValues('password');
-        const user = await authApi.signIn(phoneNumber, password);
-        if (verifyErrors(authApi, setPhoneNumberError, setPasswordError)) return;
-        if (!user) return;
-        setCookie(user);
-        action();
-    }
 
     return {
         register,
