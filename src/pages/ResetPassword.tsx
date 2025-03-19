@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { PasswordInputField } from "../components/PasswordInputField";
 import { ResetPasswordForm } from "../components/ResetPasswordForm";
 import { useResetPassword } from "../hooks/useResetPassword";
-import { initResetPasswordPage } from "../hooks/initPage";
+import { initResetPasswordPage } from "../util/initPage";
 
 export const ResetPassword = () => {
     const navigate = useNavigate();
@@ -15,7 +15,7 @@ export const ResetPassword = () => {
 
     return (
         <ResetPasswordForm handleSubmit={() => handleSubmit(resetPassword)}>
-                <PasswordInputField register={register} errors={errors} passwordError={passwordError} />
+                <PasswordInputField register={register} errors={errors} passwordError={passwordError}/>
                 <PasswordInputField register={register} errors={errors} passwordError={confirmPasswordError}
                  name="confirmPassword" requiredErrorText="Es necesaria la confirmación"
                  labelText="Confirmar contraseña" />

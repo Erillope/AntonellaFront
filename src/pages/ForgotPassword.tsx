@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/login.css";
 import "../styles/forgotPassword.css";
-import { EmailInputField } from "../components/EmailInputField";
+import { EmailInputField } from "../components/inputField/EmailInputField";
 import { useForgotPassword } from "../hooks/useForgotPassword";
 import { ForgotPasswordForm } from "../components/ForgotPasswordForm";
 
@@ -13,7 +13,8 @@ export const ForgotPassword = () => {
 
     return (
         <ForgotPasswordForm handleSubmit={() => handleSubmit(sendResetPasswordLink)} buttonText={buttonText}>
-                <EmailInputField register={register} errors={errors} emailError={emailError} />   
+                <EmailInputField register={register} errors={errors} emailError={emailError}
+                iconStyle={{ color: "#AF234A" }} />   
         </ForgotPasswordForm>
     );
 }
