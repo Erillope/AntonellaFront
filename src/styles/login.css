@@ -66,3 +66,11 @@
     color: #AF234A;
     text-decoration: none;
 }
+
+.login-box {
+    padding-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+}
