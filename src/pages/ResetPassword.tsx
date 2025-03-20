@@ -3,15 +3,14 @@ import { useEffect } from "react";
 import { PasswordInputField } from "../components/PasswordInputField";
 import { ResetPasswordForm } from "../components/ResetPasswordForm";
 import { useResetPassword } from "../hooks/useResetPassword";
-import { initResetPasswordPage } from "../util/initPage";
 
 export const ResetPassword = () => {
     const navigate = useNavigate();
     const { tokenId } = useParams();
     const { register, handleSubmit, errors, passwordError, confirmPasswordError,
-        resetPassword } = useResetPassword(tokenId ?? "", () => navigate('/'));
+        resetPassword, init } = useResetPassword(tokenId ?? "", () => navigate('/'));
 
-    useEffect(() => initResetPasswordPage(tokenId ?? "", () => navigate('/')), [])
+    useEffect(init, [])
 
     return (
         <ResetPasswordForm handleSubmit={() => handleSubmit(resetPassword)}>

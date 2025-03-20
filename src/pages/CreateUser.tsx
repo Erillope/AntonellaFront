@@ -3,14 +3,12 @@ import { useState, JSX, useEffect } from 'react';
 import { Person } from '@mui/icons-material';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import { useCreateUser } from '../hooks/useCreateUser';
-import { initCreateUserPage } from '../util/initPage';
 import { CreateUserHeader } from '../components/CreateUserHeader';
 import { CreateUserInputs } from '../components/inputField/CreateUserInputs';
 import { CreateUserForm } from '../components/CreateUserForm';
 
 export const CreateUser = () => {
     const navigate = useNavigate();
-    const [roles, setRoles] = useState<string[]>([]);
     const [userTypeClass, setUserTypeClass] = useState<string>("submit-button2");
     const [userTypeIcon, setUserTypeIcon] = useState<JSX.Element>(<EngineeringIcon />);
 
@@ -19,10 +17,10 @@ export const CreateUser = () => {
 
     const { register, control, handleSubmit, errors, phoneNumberError, emailError, nameError, dniError,
         birthdateError, selectedGender, setSelectedGender, birthdate, setBirthdate, selectedRoles,
-        setSelectedRoles, photo, setPhoto, createUser, userType, changeUserType, formRef
+        setSelectedRoles, photo, setPhoto, createUser, userType, changeUserType, formRef, roles, init
     } = useCreateUser('cliente', toClient, toEmployee);
 
-    useEffect(() => initCreateUserPage((roles) => setRoles(roles), () => navigate('/')), []);
+    useEffect(() => init(() => navigate('/')), []);
 
     return (
         <div style={{ paddingLeft: "100px", paddingRight: "100px" }}>

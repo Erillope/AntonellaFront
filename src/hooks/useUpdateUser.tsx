@@ -1,10 +1,13 @@
 import { useRef, useState } from "react";
 import { AuthUserApi, UpdateUserProps, User } from "../api/user_api";
 import { useForm } from "react-hook-form";
-import { selectRoleMessage, selectProfilePhotoMessage, alreadyExistsUserMessage,
+import {
+    selectRoleMessage, selectProfilePhotoMessage, alreadyExistsUserMessage,
     successUserUpdatedMessage
- } from "../util/alerts";
+} from "../util/alerts";
 import { BACK_URL } from "../api/config";
+import { PermissionVerifier } from "../api/verifyPermissions";
+import { RoleApi } from "../api/role_api";
 
 export const useUpdateUser = () => {
     const formRef = useRef<HTMLFormElement>(null);
@@ -24,8 +27,46 @@ export const useUpdateUser = () => {
     const [dni, setDni] = useState<string>('');
     const [address, setAddress] = useState<string>('');
     const authApi = new AuthUserApi()
+    const roleApi = new RoleApi();
+    const permissionVerifier = new PermissionVerifier();
     const [user, setUser] = useState<User>();
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+    const [roles, setRoles] = useState<string[]>([]);
+    const [editable, setEditable] = useState(false);
+
+    const init = (userId: string, notHaveReadPermissionCase: () => void, notFoundUser: () => void) => {
+        const fetchRoles = async () => {
+            const user = await authApi.getUser(userId ?? "");
+            await verifyReadAndEditUserPermissions(user?.roles ?? [],
+                notHaveReadPermissionCase);
+            let roles = await roleApi.getRoles();
+            roles = roles.filter((role) => role.name !== 'super_admin');
+            setRoles(roles.map((role) => role.name));
+            if (user) {
+                setUser(user);
+                discartChanges(user);
+            }
+            else {
+                notFoundUser(); return
+            }
+        }
+        fetchRoles();
+    }
+
+    const verifyReadAndEditUserPermissions = async (selectedUserRoles: string[],
+        notHaveReadPermissionCase: () => void) => {
+
+        const authApi = new AuthUserApi();
+        const permissions = await permissionVerifier.getUserAccessPermissions()
+        if (!permissions.read) {
+            notHaveReadPermissionCase(); return
+        }
+        const loggedUser = authApi.getLoggedUser();
+        if (selectedUserRoles.includes('super_admin')) {
+            setEditable(!!loggedUser?.roles?.includes('super_admin'));
+        }
+        else { setEditable(permissions.edit) }
+    }
 
     const updateUser = async () => {
         const userData = getUserData();
@@ -170,6 +211,9 @@ export const useUpdateUser = () => {
         setSelectedRoles,
         discartChanges,
         formRef,
-        isEmployee
+        isEmployee,
+        roles,
+        editable,
+        init
     }
 }

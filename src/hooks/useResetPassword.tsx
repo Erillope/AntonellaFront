@@ -2,12 +2,25 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AuthUserApi, User } from '../api/user_api';
 import Cookies from 'js-cookie';
+import { TokenApi } from '../api/token_api';
+import { invalidTokenMessage } from '../util/alerts';
 
 export const useResetPassword = (tokenId: string, action: () => void) => {
     const { register, handleSubmit, formState: { errors }, getValues } = useForm();
     const [passwordError, setPasswordError] = useState('');
     const [confirmPasswordError, setConfirmPasswordError] = useState('');
     const authApi = new AuthUserApi();
+    const tokenApi = new TokenApi();
+
+    const init = () => {
+        const fetchToken = async () => {
+            await tokenApi.getToken(tokenId);
+            if (tokenApi.isError('INVALID_TOKEN')) {
+                invalidTokenMessage(action);
+            }
+        }
+        fetchToken();
+    }
 
     const resetPassword = async () => {
         const password = getValues('password');
@@ -44,5 +57,6 @@ export const useResetPassword = (tokenId: string, action: () => void) => {
         passwordError,
         confirmPasswordError,
         resetPassword,
+        init
     }
 }

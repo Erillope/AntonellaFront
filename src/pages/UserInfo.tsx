@@ -1,34 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { User } from "../api/user_api";
-import "../styles/form.css";
+import { useEffect } from "react";
 import { toDateString } from "../api/date";
 import { useUpdateUser } from "../hooks/useUpdateUser";
-import { initUserInfoPage } from "../util/initPage";
 import { UpdateUserInputs } from "../components/inputField/UpdateUserInputs";
 import { UpdateUserForm } from "../components/UpdateUserForm";
 
 export const UserInfo = () => {
     const navigate = useNavigate();
-    const [roles, setRoles] = useState<string[]>([]);
-    const [editable, setEditable] = useState(false);
     const { userId } = useParams();
     const { register, control, handleSubmit, errors, phoneNumberError, emailError, nameError, dniError,
         birthdateError, selectedGender, setSelectedGender, birthdate, setBirthdate, photo, setPhoto,
         active, setActive, phoneNumber, setPhoneNumber, email, setEmail, name, setName, dni, setDni, address,
-        setAddress, updateUser, user, setUser, selectedRoles, setSelectedRoles, discartChanges, formRef,
-        isEmployee } = useUpdateUser();
+        setAddress, updateUser, user, selectedRoles, setSelectedRoles, discartChanges, formRef,
+        isEmployee, roles, editable, init} = useUpdateUser();
 
     const notHaveReadPermissionCase = () => navigate('/');
-    const haveReadPermissionCase = (editPermission: boolean) => setEditable(editPermission);
     const notFoundUser = () => navigate('/user/search/');
-    const initRoles = (roles: string[]) => setRoles(roles);
-    const initUser = (user: User) => setUser(user);
-    const initData = (user: User) => discartChanges(user);
 
-    useEffect(() => initUserInfoPage(userId ?? '', notHaveReadPermissionCase, haveReadPermissionCase,
-        initRoles, initUser, initData, notFoundUser
-    ), [])
+    useEffect(() => init(userId??'', notHaveReadPermissionCase, notFoundUser), [])
 
     return (
         <div style={{ paddingLeft: "100px", paddingRight: "100px" }}>

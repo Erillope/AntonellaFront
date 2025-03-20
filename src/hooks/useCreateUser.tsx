@@ -5,6 +5,8 @@ import {
     alreadyExistsUserMessage, successUserCreationMessage, selectRoleMessage,
     selectProfilePhotoMessage
 } from "../util/alerts";
+import { RoleApi } from "../api/role_api";
+import { PermissionVerifier } from "../api/verifyPermissions";
 
 export const useCreateUser = (type: "empleado" | "cliente",
     changeToClient: () => void, changeToEmployee: () => void
@@ -22,6 +24,26 @@ export const useCreateUser = (type: "empleado" | "cliente",
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [photo, setPhoto] = useState<string>('');
     const authApi = new AuthUserApi()
+    const permissionVerifier = new PermissionVerifier();
+    const roleApi = new RoleApi();
+    const [roles, setRoles] = useState<string[]>([]);
+
+    const init = (failureAction: () => void) => {
+        const fetchRoles = async () => {
+            await verifyCreateUserPermissions(failureAction);
+            let roles = await roleApi.getRoles();
+            roles = roles.filter((role) => role.name !== 'super_admin');
+            setRoles(roles.map((role) => role.name));
+        }
+        fetchRoles();
+    }
+
+    const verifyCreateUserPermissions = async (action: () => void) => {
+        const permissions = await permissionVerifier.getUserAccessPermissions();
+        if (!permissions.create) {
+            action();
+        }
+    }
 
     const createUser = async () => {
         const userData = getUserData();
@@ -150,6 +172,8 @@ export const useCreateUser = (type: "empleado" | "cliente",
         createUser,
         userType,
         changeUserType,
-        formRef
+        formRef,
+        roles,
+        init
     }
 }
