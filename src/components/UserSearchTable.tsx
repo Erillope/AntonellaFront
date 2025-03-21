@@ -7,6 +7,7 @@ import { Visibility } from '@mui/icons-material';
 import { IconButton, Paper, TablePagination } from "@mui/material";
 import React from "react";
 import { User } from "../api/user_api";
+import "../styles/table.css";
 
 interface UserSearchTableProps {
     order: "asc" | "desc";

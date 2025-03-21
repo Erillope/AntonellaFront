@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { PasswordInputField } from "../components/PasswordInputField";
+import { PasswordInputField } from "../components/inputField/PasswordInputField";
 import { ResetPasswordForm } from "../components/ResetPasswordForm";
 import { useResetPassword } from "../hooks/useResetPassword";
 

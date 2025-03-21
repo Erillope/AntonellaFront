@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 import { PhoneInputField } from '../components/inputField/PhoneInputField';
-import { PasswordInputField } from "../components/PasswordInputField";
+import { PasswordInputField } from "../components/inputField/PasswordInputField";
 import { useLogin } from "../hooks/useLogin";
 import { LoginForm } from "../components/LoginForm";
 

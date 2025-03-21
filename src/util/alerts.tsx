@@ -81,3 +81,53 @@ export const invalidTokenMessage = (action: () => void) => {
         action();
     });
 }
+
+export const permissionsNotSelectedMessage = () => {
+    Swal.fire({
+        title: 'Permisos no seleccionados',
+        text: 'Debe seleccionar al menos un permiso',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+    });
+}
+
+export const successRoleCreatedMessage = (action: () => void) => {
+    Swal.fire({
+        title: 'Rol creado',
+        text: 'El rol se ha creado correctamente',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+    }).then(action);
+}
+
+export const successRoleUpdatedMessage = () => {
+    Swal.fire({
+        title: 'Rol actualizado',
+        text: 'El rol se ha sido actualizado correctamente',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+    });
+}
+
+export const roleDeletedMessage = (roleName: string) => {
+    Swal.fire({
+        title: 'Rol eliminado',
+        text: `El rol ${roleName} ha sido eliminado correctamente`,
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+    })
+}
+
+export const confirmDeleteRoleMessage = (action: () => void) => {
+    Swal.fire({
+        title: 'Eliminar Rol',
+        text: '¿Está seguro que desea eliminar el rol? También se removerá de la lista de roles de los usuarios',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Aceptar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            action();
+    }})
+}

@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import "../styles/table.css";
 import { useSearchUser } from "../hooks/useSearchUser";
 import { useEffect } from "react";
-import { UserSearchFilters } from "../components/userSearchFilters";
+import { UserSearchFilters } from "../components/UserSearchFilters";
 import { UserSearchTable } from "../components/UserSearchTable";
 
 export const SearchUser = () => {
