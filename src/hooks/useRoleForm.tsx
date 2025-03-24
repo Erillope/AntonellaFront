@@ -1,17 +1,14 @@
-import { useRef, useState } from "react";
-import { PermissionVerifier } from "../api/verifyPermissions";
-import { AccessPermission, CreateRole, RoleApi, Role } from "../api/role_api";
 import { useForm } from "react-hook-form";
-import {
-    permissionsNotSelectedMessage, successRoleCreatedMessage,
-    successRoleUpdatedMessage, roleDeletedMessage
-} from "../util/alerts";
+import { AccessPermission, CreateRole, Role, RoleApi } from "../api/role_api";
+import { PermissionVerifier } from "../api/verifyPermissions";
+import { useRef, useState } from "react";
 
-export const useCreateRole = () => {
-    const roleApi = new RoleApi();
+export const useRoleForm = () => {
     const formRef = useRef<HTMLFormElement>(null);
     const permissionVerifier = new PermissionVerifier();
     const { register, handleSubmit, formState: { errors }, getValues, setValue } = useForm();
+    const [roleNameError, setRoleNameError] = useState('');
+    const roleApi = new RoleApi();
     const [citasPermissions, setCitasPermissions] = useState<string[]>([]);
     const [usuariosPermissions, setUsuariosPermissions] = useState<string[]>([]);
     const [serviciosPermissions, setServiciosPermissions] = useState<string[]>([]);
@@ -22,75 +19,9 @@ export const useCreateRole = () => {
     const [pagosPermissions, setPagosPermissions] = useState<string[]>([]);
     const [movilPermissions, setMovilPermissions] = useState<string[]>([]);
     const [roleName, setRoleName] = useState('');
-    const [roleNameError, setRoleNameError] = useState('');
     const [role, setRole] = useState<Role>();
     const [editable, setEditable] = useState(false);
     const [deletePermission, setDeletePermission] = useState(false);
-
-    const initCreate = (notHaveCreatePermission: () => void) => {
-        const verifyPermissions = async () => {
-            const permissions = await permissionVerifier.getRoleAccessPermissions();
-            if (!permissions.create) {
-                notHaveCreatePermission(); return
-            }
-        }
-        verifyPermissions();
-    }
-
-    const initEdit = (roleId: string, notHaveReadpermission: () => void, notFound: () => void) => {
-        const verifyPermissions = async () => {
-            const permissions = await permissionVerifier.getRoleAccessPermissions();
-            const selectedRole = await roleApi.getRole(roleId);
-            if (roleApi.isError('ROLE_NOT_FOUND')) {
-                notFound(); return
-            }
-            if (!permissions.read) {
-                notHaveReadpermission(); return
-            }
-            if (!!(selectedRole?.name === "super_admin")) {
-                setEditable(false);
-                setDeletePermission(false);
-            }
-            else {
-                setEditable(permissions.edit)
-                setDeletePermission(permissions.delete)
-            }
-            if (selectedRole) {
-                setRole(selectedRole);
-                discartChanges(selectedRole);
-            }
-        }
-        verifyPermissions();
-    }
-
-    const createRole = async () => {
-        const request = getRoleData();
-        if (request.accesses.length === 0) {
-            permissionsNotSelectedMessage();
-            return;
-        }
-        await roleApi.createRole(request);
-        if (verifyErros()) { return }
-        successRoleCreatedMessage(clearForm);
-    }
-
-    const updateRole = async () => {
-        const request = getRoleData();
-        if (request.accesses.length === 0) {
-            permissionsNotSelectedMessage();
-            return;
-        }
-        const updatedRole = await roleApi.updateRole({ role: role?.name ?? '', name: request.name, accesses: request.accesses });
-        if (verifyErros()) { return }
-        setRole(updatedRole);
-        successRoleUpdatedMessage();
-    }
-
-    const deleteRole = (action: () => void) => {
-        roleApi.deleteRole(role?.name ?? '');
-        roleDeletedMessage(role?.name ?? '');
-        action();
-    }
 
     const getRoleData = (): CreateRole => {
         return {
@@ -99,7 +30,38 @@ export const useCreateRole = () => {
         }
     }
 
-    const verifyErros = (): boolean => {
+    const verifyCreateRolePermissions = async (notHaveCreatePermission: () => void) => {
+        const permissions = await permissionVerifier.getRoleAccessPermissions();
+        if (!permissions.create) {
+            notHaveCreatePermission(); return
+        }
+    }
+
+    const verifyReadAndEditRolePermissions = async (roleId: string, notFound: () => void, 
+    notHaveReadpermission: () => void) => {
+        const permissions = await permissionVerifier.getRoleAccessPermissions();
+        const selectedRole = await roleApi.getRole(roleId);
+        if (roleApi.isError('ROLE_NOT_FOUND')) {
+            notFound(); return
+        }
+        if (!permissions.read) {
+            notHaveReadpermission(); return
+        }
+        if (!!(selectedRole?.name === "super_admin")) {
+            setEditable(false);
+            setDeletePermission(false);
+        }
+        else {
+            setEditable(permissions.edit)
+            setDeletePermission(permissions.delete)
+        }
+        if (selectedRole) {
+            setRole(selectedRole);
+            discartChanges(selectedRole);
+        }
+    }
+
+    const verifyErrors = (): boolean => {
         setRoleNameError('');
         if (roleApi.isError('INVALID_ROLE_NAME')) {
             setRoleNameError(roleApi.getErrorMessage());
@@ -128,7 +90,7 @@ export const useCreateRole = () => {
 
     const discartChanges = (role: Role | undefined) => {
         setRole(role);
-        setRoleName(role?.name??'');
+        setRoleName(role?.name ?? '');
         setValue("roleName", role?.name);
         setMovilPermissions([]);
         role?.accesses.forEach(access => {
@@ -186,11 +148,19 @@ export const useCreateRole = () => {
     }
 
     return {
+        verifyCreateRolePermissions,
+        verifyReadAndEditRolePermissions,
+        getRoleData,
+        roleApi,
+        verifyErrors,
+        clearForm,
+        role,
+        setRole,
+        editable,
+        formRef,
         register,
         handleSubmit,
         errors,
-        createRole,
-        initCreate,
         citasPermissions,
         setCitasPermissions,
         usuariosPermissions,
@@ -207,19 +177,13 @@ export const useCreateRole = () => {
         setChatsPermissions,
         pagosPermissions,
         setPagosPermissions,
-        setMovilPermissions,
         movilPermissions,
+        setMovilPermissions,
         roleNameError,
         roleName,
         setRoleName,
-        formRef,
-        updateRole,
-        initEdit,
-        editable,
-        deletePermission,
         discartChanges,
-        deleteRole,
-        role
+        deletePermission,
+        setDeletePermission
     }
-
 }

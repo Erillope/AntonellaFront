@@ -19,6 +19,7 @@ export interface User {
     birthdate: Date;
     createdDate: Date;
     roles?: string[];
+    categories?: string[];
 }
 
 export interface CreateUserProps {
@@ -32,6 +33,7 @@ export interface CreateUserProps {
         address: string;
         photo: string;
         roles: string[];
+        categories: string[];
     }
 }
 
@@ -55,6 +57,7 @@ export interface UpdateUserProps {
     address?: string;
     photo?: string;
     roles?: string[];
+    categories?: string[];
 }
 
 export class AuthUserApi extends AbsctractApi {
@@ -208,7 +211,8 @@ export class AuthUserApi extends AbsctractApi {
             gender: data.gender,
             birthdate: toDate(data.birthdate),
             createdDate: toDate(data.created_date),
-            roles: data.roles
+            roles: data.roles,
+            categories: data.categories
         }
     }
 
@@ -245,7 +249,8 @@ export class AuthUserApi extends AbsctractApi {
             'dni': data.dni,
             'address': data.address,
             'photo': data.photo,
-            'roles': data.roles
+            'roles': data.roles,
+            'categories': data.categories
         }
     }
 }

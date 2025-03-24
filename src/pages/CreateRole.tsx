@@ -1,24 +1,25 @@
-import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { TextInputField } from '../components/inputField/TextInputField';
-import { useCreateRole } from '../hooks/useCreateRole';
+import { useRole } from '../hooks/useRole';
 import { MovilPermission } from '../components/inputField/SelectPermissions';
 import { RolePermissionsTable } from '../components/RolePermissionsTable';
 import { CreateRoleForm } from '../components/CreateRoleForm';
+import { useRoleFormActions } from '../hooks/useRoleFormActions';
 
 export const CreateRole = () => {
-    const navigate = useNavigate();
     const { register, handleSubmit, errors, createRole, setCitasPermissions, setUsuariosPermissions,
         setServiciosPermissions, setProductosPermissions, setRolesPermissions, setNotificacionesPermissions, setChatsPermissions, setPagosPermissions, setMovilPermissions, roleNameError, initCreate,
         roleName, setRoleName, movilPermissions, citasPermissions, chatsPermissions,
         pagosPermissions, productosPermissions, rolesPermissions, usuariosPermissions,
-        serviciosPermissions, notificacionesPermissions, formRef } = useCreateRole();
+        serviciosPermissions, notificacionesPermissions, formRef, clearForm} = useRole();
+    
+    const { handleCreateRole, notHaveCreatePermissionAction } = useRoleFormActions({clearForm, createRole})
 
-    useEffect(() => initCreate(() => navigate('/')), [])
+    useEffect(() => initCreate(notHaveCreatePermissionAction), [])
 
     return (
-        <CreateRoleForm handleSubmit={() => handleSubmit(createRole)} formRef={formRef}>
-            <TextInputField register={register} errors={errors} name="roleName"
+        <CreateRoleForm handleSubmit={() => handleSubmit(handleCreateRole)} formRef={formRef}>
+            <TextInputField register={register} errors={errors} name="roleName" style={{ width: "50%" }}
                 inputError={roleNameError} value={roleName} onValueChange={setRoleName}
                 labelText="Nombre del rol" requiredErrorText="El nombre del rol es requerido" />
             <MovilPermission onSelectMovilPermissions={setMovilPermissions} value={movilPermissions} />

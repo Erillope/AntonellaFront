@@ -1,40 +1,36 @@
-import { useNavigate } from 'react-router-dom';
-import { useState, JSX, useEffect } from 'react';
-import { Person } from '@mui/icons-material';
-import EngineeringIcon from '@mui/icons-material/Engineering';
-import { useCreateUser } from '../hooks/useCreateUser';
+import { useEffect } from 'react';
+import { useUser } from '../hooks/useUser';
 import { CreateUserHeader } from '../components/CreateUserHeader';
 import { CreateUserInputs } from '../components/inputField/CreateUserInputs';
 import { CreateUserForm } from '../components/CreateUserForm';
+import { useUserFormActions } from '../hooks/useUserFormActions';
 
 export const CreateUser = () => {
-    const navigate = useNavigate();
-    const [userTypeClass, setUserTypeClass] = useState<string>("submit-button2");
-    const [userTypeIcon, setUserTypeIcon] = useState<JSX.Element>(<EngineeringIcon />);
-
-    const toClient = () => { setUserTypeClass("submit-button2"); setUserTypeIcon(<EngineeringIcon />) }
-    const toEmployee = () => { setUserTypeClass("submit-button"); setUserTypeIcon(<Person />) }
-
     const { register, control, handleSubmit, errors, phoneNumberError, emailError, nameError, dniError,
         birthdateError, selectedGender, setSelectedGender, birthdate, setBirthdate, selectedRoles,
-        setSelectedRoles, photo, setPhoto, createUser, userType, changeUserType, formRef, roles, init
-    } = useCreateUser('cliente', toClient, toEmployee);
+        setSelectedRoles, photo, setPhoto, createUser, creationUserType, changeCreationUserType, 
+        formRef, roles, initCreate, selectedCategories, setSelectedCategories, isCategoriesOpen, clearForm
+    } = useUser();
 
-    useEffect(() => init(() => navigate('/')), []);
+    const { userTypeClass, userTypeIcon, changeUserType, handleCreateUser, failureCreateAction
+    } = useUserFormActions({changeCreationUserType, createUser, clearForm});
+
+    useEffect(() => initCreate(failureCreateAction), []);
 
     return (
         <div style={{ paddingLeft: "100px", paddingRight: "100px" }}>
-            <CreateUserHeader userType={userType} buttonClass={userTypeClass} buttonIcon={userTypeIcon}
-                changeUserType={changeUserType} />
-            <CreateUserForm formRef={formRef} handleSubmit={() => handleSubmit(createUser)}>
+            <CreateUserHeader userType={creationUserType}
+            buttonClass={userTypeClass} buttonIcon={userTypeIcon} changeUserType={changeUserType} />
+            <CreateUserForm formRef={formRef} handleSubmit={() => handleSubmit(handleCreateUser)}>
                 <CreateUserInputs register={register} control={control} errors={errors}
                     phoneNumberError={phoneNumberError} emailError={emailError} nameError={nameError}
-                    birthdateError={birthdateError} dniError={dniError} roles={roles}
+                    birthdateError={birthdateError} dniError={dniError} roles={roles} birthdate={birthdate}  
                     selectedRoles={selectedRoles} setSelectedRoles={setSelectedRoles}
-                    userType={userType} selectedGender={selectedGender} setSelectedGender={setSelectedGender}
-                    birthdate={birthdate} setBirthdate={setBirthdate} photo={photo} setPhoto={setPhoto} />
+                    userType={creationUserType} selectedGender={selectedGender} photo={photo}
+                    setSelectedGender={setSelectedGender} setPhoto={setPhoto} setBirthdate={setBirthdate}  
+                    selectedCategories={selectedCategories} onSelectedCategories={setSelectedCategories}
+                    isCategoriesOpen={isCategoriesOpen}/>
             </CreateUserForm>
         </div>
-
     )
 }

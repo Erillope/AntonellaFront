@@ -91,6 +91,15 @@ export const permissionsNotSelectedMessage = () => {
     });
 }
 
+export const categoriesNotSelectedMessage = () => {
+    Swal.fire({
+        title: 'Categorías no seleccionadas',
+        text: 'Ya que el empleado posee rol de acceso al aplicativo móvil, debe seleccionar al menos una categoría de empleado',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+    });
+}
+
 export const successRoleCreatedMessage = (action: () => void) => {
     Swal.fire({
         title: 'Rol creado',

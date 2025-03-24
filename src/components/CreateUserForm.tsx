@@ -14,8 +14,8 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ formRef, handleS
             onSubmit={handleSubmit()}>
             <div className='input-group'>
                 {children}
-                <SubmitButton />
             </div>
+            <SubmitButton />
         </form>
     )
 }

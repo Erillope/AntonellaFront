@@ -8,6 +8,7 @@ import { AddressInputField } from './AddressInputField';
 import ImageUploader from '../ImageUploader';
 import { SelectRoles } from '../SelectRoles';
 import { Control, FieldErrors, FieldValues, useForm } from 'react-hook-form';
+import { EmployeeCategoriesCheck } from './EmployeeCategoriesCheck';
 import React from 'react';
 
 interface CreateUserInputsProps {
@@ -29,12 +30,16 @@ interface CreateUserInputsProps {
     setBirthdate: (date: Date | undefined) => void;
     photo: string;
     setPhoto: (photo: string) => void;
+    selectedCategories: string[];
+    onSelectedCategories: (categories: string[]) => void;
+    isCategoriesOpen?: boolean;
 }
 
 export const CreateUserInputs: React.FC<CreateUserInputsProps> = ({
     register, control, errors, phoneNumberError, emailError, nameError, birthdateError,
     dniError, roles, selectedRoles, setSelectedRoles, userType, selectedGender,
-    setSelectedGender, birthdate, setBirthdate, photo, setPhoto
+    setSelectedGender, birthdate, setBirthdate, photo, setPhoto, selectedCategories, onSelectedCategories,
+    isCategoriesOpen
 }) => {
     return (
         <>
@@ -76,18 +81,27 @@ export const CreateUserInputs: React.FC<CreateUserInputsProps> = ({
             }
 
             {userType === "empleado" &&
-                <div style={{ flex: "1 0 50%" }}>
-                    <AddressInputField register={register} errors={errors} style={{ width: "80%" }} />
-                </div>
+                <>
+                    <div style={{ flex: "1 0 50%" }}>
+                        <AddressInputField register={register} errors={errors} style={{ width: "80%" }} />
+                    </div>
+                    <div style={{ flex: "1 0 50%", justifyContent: "center", alignItems: 'center', display: 'flex', maxWidth: "50%" }}>
+                        <SelectRoles roles={roles}
+                            selectedRoles={selectedRoles}
+                            onAddRole={(role) => setSelectedRoles([...selectedRoles, role])}
+                            onRemoveRole={(role) => setSelectedRoles(selectedRoles.filter(r => r !== role))} />
+                    </div>
+                    <div style={{ flex: "1 0 50%", justifyContent: "center", alignItems: 'center', display: 'flex', width: "50%" }}>
+                        <div style={{ width: '80%' }}>
+                            <EmployeeCategoriesCheck selectedCategories={selectedCategories}
+                                onSelectedCategories={onSelectedCategories}
+                                disabled={!isCategoriesOpen} />
+                        </div>
+                    </div>
+                    <div style={{ flex: "1 0 50%" }}></div>
+                </>
             }
-            {userType === "empleado" &&
-                <div style={{ flex: "1 0 50%", justifyContent: "center", alignItems: 'center', display: 'flex', maxWidth: "50%" }}>
-                    <SelectRoles roles={roles}
-                        selectedRoles={selectedRoles}
-                        onAddRole={(role) => setSelectedRoles([...selectedRoles, role])}
-                        onRemoveRole={(role) => setSelectedRoles(selectedRoles.filter(r => r !== role))} />
-                </div>
-            }
+
         </>
     )
 }

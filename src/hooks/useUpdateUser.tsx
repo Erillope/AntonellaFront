@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthUserApi, UpdateUserProps, User } from "../api/user_api";
 import { useForm } from "react-hook-form";
 import {
@@ -33,6 +33,23 @@ export const useUpdateUser = () => {
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [roles, setRoles] = useState<string[]>([]);
     const [editable, setEditable] = useState(false);
+    const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fechIsCategoriesOpen = async () => {
+            let isOpen = false;
+            for (const role of selectedRoles) {
+                const permissions = await roleApi.getRolePermissions(role, "MOVIL");
+                if (permissions.length > 0) {
+                    isOpen = true;
+                    break;
+                }
+            }
+            setIsCategoriesOpen(isOpen);
+        }
+        fechIsCategoriesOpen();
+    }, [selectedRoles]);
 
     const init = (userId: string, notHaveReadPermissionCase: () => void, notFoundUser: () => void) => {
         const fetchRoles = async () => {
@@ -89,7 +106,8 @@ export const useUpdateUser = () => {
             address: getValues('address'),
             photo: photo.split(',')[1],
             roles: selectedRoles,
-            status: active ? 'ENABLE' : 'DISABLE'
+            status: active ? 'ENABLE' : 'DISABLE',
+            categories: selectedCategories
         }
     }
 
@@ -174,6 +192,7 @@ export const useUpdateUser = () => {
         setValue('address', user.address);
         setSelectedRoles(user.roles ?? []);
         setActive(user.status === 'ENABLE')
+        setSelectedCategories(user.categories?? []);
     }
 
     return {
@@ -214,6 +233,9 @@ export const useUpdateUser = () => {
         isEmployee,
         roles,
         editable,
-        init
+        init,
+        isCategoriesOpen,
+        selectedCategories,
+        setSelectedCategories
     }
 }

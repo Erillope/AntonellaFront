@@ -17,7 +17,7 @@ export const SelectRoles: React.FC<SelectRolesProps> = ({ roles, selectedRoles, 
 
     useEffect(() => {
         setOptions(loadOptions());
-    }, [selectedRole])
+    }, [selectedRoles])
 
     const loadOptions = (): string[] => {
         if (roles === undefined) { return []; }

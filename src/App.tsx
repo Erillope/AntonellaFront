@@ -14,6 +14,7 @@ import { UserInfo } from "./pages/UserInfo";
 import { CreateRole } from "./pages/CreateRole";
 import { SearchRole } from "./pages/SearchRole";
 import { RoleInfo } from "./pages/RoleInfo";
+import { CreateService } from "./pages/CreateService";
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
             <Route path="role/create/" element={<CreateRole/>}/>
             <Route path="role/search/" element={<SearchRole/>}/>
             <Route path="role/search/:roleId" element={<RoleInfo/>}/>
+            <Route path="service/create/" element={<CreateService/>}/>
           </Route>
         </Route>
 

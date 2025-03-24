@@ -11,6 +11,7 @@ import React from "react";
 import ImageUploader from "../ImageUploader";
 import { SelectRoles } from "../SelectRoles";
 import "../../styles/form.css";
+import { EmployeeCategoriesCheck } from "./EmployeeCategoriesCheck";
 
 interface UpdateUserInputsProps {
     register: ReturnType<typeof useForm>["register"];
@@ -46,6 +47,9 @@ interface UpdateUserInputsProps {
     createdDate: string;
     isEmployee: boolean;
     isSuperAdmin: boolean;
+    selectedCategories: string[];
+    onSelectedCategories: (categories: string[]) => void;
+    isCategoriesOpen?: boolean;
 }
 
 export const UpdateUserInputs: React.FC<UpdateUserInputsProps> = ({
@@ -53,7 +57,7 @@ export const UpdateUserInputs: React.FC<UpdateUserInputsProps> = ({
     birthdateError, selectedGender, setSelectedGender, birthdate, setBirthdate, photo, setPhoto,
     phoneNumber, setPhoneNumber, email, setEmail, name, setName, dni, setDni, address,
     setAddress, active, setActive, roles, selectedRoles, setSelectedRoles, editable,
-    isEmployee, isSuperAdmin, createdDate
+    isEmployee, isSuperAdmin, createdDate, selectedCategories, onSelectedCategories, isCategoriesOpen
 }) => {
     return (
         <>
@@ -101,20 +105,28 @@ export const UpdateUserInputs: React.FC<UpdateUserInputsProps> = ({
                 }
 
                 {isEmployee &&
-                    <div style={{ flex: "1 0 50%" }}>
-                        <AddressInputField register={register} errors={errors} style={{ width: "80%" }}
-                            value={address} onChange={(value) => setAddress(value)}
-                            disabled={!editable} />
-                    </div>
-                }
-                {isEmployee &&
-                    <div style={{ flex: "1 0 50%", justifyContent: "center", alignItems: 'center', display: 'flex', maxWidth: "50%" }}>
-                        <SelectRoles roles={roles}
-                            selectedRoles={selectedRoles}
-                            disabled={isSuperAdmin ? true : !editable}
-                            onAddRole={(role) => setSelectedRoles([...selectedRoles, role])}
-                            onRemoveRole={(role) => setSelectedRoles(selectedRoles.filter(r => r !== role))} />
-                    </div>
+                    <>
+                        <div style={{ flex: "1 0 50%" }}>
+                            <AddressInputField register={register} errors={errors} style={{ width: "80%" }}
+                                value={address} onChange={(value) => setAddress(value)}
+                                disabled={!editable} />
+                        </div>
+                        <div style={{ flex: "1 0 50%", justifyContent: "center", alignItems: 'center', display: 'flex', maxWidth: "50%" }}>
+                            <SelectRoles roles={roles}
+                                selectedRoles={selectedRoles}
+                                disabled={isSuperAdmin ? true : !editable}
+                                onAddRole={(role) => setSelectedRoles([...selectedRoles, role])}
+                                onRemoveRole={(role) => setSelectedRoles(selectedRoles.filter(r => r !== role))} />
+                        </div>
+                        <div style={{ flex: "1 0 50%", justifyContent: "center", alignItems: 'center', display: 'flex', width: "50%" }}>
+                            <div style={{ width: '80%' }}>
+                                <EmployeeCategoriesCheck selectedCategories={selectedCategories}
+                                    onSelectedCategories={onSelectedCategories}
+                                    disabled={!isCategoriesOpen} />
+                            </div>
+                        </div>
+                        <div style={{ flex: "1 0 50%" }}></div>
+                    </>
                 }
 
             </div>
