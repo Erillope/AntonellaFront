@@ -13,6 +13,7 @@ import {
 } from "@mui/material"
 import React, { JSX } from "react";
 import { RoleData } from "../hooks/useSearchRole";
+import { v4 as uuidv4 } from "uuid";
 
 interface SearchRoleTableProps {
     order: "asc" | "desc";
@@ -129,7 +130,7 @@ const RoleAccessCell: React.FC<{ accesses: string[] }> = ({ accesses }) => {
         <TableCell style={{ fontWeight: "bold", color: "#37474F" }}>
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 {accesses.map((access) => (
-                    <div>{accessIcon[access]}</div>
+                    <div key={uuidv4()}>{accessIcon[access]}</div>
                 ))}
             </div>
         </TableCell>

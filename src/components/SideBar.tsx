@@ -6,12 +6,17 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import "../styles/sideBar.css";
 import { PermissionVerifier, Permissions } from "../api/verifyPermissions";
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import BoxIcon from '@mui/icons-material/Inbox';
 
 export const SideBar = () => {
     const [principalClass, setPrincipalClass] = useState("menuOpen");
     const [usuariosClass, setUsuariosClass] = useState("menuClose");
     const [usuarioMenuOpen, setUsuarioMenuOpen] = useState(false);
     const [userIconColor, setUserIconColor] = useState("#37474F");
+
+    const [productosClass, setProductosClass] = useState("menuClose");
+    const [productosMenuOpen, setProductosMenuOpen] = useState(false);
+    const [productoIconColor, setProductoIconColor] = useState("#37474F");
 
     const [rolesClass, setRolesClass] = useState("menuClose");
     const [roleMenuOpen, setRoleMenuOpen] = useState(false);
@@ -25,12 +30,15 @@ export const SideBar = () => {
     const [userAccessPermissions, setUserAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
     const [roleAccessPermissions, setRoleAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
     const [serviceAccessPermissions, setServiceAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
+    const [productAccessPermissions, setProductAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
 
     useEffect(() => {
         const fetchPermissions = async () => {
             const userAccessPermissions = await permissionVerifier.getUserAccessPermissions();
             const roleAccessPermissions = await permissionVerifier.getRoleAccessPermissions();
             const serviceAccessPermissions = await permissionVerifier.getServiceAccessPermissions();
+            const productAccessPermissions = await permissionVerifier.getProductAccessPermissions();
+            setProductAccessPermissions(productAccessPermissions);
             setUserAccessPermissions(userAccessPermissions);
             setRoleAccessPermissions(roleAccessPermissions);
             setServiceAccessPermissions(serviceAccessPermissions);
@@ -64,6 +72,13 @@ export const SideBar = () => {
         setServiceIconColor("white");
     }
 
+    const onClickProductos = () => {
+        closeAll();
+        setProductosClass("menuOpen");
+        setProductosMenuOpen(!productosMenuOpen);
+        setProductoIconColor("white");
+    }
+
     const closeAll = () => {
         setPrincipalClass("menuClose");
         setUsuariosClass("menuClose");
@@ -75,6 +90,9 @@ export const SideBar = () => {
         setServicesClass("menuClose");
         setServiceMenuOpen(false);
         setServiceIconColor("#37474F");
+        setProductosClass("menuClose");
+        setProductosMenuOpen(false);
+        setProductoIconColor("#37474F");
     }
 
     return (
@@ -159,6 +177,29 @@ export const SideBar = () => {
                     </List>
                 </Collapse>
 
+                {!productAccessPermissions.empty &&
+                    <ListItemButton onClick={onClickProductos} className={productosClass}>
+                        <ListItemIcon>
+                            <BoxIcon style={{ color: productoIconColor }} />
+                        </ListItemIcon>
+                        <ListItemText primary="Productos" />
+                        {productosMenuOpen ? <ExpandLess /> : <ExpandMore />}
+                    </ListItemButton>
+                }
+                <Collapse in={productosMenuOpen} timeout="auto" unmountOnExit>
+                    <List component="div" disablePadding sx={{ bgcolor: "#EBEDEE" }}>
+                        {productAccessPermissions.create &&
+                            <ListItemButton component={Link} to="/product/create/">
+                                <ListItemText primary="Crear" />
+                            </ListItemButton>
+                        }
+                        {productAccessPermissions.read &&
+                            <ListItemButton component={Link} to="/product/search/">
+                                <ListItemText primary="Consultar" />
+                            </ListItemButton>
+                        }
+                    </List>
+                </Collapse>
             </List>
         </div>
     );

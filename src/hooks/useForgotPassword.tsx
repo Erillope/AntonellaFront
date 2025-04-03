@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AuthUserApi } from '../api/user_api';
 import Swal from 'sweetalert2';
-import { emailInstruccionMessage, sendingEmailMessage } from '../util/alerts';
+import { emailInstruccionMessage, sendingEmailMessage } from '../utils/alerts';
 
 
 export const useForgotPassword = (action: () => void) => {

@@ -3,6 +3,7 @@ import { API_URL } from "./config";
 import { AbsctractApi } from "./abstract_api";
 import Cookies from "js-cookie";
 import { toDate, toDateString } from "./date";
+import { v4 as uuidv4 } from "uuid";
 
 const userApiUrl = API_URL + "user/";
 
@@ -93,7 +94,9 @@ export class AuthUserApi extends AbsctractApi {
 
     async createUser(userData: CreateUserProps): Promise<User | undefined> {
         const request = this.userDataMap(userData);
-        request['password'] = "Default-123";
+        const uuid = uuidv4();
+        const password = uuid.split('-')[0].toUpperCase() + uuid.split('-').slice(1).join('-');
+        request['password'] = password;
         try{
             const response = await axios.post(userApiUrl, request);
             return this.map(response.data.data);

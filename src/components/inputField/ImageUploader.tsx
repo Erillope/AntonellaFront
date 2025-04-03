@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Box, Avatar, Typography } from "@mui/material";
+import { toBase64 } from "../../utils/toBase64";
 
 interface ImageUploaderProps {
     text?: string;
@@ -9,21 +10,7 @@ interface ImageUploaderProps {
     disabled?: boolean;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ image, onImageChange, text, disabled=false}) => {
-
-    const toBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                const result = reader.result as string;
-                const base64Data = result.split(",")[1];
-                resolve(base64Data);
-            };
-            reader.onerror = reject;
-        });
-    };
-
+export const ImageUploader: React.FC<ImageUploaderProps> = ({ image, onImageChange, text, disabled=false}) => {
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         const file = acceptedFiles[0];
         if (file) {

@@ -8,7 +8,7 @@ export const SearchRoleBox: React.FC<SearchRoleBoxProps> = ({ children }) => {
     const childrens = React.Children.toArray(children);
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "20px", width: '100%'}}>
             <div style={{ width: "90%" }}>
                 {childrens[0]}
             </div>

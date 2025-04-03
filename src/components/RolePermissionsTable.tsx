@@ -17,7 +17,7 @@ export const RolePermissionsTable: React.FC<RolePermissionsTableProps> = ({
     onSelectProductosPermissions, onSelectRolesPermissions, onSelectNotificacionesPermissions,
     onSelectChatsPermissions, onSelectPagosPermissions, citasPermissions, usuariosPermissions,
     serviciosPermissions, productosPermissions, rolesPermissions, notificacionesPermissions,
-    chatsPermissions, pagosPermissions
+    chatsPermissions, pagosPermissions, disabled
 }) => {
     return (
         <TableContainer component={Paper} style={{ width: "100%", margin: "auto" }}>
@@ -35,7 +35,7 @@ export const RolePermissionsTable: React.FC<RolePermissionsTableProps> = ({
                     citasPermissions={citasPermissions} usuariosPermissions={usuariosPermissions}
                     serviciosPermissions={serviciosPermissions} productosPermissions={productosPermissions}
                     rolesPermissions={rolesPermissions} notificacionesPermissions={notificacionesPermissions}
-                    chatsPermissions={chatsPermissions} pagosPermissions={pagosPermissions}
+                    chatsPermissions={chatsPermissions} pagosPermissions={pagosPermissions} disabled={disabled}
                 />
             </Table>
         </TableContainer>
@@ -73,6 +73,7 @@ interface RolePermissionsTableBodyProps {
     onSelectNotificacionesPermissions?: (permissions: string[]) => void;
     onSelectChatsPermissions?: (permissions: string[]) => void;
     onSelectPagosPermissions?: (permissions: string[]) => void;
+    disabled?: boolean;
 }
 
 const RolePermissionsTableBody: React.FC<RolePermissionsTableBodyProps> = ({
@@ -80,7 +81,7 @@ const RolePermissionsTableBody: React.FC<RolePermissionsTableBodyProps> = ({
     onSelectProductosPermissions, onSelectRolesPermissions, onSelectNotificacionesPermissions,
     onSelectChatsPermissions, onSelectPagosPermissions, citasPermissions, usuariosPermissions,
     serviciosPermissions, productosPermissions, rolesPermissions, notificacionesPermissions,
-    chatsPermissions, pagosPermissions
+    chatsPermissions, pagosPermissions, disabled
 }) => {
     const withoutDelete = ["READ", "CREATE", "EDIT"];
     const onlyReadAndCreate = ["READ", "CREATE"];
@@ -88,22 +89,22 @@ const RolePermissionsTableBody: React.FC<RolePermissionsTableBodyProps> = ({
     return (
         <TableBody>
             <AccessRow accessName="Citas" icon={<CalendarMonth />} availablePermissions={withoutDelete}
-            onSelectPermissions={onSelectCitasPermissions} selectedPermissions={citasPermissions}/>
+            onSelectPermissions={onSelectCitasPermissions} selectedPermissions={citasPermissions} disabled={disabled}/>
             <AccessRow accessName="Usuarios" icon={<Person />} availablePermissions={withoutDelete}
-            onSelectPermissions={onSelectUsuariosPermissions} selectedPermissions={usuariosPermissions}/>
+            onSelectPermissions={onSelectUsuariosPermissions} selectedPermissions={usuariosPermissions} disabled={disabled}/>
             <AccessRow accessName="Servicios" icon={<StorefrontIcon />}
-            onSelectPermissions={onSelectServiciosPermissions} selectedPermissions={serviciosPermissions}/>
+            onSelectPermissions={onSelectServiciosPermissions} selectedPermissions={serviciosPermissions} disabled={disabled}/>
             <AccessRow accessName="Productos" icon={<BoxIcon />}
-            onSelectPermissions={onSelectProductosPermissions} selectedPermissions={productosPermissions}/>
+            onSelectPermissions={onSelectProductosPermissions} selectedPermissions={productosPermissions} disabled={disabled}/>
             <AccessRow accessName="Roles" icon={<ManageAccountsIcon />}
-            onSelectPermissions={onSelectRolesPermissions} selectedPermissions={rolesPermissions}/>
+            onSelectPermissions={onSelectRolesPermissions} selectedPermissions={rolesPermissions} disabled={disabled}/>
             <AccessRow accessName="Notificaciones" icon={<NotificationsIcon/>}
             availablePermissions={withoutDelete} onSelectPermissions={onSelectNotificacionesPermissions}
-            selectedPermissions={notificacionesPermissions}/> 
+            selectedPermissions={notificacionesPermissions} disabled={disabled}/> 
             <AccessRow accessName="Chats" icon={<ChatIcon />} availablePermissions={onlyReadAndCreate}
-            onSelectPermissions={onSelectChatsPermissions} selectedPermissions={chatsPermissions}/>
+            onSelectPermissions={onSelectChatsPermissions} selectedPermissions={chatsPermissions} disabled={disabled}/>
             <AccessRow accessName="Pagos" icon={<PaymentIcon />} availablePermissions={onlyReadAndCreate}
-            onSelectPermissions={onSelectPagosPermissions} selectedPermissions={pagosPermissions}/>
+            onSelectPermissions={onSelectPagosPermissions} selectedPermissions={pagosPermissions} disabled={disabled}/>
         </TableBody>
     )
 }
@@ -111,10 +112,11 @@ const RolePermissionsTableBody: React.FC<RolePermissionsTableBodyProps> = ({
 interface AccessRowProps extends SelectPermissionsProps {
     accessName: string;
     icon: JSX.Element;
+    disabled?: boolean;
 }
 
 const AccessRow: React.FC<AccessRowProps> = ({ accessName, icon, availablePermissions,
-    onSelectPermissions, selectedPermissions }) => {
+    onSelectPermissions, selectedPermissions, disabled }) => {
     return (
         <TableRow>
             <TableCell style={{ fontWeight: "bold", color: "#37474F" }}>
@@ -125,7 +127,8 @@ const AccessRow: React.FC<AccessRowProps> = ({ accessName, icon, availablePermis
             </TableCell>
             <TableCell style={{ fontWeight: "bold", color: "#37474F" }}>
                 <SelectPermissions availablePermissions={availablePermissions}
-                onSelectPermissions={onSelectPermissions} selectedPermissions={selectedPermissions}/>
+                onSelectPermissions={onSelectPermissions} selectedPermissions={selectedPermissions}
+                disabled={disabled}/>
             </TableCell>
         </TableRow>
     )

@@ -6,7 +6,7 @@ import { voidFunction } from "../api/types";
 import { CreateUserActions, UpdateUserActions } from "./useUser";
 import { selectRoleMessage, selectProfilePhotoMessage, alreadyExistsUserMessage, successUserCreationMessage,
     successUserUpdatedMessage, categoriesNotSelectedMessage
-} from '../util/alerts';
+} from '../utils/alerts';
 import { useNavigate } from "react-router-dom";
 
 interface UserFormActionsProps {

@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2';
+import "../styles/swal.css";
 
 export const alreadyExistsUserMessage = (email: string, phoneNumber: string, dni: string | undefined) => {
     let message = `El usuario con email ${email} o número de celular ${phoneNumber} ya se encuentra registrado en el sistema.`;
@@ -138,5 +139,89 @@ export const confirmDeleteRoleMessage = (action: () => void) => {
     }).then((result) => {
         if (result.isConfirmed) {
             action();
-    }})
+        }
+    })
+}
+
+export const notSelectedImageMessage = () => {
+    Swal.fire({
+        title: 'Imagen no seleccionada',
+        text: 'Por favor seleccione una imagen',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+    })
+}
+
+export const invalidQuestionMessage = () => {
+    Swal.fire({
+        title: 'Pregunta inválida',
+        text: 'Por favor llene los campos necesarios',
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+        customClass: {
+            popup: "swal-custom",
+        },
+    })
+}
+
+export const successProductUpdatedMessage = () => {
+    Swal.fire({
+        title: 'Producto actualizado',
+        text: 'El producto ha sido actualizado exitosamente.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+}
+
+
+export const successCreatedProductMessage = () => {
+    Swal.fire({
+        title: 'Producto creado',
+        text: 'El producto ha sido creado exitosamente.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+}
+
+export const successServiceCreatedMessage = () => {
+    Swal.fire({
+        title: 'Servicio creado',
+        text: 'El servicio ha sido creado exitosamente.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+}
+
+export const confirmDeleteServiceMessage = (action: () => void) => {
+    Swal.fire({
+        title: 'Eliminar Servicio',
+        text: '¿Está seguro que desea eliminar el servicio?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Aceptar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            action();
+        }
+    })
+}
+
+
+export const successServiceUpdatedMessage = () => {
+    Swal.fire({
+        title: 'Servicio actualizado',
+        text: 'El servicio ha sido actualizado exitosamente.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+}
+
+export const successFormUpdatedMessage = () => {
+    Swal.fire({
+        title: 'Formulario actualizado',
+        text: 'El formulario ha sido actualizado exitosamente.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
 }

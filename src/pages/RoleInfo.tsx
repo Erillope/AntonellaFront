@@ -26,9 +26,10 @@ export const RoleInfo = () => {
             deletePermission={deletePermission} editable={editable}
             discartChanges={() => discartChanges(role)} confirmDeleteRole={handleDeleteRole}>
             <TextInputField register={register} errors={errors} name="roleName" style={{ width: "50%" }}
-                inputError={roleNameError} value={roleName} onValueChange={setRoleName}
+                inputError={roleNameError} value={roleName} onValueChange={setRoleName} disabled={!editable}
                 labelText="Nombre del rol" requiredErrorText="El nombre del rol es requerido" />
-            <MovilPermission onSelectMovilPermissions={setMovilPermissions} value={movilPermissions} />
+            <MovilPermission onSelectMovilPermissions={setMovilPermissions} value={movilPermissions}
+            disabled={!editable}/>
             <RolePermissionsTable
                 onSelectCitasPermissions={setCitasPermissions}
                 onSelectUsuariosPermissions={setUsuariosPermissions}
@@ -41,7 +42,7 @@ export const RoleInfo = () => {
                 citasPermissions={citasPermissions} usuariosPermissions={usuariosPermissions}
                 serviciosPermissions={serviciosPermissions} productosPermissions={productosPermissions}
                 rolesPermissions={rolesPermissions} notificacionesPermissions={notificacionesPermissions}
-                chatsPermissions={chatsPermissions} pagosPermissions={pagosPermissions}
+                chatsPermissions={chatsPermissions} pagosPermissions={pagosPermissions} disabled={!editable}
             />
         </UpdateRoleForm>
     )

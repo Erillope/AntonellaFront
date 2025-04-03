@@ -8,8 +8,8 @@ import { AddressInputField } from "./AddressInputField";
 import { SwitchField } from "./SwitchField";
 import { useForm } from "react-hook-form";
 import React from "react";
-import ImageUploader from "../ImageUploader";
-import { SelectRoles } from "../SelectRoles";
+import ImageUploader from "./ImageUploader";
+import { SelectRoles } from "./SelectRoles";
 import "../../styles/form.css";
 import { EmployeeCategoriesCheck } from "./EmployeeCategoriesCheck";
 
@@ -122,7 +122,7 @@ export const UpdateUserInputs: React.FC<UpdateUserInputsProps> = ({
                             <div style={{ width: '80%' }}>
                                 <EmployeeCategoriesCheck selectedCategories={selectedCategories}
                                     onSelectedCategories={onSelectedCategories}
-                                    disabled={!isCategoriesOpen} />
+                                    disabled={!isCategoriesOpen || (isSuperAdmin ? true : !editable)} />
                             </div>
                         </div>
                         <div style={{ flex: "1 0 50%" }}></div>

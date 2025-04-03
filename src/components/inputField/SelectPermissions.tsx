@@ -11,10 +11,11 @@ export interface SelectPermissionsProps {
     availablePermissions?: string[];
     selectedPermissions?: string[];
     onSelectPermissions?: (permissions: string[]) => void;
+    disabled?: boolean;
 }
 
 export const SelectPermissions: React.FC<SelectPermissionsProps> = ({ availablePermissions,
-    onSelectPermissions, selectedPermissions }) => {
+    onSelectPermissions, selectedPermissions, disabled }) => {
     const defaultPermissions = ["READ", "CREATE", "EDIT", "DELETE"];
     const [readClass, setReadClass] = useState("not-selected");
     const [createClass, setCreateClass] = useState("not-selected");
@@ -125,19 +126,19 @@ export const SelectPermissions: React.FC<SelectPermissionsProps> = ({ availableP
         <div style={{ display: "flex", alignItems: "center" }}>
             {getPermissions().includes("READ") &&
                 <PermissionButton permission="Visualizar" className={readClass} icon={<Visibility />}
-                    onClick={() => read(new Set(selectedPermissions))} />
+                    onClick={() => read(new Set(selectedPermissions))} disabled={disabled}/>
             }
             {getPermissions().includes("CREATE") &&
                 <PermissionButton permission="Crear" className={createClass} icon={<AddBoxIcon />}
-                    onClick={() => create(new Set(selectedPermissions))} />
+                    onClick={() => create(new Set(selectedPermissions))} disabled={disabled}/>
             }
             {getPermissions().includes("EDIT") &&
                 <PermissionButton permission="Editar" className={editClass} icon={<CreateIcon />}
-                    onClick={() => edit(new Set(selectedPermissions))} />
+                    onClick={() => edit(new Set(selectedPermissions))} disabled={disabled}/>
             }
             {getPermissions().includes("DELETE") &&
                 <PermissionButton permission="Eliminar" className={deleteClass} icon={<DeleteIcon />}
-                    onClick={() => del(new Set(selectedPermissions))} />
+                    onClick={() => del(new Set(selectedPermissions))} disabled={disabled}/>
             }
         </div>
     )
@@ -147,9 +148,10 @@ export const SelectPermissions: React.FC<SelectPermissionsProps> = ({ availableP
 interface MovilPermissionProps {
     onSelectMovilPermissions?: (permissions: string[]) => void;
     value?: string[];
+    disabled?: boolean;
 }
 
-export const MovilPermission: React.FC<MovilPermissionProps> = ({ onSelectMovilPermissions, value }) => {
+export const MovilPermission: React.FC<MovilPermissionProps> = ({ onSelectMovilPermissions, value, disabled }) => {
     const [movilClass, setMovilClass] = useState("not-selected");
     const allPermissions = ["READ", "CREATE", "EDIT", "DELETE"];
 
@@ -175,7 +177,7 @@ export const MovilPermission: React.FC<MovilPermissionProps> = ({ onSelectMovilP
 
     return (
         <Button style={{ float: "right", marginTop: "10px" }} className={movilClass}
-            onClick={() => selectMovilPermissions()}>
+            onClick={() => selectMovilPermissions()} disabled={disabled}> 
             Aplicativo móvil
             <SmartphoneIcon />
         </Button>
@@ -187,12 +189,14 @@ interface PermissionButtonProps {
     onClick: () => void;
     className: string;
     icon: React.ReactNode;
+    disabled?: boolean;
 }
 
-const PermissionButton: React.FC<PermissionButtonProps> = ({ permission, onClick, className, icon }) => {
+const PermissionButton: React.FC<PermissionButtonProps> = ({ permission, onClick, className, icon, disabled }) => {
     return (
         <div style={{ display: "flex", alignItems: "center", flexDirection: "column", margin: "10px" }}>
             <Button className={className} style={{ gap: "5px" }}
+                disabled={disabled}
                 onClick={onClick}>
                 {permission}
                 {icon}

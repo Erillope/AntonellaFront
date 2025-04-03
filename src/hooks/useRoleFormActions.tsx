@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { successRoleCreatedMessage, permissionsNotSelectedMessage, successRoleUpdatedMessage,
     confirmDeleteRoleMessage, roleDeletedMessage
- } from "../util/alerts";
+ } from "../utils/alerts";
 import { CreateRoleActions, UpdateRoleActions } from "./useRole";
 import { Role } from "../api/role_api";
 

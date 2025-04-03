@@ -10,6 +10,14 @@
     background-color: #2FAA38 !important;
 }
 
+.disabled-button {
+    background-color: #A9A9A9 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: not-allowed !important;
+}
+
 .submit-button2 {
     background-color: #16417C !important;
     color: white !important;

@@ -43,4 +43,8 @@ export class PermissionVerifier {
     async getMovilAccessPermissions(): Promise<Permissions> {
         return await this.getLoggedUserPermissions("MOVIL");
     }
+
+    async getProductAccessPermissions(): Promise<Permissions> {
+        return await this.getLoggedUserPermissions("PRODUCTOS");
+    }
 }

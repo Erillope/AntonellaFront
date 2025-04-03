@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { AuthUserApi, User } from '../api/user_api';
 import Cookies from 'js-cookie';
 import { TokenApi } from '../api/token_api';
-import { invalidTokenMessage } from '../util/alerts';
+import { invalidTokenMessage } from '../utils/alerts';
 
 export const useResetPassword = (tokenId: string, action: () => void) => {
     const { register, handleSubmit, formState: { errors }, getValues } = useForm();

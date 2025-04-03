@@ -2,7 +2,7 @@ import { TextField } from "@mui/material"
 import { FieldErrors, useForm } from "react-hook-form";
 import React from "react";
 
-interface TextInputFieldProps {
+export interface TextInputFieldProps {
     register?: ReturnType<typeof useForm>["register"];
     errors?: FieldErrors;
     value?: string;
@@ -12,12 +12,14 @@ interface TextInputFieldProps {
     requiredErrorText?: string;
     labelText?: string;
     style?: React.CSSProperties;
+    disabled?: boolean;
 }
 
-export const TextInputField: React.FC<TextInputFieldProps> = ({ register, errors = {}, name='', requiredErrorText, labelText, inputError='', value, onValueChange, style}) => {
+export const TextInputField: React.FC<TextInputFieldProps> = ({ register, errors = {}, name='', requiredErrorText, labelText, inputError='', value, onValueChange, style, disabled}) => {
     return (
         <TextField
             label={labelText}
+            disabled={disabled}
             variant="outlined"
             value={value}
             margin="normal"
@@ -28,4 +30,31 @@ export const TextInputField: React.FC<TextInputFieldProps> = ({ register, errors
             style={style}
         />
     )
+}
+
+export const useTexInputFiled = (register: ReturnType<typeof useForm>['register'], errors: FieldErrors) => {
+    const [value, setValue] = React.useState<string>('')
+    const [inputError, setInputError] = React.useState<string>()
+    const getTextInputFieldProps = (): TextInputFieldProps => {
+        return {
+            register: register,
+            errors: errors,
+            value: value,
+            onValueChange: setValue,
+            inputError: inputError,
+        };
+    };
+
+    const clearInput = () => setValue('')
+    const clearError = () => setInputError('')
+
+    return {
+        getTextInputFieldProps,
+        setInputError,
+        clearInput,
+        clearError,
+        setValue,
+        value,
+        inputError,
+    };
 }

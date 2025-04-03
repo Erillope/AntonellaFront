@@ -47,7 +47,8 @@ export const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({ name, onCh
                     </div>
                 </div>
                 <div>
-                    <SelectInput values={roles} value={selectedRole} onSelect={onSelectRole} />
+                    <SelectInput values={roles} value={selectedRole} onSelect={onSelectRole}
+                    label="Filtrar por roles"/>
                 </div>
             </div>
         </div>
