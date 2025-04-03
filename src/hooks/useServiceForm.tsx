@@ -305,6 +305,7 @@ export const useServiceForm = () => {
         configApi,
         initEditData,
         getUpdateData,
-        verifyErrors
+        verifyErrors,
+        clearErrors
     }
 }
