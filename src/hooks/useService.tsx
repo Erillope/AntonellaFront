@@ -13,13 +13,12 @@ export interface UseServiceInputsProps {
     notHaveCreatePermissions?: () => void;
 }
 
-export const useService = ({ notSelectedImageAction }: UseServiceInputsProps) => {
+export const useService = ({  }: UseServiceInputsProps) => {
     const navigate = useNavigate()
     const permissionsVerifier = new PermissionVerifier()
     const storeServiceApi = new StoreServiceApi()
     const [services, setServices] = useState<StoreService[]>([])
-    const { getCreateData, handleSubmit, getServiceInputsProps, clearForm, initCreate, 
-        verifySelectedImageError, categories, configApi, initEditData, getUpdateData, verifyErrors} = useServiceForm() 
+    const { getCreateData, handleSubmit, getServiceInputsProps, initCreate, categories, configApi, initEditData, getUpdateData, verifyErrors} = useServiceForm() 
     const [typeInfo, setTypeInfo] = useState<ServiceTypeInfo[]>([])
     const [editService, setEditService] = useState<StoreService>({} as StoreService)
     const [editable, setEditable] = useState(false)

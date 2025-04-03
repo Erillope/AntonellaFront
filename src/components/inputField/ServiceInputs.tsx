@@ -7,7 +7,7 @@ import { TextAreaField } from "./TextAreaField"
 import { PriceRange, PriceRangeProps } from "./PriceRange"
 import { EmployeeCard, EmployeeCardProps } from "../EmployeeCards"
 import { AuthUserApi, User } from "../../api/user_api"
-import React, { use, useEffect } from "react"
+import React, { useEffect } from "react"
 
 export interface ServiceInputsProps {
     getSelectCategoryProps?: () => SelectInputProps;
