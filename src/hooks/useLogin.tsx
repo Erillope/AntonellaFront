@@ -1,12 +1,15 @@
 import Cookies from "js-cookie";
 import { AuthUserApi, User } from '../api/user_api'
-import { useForm } from 'react-hook-form';
-import { useState } from "react";
+import { useInputTextField } from "../components/inputs/InputTextField";
+import { verifyUserMessage, closeAlert } from "../utils/alerts";
 
-export const useLogin = (action: () => void) => {
-    const { register, handleSubmit, formState: { errors }, getValues } = useForm();
-    const [phoneNumberError, setPhoneNumberError] = useState('');
-    const [passwordError, setPasswordError] = useState('');
+interface useLoginProps {
+    afterLogin: () => void;
+}
+
+export const useLogin = (props: useLoginProps) => {
+    const phoneNumberController = useInputTextField();
+    const passwordController = useInputTextField();
     const authApi = new AuthUserApi();
 
     const setCookie = (user: User) => {
@@ -14,37 +17,48 @@ export const useLogin = (action: () => void) => {
     }
 
     const signIn = async () => {
-        const phoneNumber = getValues('phoneNumber');
-        const password = getValues('password');
-        const user = await authApi.signIn(phoneNumber, password);
-        if (verifyErrors()) return;
-        if (!user) return;
+        if (validate()) return;
+        verifyUserMessage()
+        const user = await authApi.signIn(phoneNumberController.value, passwordController.value);
+        closeAlert();
+        if (!user) {verifyErrors(); return}
         setCookie(user);
-        action();
+        props.afterLogin();
     }
 
-    const verifyErrors = (): boolean => {
-    
-        setPhoneNumberError("");
-        setPasswordError("");
-    
+    const validate = (): boolean => {
+        clearErrors();
+        if (phoneNumberController.isEmpty()) {
+            phoneNumberController.setError("El número de teléfono es requerido.");
+            return true;
+        }
+        if (passwordController.isEmpty()) {
+            passwordController.setError("La contraseña es requerida.");
+            return true;
+        }
+        return false;
+    }
+
+    const verifyErrors = (): boolean => {    
         if (authApi.isError("PHONE_NUMBER_NOT_REGISTERED")) {
-            setPhoneNumberError(authApi.getErrorMessage());
+            phoneNumberController.setError(authApi.getErrorMessage());
             return true;
         }
         if (authApi.isError("ICORRECT_PASSWORD")) {
-            setPasswordError(authApi.getErrorMessage());
+            passwordController.setError(authApi.getErrorMessage());
             return true;
         }
         return false;
     };
 
+    const clearErrors = () => {
+        phoneNumberController.clearError();
+        passwordController.clearError();
+    }
+
     return {
-        register,
-        handleSubmit,
-        errors,
-        phoneNumberError,
-        passwordError,
         signIn,
+        phoneNumberProps: phoneNumberController.getProps(),
+        passwordProps: passwordController.getProps(),
     };
 }

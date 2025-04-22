@@ -1,6 +1,6 @@
 import { AbsctractApi } from "./abstract_api";
-import { API_URL, BACK_URL } from "./config";
-import { toDate } from "./date";
+import { API_URL } from "./config";
+import { toDate, removeHeaderFromImage, capitalizeFirstLetter, addDomainToUrl } from "./utils";
 import axios from "axios";
 
 const productApiUrl = `${API_URL}product/`
@@ -92,38 +92,41 @@ export class ProductApi extends AbsctractApi {
         }
     }
 
+    async delete(id: string): Promise<void | undefined> {
+        try{
+            await axios.delete(productApiUrl, { params: { id } })
+        }
+        catch (error) {
+            this.catchError(error);
+        }
+    }
+
     private mapCreateProductData(data: CreateProduct): any{
         return {
-            service_type: data.type,
-            service_subtype: data.subType,
+            service_type: data.type.toUpperCase(),
+            service_subtype: data.subType.toUpperCase(),
             name: data.name,
             description: data.description,
-            product_type: data.productType,
+            product_type: data.productType.toUpperCase(),
             price: data.price,
             stock: data.stock,
             volume: data.volume,
-            images: data.images.map((image) => image.split(',')[1])
+            images: data.images.map(removeHeaderFromImage)
         }
     }
 
     private mapUpdateProductData(data: UpdateProduct): any{
-        const images = data.images?.map((image) => {
-            if (image.split(',')[1]) {
-                return image.split(',')[1]
-            }
-            else{ return image.replace(BACK_URL, '') }
-        })
         return {
             id: data.id,
-            service_type: data.type,
-            service_subtype: data.subType,
+            service_type: data.type?.toUpperCase(),
+            service_subtype: data.subType?.toUpperCase(),
             name: data.name,
             description: data.description,
-            product_type: data.productType,
+            product_type: data.productType?.toUpperCase(),
             price: data.price,
             additional_stock: data.additionalStock,
             volume: data.volume,
-            images: images,
+            images: data.images?.map(removeHeaderFromImage),
             status: data.status
         }
     }
@@ -131,15 +134,15 @@ export class ProductApi extends AbsctractApi {
     private map(data: any) : Product {
         return {
             id: data.id,
-            type: data.service_type,
-            subType: data.service_subtype,
+            type: capitalizeFirstLetter(data.service_type),
+            subType: capitalizeFirstLetter(data.service_subtype),
             name: data.name,
             description: data.description,
-            productType: data.product_type,
+            productType: capitalizeFirstLetter(data.product_type),
             price: data.price,
             stock: data.stock,
             volume: data.volume,
-            images: data.images.map((image: string) => BACK_URL + image),
+            images: data.images.map(addDomainToUrl),
             stockModifiedDate: toDate(data.stock_modified_date),
             createdDate: toDate(data.created_date),
             status: data.status

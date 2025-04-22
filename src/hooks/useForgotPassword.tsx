@@ -1,39 +1,43 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { AuthUserApi } from '../api/user_api';
 import Swal from 'sweetalert2';
 import { emailInstruccionMessage, sendingEmailMessage } from '../utils/alerts';
+import { useInputTextField } from '../components/inputs/InputTextField';
 
 
 export const useForgotPassword = (action: () => void) => {
-    const { register, handleSubmit, formState: { errors }, getValues } = useForm();
-    const [emailError, setEmailError] = useState('');
+    const emailController = useInputTextField()
     const authApi = new AuthUserApi();
 
     const sendResetPasswordLink = async () => {
-        const email = getValues('email');
+        if (validate()) return;
         sendingEmailMessage();
-        await authApi.forgotPassword(email);
+        await authApi.forgotPassword(emailController.value);
         if (verifyErrors()) return;
-        emailInstruccionMessage(email);
+        emailInstruccionMessage(emailController.value);
         action();
     }
 
     const verifyErrors = (): boolean => {
-        setEmailError('');
+        emailController.clearError();
         if (authApi.isError('EMAIL_NOT_REGISTERED')) {
-            setEmailError(authApi.getErrorMessage());
+            emailController.setError(authApi.getErrorMessage())
             Swal.close();
             return true;
         }
         return false;
     }
 
+    const validate = (): boolean => {
+        emailController.clearError()
+        if (emailController.isEmpty()) {
+            emailController.setError('El email es requerido')
+            return true;
+        }
+        return false
+    }
+
     return {
-        register,
-        handleSubmit,
-        errors,
-        emailError,
+        emailProps: emailController.getProps(),
         sendResetPasswordLink
     }
 }

@@ -1,14 +1,13 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { AuthUserApi, User } from '../api/user_api';
 import Cookies from 'js-cookie';
 import { TokenApi } from '../api/token_api';
 import { invalidTokenMessage } from '../utils/alerts';
+import { useInputTextField } from '../components/inputs/InputTextField';
+import { validatePassword } from '../utils/validators';
 
 export const useResetPassword = (tokenId: string, action: () => void) => {
-    const { register, handleSubmit, formState: { errors }, getValues } = useForm();
-    const [passwordError, setPasswordError] = useState('');
-    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+    const passwordController = useInputTextField();
+    const confirmPasswordController = useInputTextField();
     const authApi = new AuthUserApi();
     const tokenApi = new TokenApi();
 
@@ -23,24 +22,17 @@ export const useResetPassword = (tokenId: string, action: () => void) => {
     }
 
     const resetPassword = async () => {
-        const password = getValues('password');
-        const confirmPassword = getValues('confirmPassword');
-        const user = await authApi.resetPassword(tokenId, password);
-        if (verifyErrors(password, confirmPassword)) return;
+        if (validate(passwordController.value, confirmPasswordController.value)) return;
+        const user = await authApi.resetPassword(tokenId, passwordController.value);
+        if (verifyErrors()) return;
         if (!user) return;
         setCookie(user);
         action();
     }
 
-    const verifyErrors = (password: string, confirmPassword: string): boolean => {
-        setPasswordError('');
-        setConfirmPasswordError('');
-        if (password !== confirmPassword) {
-            setConfirmPasswordError('Las contraseñas no coinciden');
-            return true;
-        }
+    const verifyErrors = (): boolean => {
         if (authApi.isError('INVALID_PASSWORD')) {
-            setPasswordError(authApi.getErrorMessage());
+            passwordController.setError(authApi.getErrorMessage());
             return true;
         }
         return false;
@@ -50,13 +42,32 @@ export const useResetPassword = (tokenId: string, action: () => void) => {
         Cookies.set('user', JSON.stringify(user), { expires: 1 });
     }
 
+    const validate = (password: string, confirmPassword: string): boolean => {
+        passwordController.clearError();
+        confirmPasswordController.clearError();
+        if (passwordController.isEmpty()) {
+            passwordController.setError('La contraseña es requerida');
+            return true;
+        }
+        if (confirmPasswordController.isEmpty()) {
+            confirmPasswordController.setError('Es necesaria la confirmación');
+            return true;
+        }
+        if (password !== confirmPassword) {
+            confirmPasswordController.setError('Las contraseñas no coinciden');
+            return true;
+        }
+        if (!validatePassword(password)) {
+            passwordController.setError('La contraseña no es válida');
+            return true;
+        }
+        return false;
+    }
+
     return {
-        register,
-        handleSubmit,
-        errors,
-        passwordError,
-        confirmPasswordError,
         resetPassword,
-        init
+        init,
+        passwordProps: passwordController.getProps(),
+        confirmPasswordProps: confirmPasswordController.getProps(),
     }
 }

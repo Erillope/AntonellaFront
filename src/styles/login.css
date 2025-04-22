@@ -8,7 +8,7 @@
     background-attachment: fixed;
     width: 100vw;
     height: 100vh;
-    background-image: url('../assets/antonella_local.jpg');
+    background-image: url('../assets/antonella_local.png');
 }
 
 .right {
@@ -21,7 +21,7 @@
     width: 40%;
     height: 100%;
     overflow-y: auto;
-    background-color: #EBB7C9;
+    background-color: #E596A9;
 }
 
 .left {
@@ -33,8 +33,9 @@
 .logo {
     padding-top: 30px;
     padding-bottom: 30px;
-    width: 90%;
+    width: 50%;
     height: 30%;
+    filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.5));
 }
 
 .input {
@@ -50,16 +51,16 @@
 
 
 .login-button {
-    background-color: #C9285D !important;
+    background-color: #F44565 !important;
     color: white !important;
-    padding-top: 10px !important;
     border: none !important;
-    border-radius: 5px !important;
+    border-radius: 10px !important;
+    width: 50% ;
     cursor: pointer !important;
 }
 
 .login-button:hover {
-    background-color: #AF234A !important;
+    background-color: #C9285D !important;
 }
 
 .link {
@@ -67,9 +68,14 @@
     text-decoration: none;
 }
 
+.link:hover {
+    text-decoration: underline;
+    color: gray;
+}
+
 .login-box {
-    padding-bottom: 50px;
     display: flex;
+    margin-bottom: 30px;
     flex-direction: column;
     width: 100%;
     align-items: center;

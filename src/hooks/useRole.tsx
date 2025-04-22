@@ -1,98 +1,146 @@
-import { Role } from "../api/role_api";
-import { useRoleForm } from "./useRoleForm";
+import { useEffect, useState } from "react";
+import { AccessPermission, CreateRole, Role, RoleApi } from "../api/role_api";
+import { useInputTextField } from "../components/inputs/InputTextField";
+import { useMovilPermissions, usePermissions } from "../components/inputs/PermissionsInput";
+import { PermissionVerifier } from "../api/verifyPermissions";
+import { useNavigate } from "react-router-dom";
+import { permissionsNotSelectedMessage, successRoleCreatedMessage, successRoleUpdatedMessage,
+    loadingMessage, closeAlert, roleDeletedMessage
+ } from "../utils/alerts";
+import { validateRoleName } from "../utils/validators";
+import { Permissions } from "../api/verifyPermissions";
 
-export interface CreateRoleActions {
-    successRoleCreatedAction: () => void;
-    permissionsNotSelectedAction: () => void
+interface UseRoleProps {
+    mode?: "create" | "read" | "update",
+    roleName?: string,
 }
 
-export interface UpdateRoleActions {
-    successRoleUpdatedAction: () => void;
-    permissionsNotSelectedAction: () => void
-}
+export const useRole = (props?: UseRoleProps) => {
+    const navigate = useNavigate();
+    const nameController = useInputTextField()
+    const movilController = useMovilPermissions()
+    const permissionsController = usePermissions()
+    const permissionVerifier = new PermissionVerifier();
+    const roleApi = new RoleApi();
+    const [mode, setMode] = useState<"create" | "read" | "update">(props?.mode ?? 'create');
+    const [role, setRole] = useState<Role>();
+    const [permissions, setPermissions] = useState<Permissions>();
 
-export const useRole = () => {
-    const {verifyCreateRolePermissions, verifyReadAndEditRolePermissions, getRoleData, roleApi, verifyErrors,
-        clearForm, role, setRole, editable, formRef, register, handleSubmit, errors, citasPermissions,
-        setCitasPermissions, usuariosPermissions, setUsuariosPermissions, serviciosPermissions,
-        setServiciosPermissions, productosPermissions, setProductosPermissions, rolesPermissions,
-        setRolesPermissions, notificacionesPermissions, setNotificacionesPermissions, chatsPermissions,
-        setChatsPermissions, pagosPermissions, setPagosPermissions, setMovilPermissions, movilPermissions,
-        roleNameError, roleName, setRoleName, deletePermission, discartChanges
-    } = useRoleForm();
+    useEffect(() => {
+        const init = async () => {
+            const permissions = await permissionVerifier.getUserAccessPermissions();
+            setPermissions(permissions);
+            if (!permissions?.create && mode === 'create') { navigate('/') }
+            if (!permissions?.read && mode === 'read') { navigate('/') }
+            if (permissions.read && mode === 'read') { await initRole() }
+        }
+        init()
+    }, [])
 
-    const initCreate = (notHaveCreatePermission: () => void) => {
-        verifyCreateRolePermissions(notHaveCreatePermission);
-    }
-
-    const initEdit = (roleId: string, notHaveReadpermission: () => void, notFound: () => void) => {
-        verifyReadAndEditRolePermissions(roleId, notFound, notHaveReadpermission);
-    }
-
-    const createRole = async ({ successRoleCreatedAction, permissionsNotSelectedAction }: CreateRoleActions) => {
+    const createRole = async () => {
         const request = getRoleData();
-        if (request.accesses.length === 0) {
-            permissionsNotSelectedAction();
+        if (!validate(request.accesses)) { return }
+        loadingMessage('Creando rol...')
+        const role = await roleApi.createRole(request);
+        if (!role) {
+            verifyAlreadyExistRole();
             return;
         }
-        await roleApi.createRole(request);
-        if (verifyErrors()) { return }
-        successRoleCreatedAction();
+        successRoleCreatedMessage(clearInputs);
     }
 
-    const updateRole = async ({successRoleUpdatedAction, permissionsNotSelectedAction}: UpdateRoleActions) => {
+    const updateRole = async () => {
         const request = getRoleData();
-        if (request.accesses.length === 0) {
-            permissionsNotSelectedAction();
-            return;
-        }
+        if (!validate(request.accesses)) { return }
+        loadingMessage('Actualizando rol...')
         const updatedRole = await roleApi.updateRole({ role: role?.name ?? '', name: request.name, accesses: request.accesses });
-        if (verifyErrors()) { return }
+        if (!updatedRole) {
+            verifyAlreadyExistRole();
+            return;
+        }
         setRole(updatedRole);
-        successRoleUpdatedAction();
+        successRoleUpdatedMessage();
     }
 
-    const deleteRole = async(roleDeletedAction: (role: Role) => void) => {
+    const deleteRole = async() => {
         await roleApi.deleteRole(role?.name ?? '');
-        role && roleDeletedAction(role);
+        navigate('/role/search/');
+        roleDeletedMessage(role?.name ?? '');
+    }
+
+    const initRole = async () => {
+        const role = await roleApi.getRole(props?.roleName ?? '');
+        setRole(role);
+        if (!role) { return; }
+        initData(role);
+    }
+
+    const initData = (role: Role) => {
+        nameController.setValue(role.name);
+        movilController.setPermissions(role.accesses.filter(access => access.access === 'MOVIL')[0]?.permissions ?? []);
+        permissionsController.setFromAccessPermissions(role.accesses.filter(access => access.access !== 'MOVIL'));
+    }
+
+    const getRoleData = (): CreateRole => {
+        const movilPermissions = movilController.permissions.length > 0 ? {
+            access: 'MOVIL',
+            permissions: movilController.permissions
+        } : undefined
+        const accesses = movilPermissions ? [movilPermissions, ...permissionsController.getData()] : permissionsController.getData()
+        return {
+            name: nameController.value,
+            accesses: accesses
+        }
+    }
+
+    const validate = (accesses: AccessPermission[]): boolean => {
+        clearErrors()
+        let isValid = true
+        if (!validateRoleName(nameController.value)) {
+            nameController.setError('El nombre del rol no es valido')
+            isValid = false
+        }
+        if (accesses.length === 0) {
+            permissionsNotSelectedMessage();
+            isValid = false
+        }
+        return isValid
+    }
+
+    const verifyAlreadyExistRole = () => {
+        if (roleApi.isError('ROLE_ALREADY_EXISTS')) {
+            nameController.setError(roleApi.getErrorMessage())
+            closeAlert()
+        }
+    }
+
+    const clearInputs = () => {
+        nameController.clearInput()
+        movilController.clearInput()
+        permissionsController.clearInputs()
+    }
+
+    const clearErrors = () => {
+        nameController.clearError()
+        movilController.clearError()
+    }
+
+    const isSuperAdminRole = () => {
+        return role?.name === 'super_admin'
     }
 
     return {
-        register,
-        handleSubmit,
-        errors,
         createRole,
-        initCreate,
-        citasPermissions,
-        setCitasPermissions,
-        usuariosPermissions,
-        setUsuariosPermissions,
-        serviciosPermissions,
-        setServiciosPermissions,
-        productosPermissions,
-        setProductosPermissions,
-        rolesPermissions,
-        setRolesPermissions,
-        notificacionesPermissions,
-        setNotificacionesPermissions,
-        chatsPermissions,
-        setChatsPermissions,
-        pagosPermissions,
-        setPagosPermissions,
-        setMovilPermissions,
-        movilPermissions,
-        roleNameError,
-        roleName,
-        setRoleName,
-        formRef,
         updateRole,
-        initEdit,
-        editable,
-        deletePermission,
-        discartChanges,
         deleteRole,
-        role,
-        clearForm
+        movilProps: movilController.getProps(),
+        permissionsProps: permissionsController.getProps(),
+        nameProps: nameController.getProps(),
+        mode,
+        setMode,
+        discartChanges: () => initData(role ?? {} as Role),
+        permissions,
+        isSuperAdminRole
     }
 
 }

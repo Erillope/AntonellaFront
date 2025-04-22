@@ -1,5 +1,5 @@
 .menuOpen {
-    background-color: #37474F !important;
+    background-color: #F44565 !important;
     color: white !important;
 }
 
@@ -15,4 +15,19 @@
 .menuClosed:hover {
     background-color: #E0E0E0 !important;
     color: #37474F !important;
+}
+
+.subMenuOpen {
+    background-color: #E596A9 !important;
+    color: black !important;
+}
+
+.subMenuClosed {
+    background-color: #FAE2E1 !important;
+    color: black !important;
+}
+
+.subMenuClosed:hover {
+    background-color: #eac8c7 !important;
+    color: black !important;
 }

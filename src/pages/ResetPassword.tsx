@@ -1,23 +1,20 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { PasswordInputField } from "../components/inputField/PasswordInputField";
-import { ResetPasswordForm } from "../components/ResetPasswordForm";
+import { PasswordInputField } from "../components/inputs/InputTextField";
 import { useResetPassword } from "../hooks/useResetPassword";
+import { FormBox, SubmitButton } from "../components/forms/formBox";
 
 export const ResetPassword = () => {
     const navigate = useNavigate();
     const { tokenId } = useParams();
-    const { register, handleSubmit, errors, passwordError, confirmPasswordError,
-        resetPassword, init } = useResetPassword(tokenId ?? "", () => navigate('/'));
+    const { resetPassword, init, passwordProps, confirmPasswordProps } = useResetPassword(tokenId ?? "", () => navigate('/'));
 
     useEffect(init, [])
 
     return (
-        <ResetPasswordForm handleSubmit={() => handleSubmit(resetPassword)}>
-                <PasswordInputField register={register} errors={errors} passwordError={passwordError}/>
-                <PasswordInputField register={register} errors={errors} passwordError={confirmPasswordError}
-                 name="confirmPassword" requiredErrorText="Es necesaria la confirmación"
-                 labelText="Confirmar contraseña" />
-        </ResetPasswordForm>
+        <FormBox handleSubmit={resetPassword} submitChildren={<SubmitButton text="Aceptar" />}>
+                <PasswordInputField labelText="Contraseña" {...passwordProps} />
+                <PasswordInputField labelText="Confirmar contraseña" {...confirmPasswordProps} />
+        </FormBox>
     );
 }

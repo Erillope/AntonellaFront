@@ -1,20 +1,18 @@
 import { useState } from "react";
 import "../styles/login.css";
 import "../styles/forgotPassword.css";
-import { EmailInputField } from "../components/inputField/EmailInputField";
 import { useForgotPassword } from "../hooks/useForgotPassword";
-import { ForgotPasswordForm } from "../components/ForgotPasswordForm";
-
+import { ForgotPasswordForm } from "../components/forms/ForgotPasswordForm";
+import { Email } from "@mui/icons-material";
+import { IconInputField } from "../components/inputs/InputTextField";
 
 export const ForgotPassword = () => {
-    const [buttonText, setButtonText] = useState('Aceptar');
-    const { register, handleSubmit, errors, emailError,
-        sendResetPasswordLink } = useForgotPassword(() => setButtonText('Aceptar'));
+    const [buttonText, setButtonText] = useState('Enviar');
+    const { sendResetPasswordLink, emailProps } = useForgotPassword(() => setButtonText('Enviar de nuevo'));
 
     return (
-        <ForgotPasswordForm handleSubmit={() => handleSubmit(sendResetPasswordLink)} buttonText={buttonText}>
-                <EmailInputField register={register} errors={errors} emailError={emailError}
-                iconStyle={{ color: "#AF234A" }} />   
+        <ForgotPasswordForm handleSubmit={sendResetPasswordLink} buttonText={buttonText}>
+                <IconInputField labelText="Email" icon={<Email />} {...emailProps} /> 
         </ForgotPasswordForm>
     );
 }

@@ -1,37 +1,118 @@
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertResult } from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 import "../styles/swal.css";
+import okIcon from "../assets/ok.png";
+import errorIcon from "../assets/error.png";
+import warningIcon from "../assets/warning.png";
+import { Box } from '@mui/material';
+import { CircularProgress } from '@mui/material';
+
+type alertType = 'ok' | 'error' | 'warning' | 'loading';
+
+const AlertMessage = ({ message, title, type }: { message: string, title: string, type: alertType }) => {
+    const icon = type == 'ok' ? okIcon : type == 'error' ? errorIcon : type == 'warning' ? warningIcon : '';
+    return (
+        <Box textAlign='center' paddingTop={2}>
+            {type == 'loading' ? <CircularProgress style={{color: '#F44565'}}/> :
+            <img src={icon} className='swal-icon' />}
+            <h3 style={{ marginTop: '10px', fontSize: '20px', color: 'black' }}>{title}</h3>
+            <h3 style={{ fontSize: '15px' }}>{message}</h3>
+        </Box>
+    )
+}
+
+const MySwal = withReactContent(Swal);
+
+export const closeAlert = () => MySwal.close();
+
+interface AlertProps {
+    message?: string;
+    title: string;
+    type: alertType;
+    action?: (result: SweetAlertResult<any>) => void;
+    confirmButtonText?: string;
+    cancelButtonText?: string
+}
+
+const showAlert = (props: AlertProps) => {
+    MySwal.fire({
+        html: <AlertMessage message={props.message??''} title={props.title} type={props.type}/>,
+        allowOutsideClick: props.type !== 'loading',
+        showConfirmButton: props.type !== 'loading',
+        showCancelButton: props.type === 'warning',
+        confirmButtonText: props.confirmButtonText || "OK",
+        cancelButtonText: props.cancelButtonText,
+        customClass: {
+            popup: "swal-custom",
+            confirmButton: "swal-confirm-button",
+            cancelButton: "swal-confirm-button",
+        }
+    }).then((result) => props.action?.(result))
+}
+
+const confirmDeleteAlert = (title: string, message: string, action: () => void) => {
+    showAlert({title, message, type: 'warning', confirmButtonText: 'Aceptar', cancelButtonText: 'Cancelar',
+        action: (result) => {
+            if (result.isConfirmed) {
+                action();
+            }
+        }
+    })
+}
+
+export const emailInstruccionMessage = (email: string) => {
+    const title = "Instrucciones Enviadas";
+    const message = `Hemos enviado instrucciones para cambiar tu contraseña a ${email}. Por favor revise su bandeja de entrada y la carpeta de spam.`;
+    showAlert({message, title, type: 'ok'});
+}
+
+export const verifyUserMessage = () => {
+    const title = "Verificando usuario...";
+    const message = "Esto puede tardar unos segundos";
+    showAlert({message, title, type: 'loading'});
+}
+
+export const sendingEmailMessage = () => {
+    const title = "Enviando correo de verificación...";
+    const message = "Esto puede tardar unos segundos";
+    showAlert({message, title, type: 'loading'});
+}
+
+export const loadingMessage = (title: string) => {
+    const message = "Esto puede tardar unos segundos";
+    showAlert({message, title, type: 'loading'});
+}
+
+export const confirmLogOutMessage = (action: () => void) => {
+    const title = "¿Estás seguro que deseas cerrar sesión?";
+    showAlert({ message: '', title, type: 'warning', confirmButtonText: 'Sí', cancelButtonText: 'No',
+        action: (result) => {
+            if (result.isConfirmed) {
+                action();
+            }
+        }
+    });
+}
 
 export const alreadyExistsUserMessage = (email: string, phoneNumber: string, dni: string | undefined) => {
     let message = `El usuario con email ${email} o número de celular ${phoneNumber} ya se encuentra registrado en el sistema.`;
     if (dni) {
         message = `El usuario con email ${email}, número de celular ${phoneNumber} o cedula ${dni} ya se encuentra registrado en el sistema.`;
     }
-    Swal.fire({
-        title: "Usuario ya registrado",
-        text: message,
-        icon: "error",
-        confirmButtonText: "OK"
-    })
+    const title = "Usuario ya registrado";
+    showAlert({message, title, type: 'error'});
 }
 
 export const successUserCreationMessage = (action: () => void) => {
-    Swal.fire({
-        title: "Usuario creado",
-        text: `El usuario ha sido creado exitosamente.`,
-        icon: "success",
-        confirmButtonText: "OK"
-    }).then(() => {
-        action();
-    });
+    const title = "Usuario creado";
+    const message = "El usuario ha sido creado exitosamente.";
+    showAlert({message, title, type: 'ok', action});
 }
 
 export const successUserUpdatedMessage = () => {
-    Swal.fire({
-        title: "Usuario actualizado",
-        text: `El usuario ha sido actualizado exitosamente.`,
-        icon: "success",
-        confirmButtonText: "OK"
-    });
+    const title = "Usuario actualizado";
+    const message = "El usuario ha sido actualizado exitosamente.";
+    showAlert({message, title, type: 'ok'});
 }
 
 export const selectRoleMessage = () => {
@@ -43,104 +124,40 @@ export const selectRoleMessage = () => {
     })
 }
 
-export const selectProfilePhotoMessage = () => {
-    Swal.fire({
-        title: "Foto no seleccionada",
-        text: `Por favor seleccione una foto de perfil para el usuario.`,
-        icon: "error",
-        confirmButtonText: "OK"
-    })
-}
-
-export const emailInstruccionMessage = (email: string) => {
-    Swal.fire({
-        title: "Instrucciones Enviadas",
-        text: `Hemos enviado instrucciones para cambiar tu contraseña a ${email}. Por favor revise su bandeja de entrada y la carpeta de spam.`,
-        icon: "success",
-        confirmButtonText: "OK"
-    });
-}
-
-export const sendingEmailMessage = () => {
-    Swal.fire({
-        title: "Enviando correo de verificación...",
-        text: "Esto puede tardar unos segundos",
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-}
-
 export const invalidTokenMessage = (action: () => void) => {
-    Swal.fire({
-        title: "Link inválido",
-        text: `Lo sentimos pero el link que has ingresado no es válido o está caducado.`,
-        icon: "error",
-        confirmButtonText: "OK"
-    }).then(() => {
-        action();
-    });
+    const message = "Lo sentimos pero el link que has ingresado no es válido o está caducado.";
+    const title = "Link inválido";
+    showAlert({message, title, type: 'error', action});
 }
 
 export const permissionsNotSelectedMessage = () => {
-    Swal.fire({
-        title: 'Permisos no seleccionados',
-        text: 'Debe seleccionar al menos un permiso',
-        icon: 'error',
-        confirmButtonText: 'Aceptar'
-    });
-}
-
-export const categoriesNotSelectedMessage = () => {
-    Swal.fire({
-        title: 'Categorías no seleccionadas',
-        text: 'Ya que el empleado posee rol de acceso al aplicativo móvil, debe seleccionar al menos una categoría de empleado',
-        icon: 'error',
-        confirmButtonText: 'Aceptar'
-    });
+    const title = "Permisos no seleccionados";
+    const message = "Por favor seleccione al menos un permiso para el rol.";
+    showAlert({message, title, type: 'error'});
 }
 
 export const successRoleCreatedMessage = (action: () => void) => {
-    Swal.fire({
-        title: 'Rol creado',
-        text: 'El rol se ha creado correctamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-    }).then(action);
+    const title = "Rol creado";
+    const message = "El rol ha sido creado exitosamente.";
+    showAlert({message, title, type: 'ok', action});
 }
 
 export const successRoleUpdatedMessage = () => {
-    Swal.fire({
-        title: 'Rol actualizado',
-        text: 'El rol se ha sido actualizado correctamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-    });
+    const title = "Rol actualizado";
+    const message = "El rol ha sido actualizado exitosamente.";
+    showAlert({message, title, type: 'ok'});
 }
 
 export const roleDeletedMessage = (roleName: string) => {
-    Swal.fire({
-        title: 'Rol eliminado',
-        text: `El rol ${roleName} ha sido eliminado correctamente`,
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-    })
+    const title = "Rol eliminado";
+    const message = `El rol ${roleName} ha sido eliminado exitosamente.`;
+    showAlert({message, title, type: 'ok'});
 }
 
 export const confirmDeleteRoleMessage = (action: () => void) => {
-    Swal.fire({
-        title: 'Eliminar Rol',
-        text: '¿Está seguro que desea eliminar el rol? También se removerá de la lista de roles de los usuarios',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Aceptar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            action();
-        }
-    })
+    const title = "Eliminar Rol";
+    const message = "¿Está seguro que desea eliminar el rol?";
+    confirmDeleteAlert(title, message, action);
 }
 
 export const notSelectedImageMessage = () => {
@@ -165,63 +182,64 @@ export const invalidQuestionMessage = () => {
 }
 
 export const successProductUpdatedMessage = () => {
-    Swal.fire({
-        title: 'Producto actualizado',
-        text: 'El producto ha sido actualizado exitosamente.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
+    const title = "Producto actualizado";
+    const message = "El producto ha sido actualizado exitosamente.";
+    showAlert({message, title, type: 'ok'});
+}
+
+export const productDeletedMessage = (productName: string) => {
+    const title = "Producto eliminado";
+    const message = `El producto ${productName} ha sido eliminado exitosamente.`;
+    showAlert({message, title, type: 'ok'});
 }
 
 
-export const successCreatedProductMessage = () => {
-    Swal.fire({
-        title: 'Producto creado',
-        text: 'El producto ha sido creado exitosamente.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
+export const successCreatedProductMessage = (action: () => void) => {
+    const title = "Producto creado";
+    const message = "El producto ha sido creado exitosamente.";
+    showAlert({message, title, type: 'ok', action});
+}
+
+
+export const confirmDeleteProductMessage = (action: () => void) => {
+    const title = "Eliminar Producto";
+    const message = "¿Está seguro que desea eliminar el producto?";
+    confirmDeleteAlert(title, message, action);
+}
+
+export const confirmDeleteQuestionMessage = (action: () => void) => {
+    const title = "Eliminar Pregunta";
+    const message = "¿Está seguro que desea eliminar la pregunta?";
+    confirmDeleteAlert(title, message, action);
 }
 
 export const successServiceCreatedMessage = () => {
-    Swal.fire({
-        title: 'Servicio creado',
-        text: 'El servicio ha sido creado exitosamente.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
+    const title = "Servicio creado";
+    const message = "El servicio ha sido creado exitosamente.";
+    showAlert({message, title, type: 'ok'});
 }
 
 export const confirmDeleteServiceMessage = (action: () => void) => {
-    Swal.fire({
-        title: 'Eliminar Servicio',
-        text: '¿Está seguro que desea eliminar el servicio?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Aceptar',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            action();
-        }
-    })
+    const title = "Eliminar Servicio";
+    const message = "¿Está seguro que desea eliminar el servicio?";
+    confirmDeleteAlert(title, message, action);
 }
 
 
 export const successServiceUpdatedMessage = () => {
-    Swal.fire({
-        title: 'Servicio actualizado',
-        text: 'El servicio ha sido actualizado exitosamente.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
+    const title = "Servicio actualizado";
+    const message = "El servicio ha sido actualizado exitosamente.";
+    showAlert({message, title, type: 'ok'});
 }
 
 export const successFormUpdatedMessage = () => {
-    Swal.fire({
-        title: 'Formulario actualizado',
-        text: 'El formulario ha sido actualizado exitosamente.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
+    const title = "Formulario actualizado";
+    const message = "El formulario ha sido actualizado exitosamente.";
+    showAlert({message, title, type: 'ok'});
+}
+
+export const questionsNotCreatedMessage = () => {
+    const title = "Preguntas no creadas";
+    const message = "Por favor cree al menos una pregunta para el servicio.";
+    showAlert({message, title, type: 'error'});
 }

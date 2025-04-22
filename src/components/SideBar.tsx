@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSX } from "react";
 import { List, ListItemButton, ListItemIcon, ListItemText, Collapse } from "@mui/material";
 import { Link } from "react-router-dom";
 import { ExpandLess, ExpandMore, Person } from "@mui/icons-material";
@@ -9,28 +9,136 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import BoxIcon from '@mui/icons-material/Inbox';
 
 export const SideBar = () => {
-    const [principalClass, setPrincipalClass] = useState("menuOpen");
-    const [usuariosClass, setUsuariosClass] = useState("menuClose");
-    const [usuarioMenuOpen, setUsuarioMenuOpen] = useState(false);
-    const [userIconColor, setUserIconColor] = useState("#37474F");
+    const sideBarController = useSideBar()
 
-    const [productosClass, setProductosClass] = useState("menuClose");
-    const [productosMenuOpen, setProductosMenuOpen] = useState(false);
-    const [productoIconColor, setProductoIconColor] = useState("#37474F");
+    return (
+        <List sx={{ width: 250, bgcolor: "white", color: "#37474F", borderRadius: 5 }}>
+            <ListItemButton className={sideBarController.pricipalMenuProps.className}
+                onClick={sideBarController.pricipalMenuProps.onClick}
+                component={Link} to={sideBarController.pricipalMenuProps.to}
+                sx={{ borderRadius: 2}}>
+                <ListItemText primary="Principal" />
+            </ListItemButton>
+            <MenuBar {...sideBarController.usuarioMenuProps} />
+            <MenuBar {...sideBarController.roleMenuProps} />
+            <MenuBar {...sideBarController.serviceMenuProps} />
+            <MenuBar {...sideBarController.productoMenuProps} />
+        </List>
+    );
+}
 
-    const [rolesClass, setRolesClass] = useState("menuClose");
-    const [roleMenuOpen, setRoleMenuOpen] = useState(false);
-    const [roleIconColor, setRoleIconColor] = useState("#37474F");
+interface MenuBarProps {
+    name: string;
+    accessPermissions: Permissions;
+    icon: JSX.Element;
+    menuClass: string;
+    menuOpen: boolean;
+    onClick: () => void;
+    to: {
+        create: string;
+        search: string;
+    };
+    crearMenuClass?: string;
+    searchMenuClass?: string;
+    onClickCrear?: () => void;
+    onClickSearch?: () => void;
+}
 
-    const [servicesClass, setServicesClass] = useState("menuClose");
-    const [serviceMenuOpen, setServiceMenuOpen] = useState(false);
-    const [serviceIconColor, setServiceIconColor] = useState("#37474F");
+function MenuBar<Variant extends MenuBarProps>(props: Variant) {
+    return (
+        <>
+            {
+                !props.accessPermissions.empty &&
+                <ListItemButton onClick={props.onClick} className={props.menuClass}>
+                    <ListItemIcon>
+                        {props.icon}
+                    </ListItemIcon>
+                    <ListItemText primary={props.name}/>
+                    {props.menuOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+            }
 
+            <Collapse in={props.menuOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                    {props.accessPermissions.create &&
+                        <ListItemButton component={Link} to={props.to.create} className={props.crearMenuClass}
+                            onClick={props.onClickCrear}>
+                            <ListItemText primary="Crear" />
+                        </ListItemButton>
+                    }
+                    {props.accessPermissions.read &&
+                        <ListItemButton component={Link} to={props.to.search} className={props.searchMenuClass}
+                            onClick={props.onClickSearch}>
+                            <ListItemText primary="Consultar" />
+                        </ListItemButton>
+                    }
+                </List>
+            </Collapse>
+        </>
+    )
+}
+
+const useMenuBar = () => {
+    const [accessPermissions, setAccessPermissions] = useState<Permissions>({ empty: true, read: false, create: false, edit: false, delete: false });
+    const [menuClass, setmenuClass] = useState("menuClose");
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [iconColor, setIconColor] = useState("black");
+    const [crearMenuClass, setCrearMenuClass] = useState("subMenuClosed");
+    const [searchMenuClass, setSearchMenuClass] = useState("subMenuClosed");
+
+    const onClickCrear = () => {
+        setCrearMenuClass(crearMenuClass === "subMenuClosed" ? "subMenuOpen" : "subMenuClosed");
+        setSearchMenuClass("subMenuClosed");
+    }
+
+    const onClickSearch = () => {
+        setSearchMenuClass(searchMenuClass === "subMenuClosed" ? "subMenuOpen" : "subMenuClosed");
+        setCrearMenuClass("subMenuClosed");
+    }
+
+    const onClick = () => {
+        setmenuClass("menuOpen");
+        setMenuOpen(!menuOpen);
+        setIconColor("white");
+    }
+
+    const close = () => {
+        setmenuClass('menuClose')
+        setMenuOpen(false)
+        setIconColor('black')
+    }
+
+    const closeSubMenus = () => {
+        setCrearMenuClass("subMenuClosed")
+        setSearchMenuClass("subMenuClosed")
+    }
+
+    return {
+        menuClass,
+        menuOpen,
+        iconColor,
+        onClick,
+        setmenuClass,
+        setMenuOpen,
+        setIconColor,
+        close,
+        accessPermissions,
+        setAccessPermissions,
+        onClickCrear,
+        onClickSearch,
+        crearMenuClass,
+        searchMenuClass,
+        closeSubMenus
+    }
+}
+
+const useSideBar = () => {
     const permissionVerifier = new PermissionVerifier();
-    const [userAccessPermissions, setUserAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
-    const [roleAccessPermissions, setRoleAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
-    const [serviceAccessPermissions, setServiceAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
-    const [productAccessPermissions, setProductAccessPermissions] = useState<Permissions>({empty: true, read: false, create: false, edit: false, delete: false});
+    const [principalClass, setPrincipalClass] = useState("menuOpen");
+    const usuarioMenuController = useMenuBar()
+    const roleMenuController = useMenuBar()
+    const servicioMenuController = useMenuBar()
+    const productoMenuController = useMenuBar()
 
     useEffect(() => {
         const fetchPermissions = async () => {
@@ -38,169 +146,130 @@ export const SideBar = () => {
             const roleAccessPermissions = await permissionVerifier.getRoleAccessPermissions();
             const serviceAccessPermissions = await permissionVerifier.getServiceAccessPermissions();
             const productAccessPermissions = await permissionVerifier.getProductAccessPermissions();
-            setProductAccessPermissions(productAccessPermissions);
-            setUserAccessPermissions(userAccessPermissions);
-            setRoleAccessPermissions(roleAccessPermissions);
-            setServiceAccessPermissions(serviceAccessPermissions);
+            usuarioMenuController.setAccessPermissions(userAccessPermissions);
+            roleMenuController.setAccessPermissions(roleAccessPermissions);
+            servicioMenuController.setAccessPermissions(serviceAccessPermissions);
+            productoMenuController.setAccessPermissions(productAccessPermissions);
         }
         fetchPermissions();
     }, [])
+
+    const closeAll = () => {
+        setPrincipalClass("menuClose");
+        usuarioMenuController.close()
+        roleMenuController.close()
+        servicioMenuController.close()
+        productoMenuController.close()
+    }
+
+    const closeAllSubMenus = () => {
+        usuarioMenuController.closeSubMenus()
+        roleMenuController.closeSubMenus()
+        servicioMenuController.closeSubMenus()
+        productoMenuController.closeSubMenus()
+    }
 
     const onClickPrincipal = () => {
         closeAll();
         setPrincipalClass("menuOpen");
     }
 
-    const onClickUsuarios = () => {
-        closeAll();
-        setUsuariosClass("menuOpen");
-        setUsuarioMenuOpen(!usuarioMenuOpen);
-        setUserIconColor("white");
+    const getUsuarioMenuProps = (): MenuBarProps => {
+        return {
+            name: 'Usuarios',
+            accessPermissions: usuarioMenuController.accessPermissions,
+            icon: <Person style={{ color: usuarioMenuController.iconColor }} />,
+            menuClass: usuarioMenuController.menuClass,
+            menuOpen: usuarioMenuController.menuOpen,
+            onClick: () => { closeAll(); usuarioMenuController.onClick() },
+            crearMenuClass: usuarioMenuController.crearMenuClass,
+            searchMenuClass: usuarioMenuController.searchMenuClass,
+            onClickCrear: () => { closeAllSubMenus(); usuarioMenuController.onClickCrear() },
+            onClickSearch: () => { closeAllSubMenus(); usuarioMenuController.onClickSearch() },
+            to: {
+                create: "/user/create/",
+                search: "/user/search/"
+            }
+        }
     }
 
-    const onClickRoles = () => {
-        closeAll();
-        setRolesClass("menuOpen");
-        setRoleMenuOpen(!roleMenuOpen);
-        setRoleIconColor("white");
+    const getRoleMenuProps = (): MenuBarProps => {
+        return {
+            name: 'Roles',
+            accessPermissions: roleMenuController.accessPermissions,
+            icon: <ManageAccountsIcon style={{ color: roleMenuController.iconColor }} />,
+            menuClass: roleMenuController.menuClass,
+            menuOpen: roleMenuController.menuOpen,
+            crearMenuClass: roleMenuController.crearMenuClass,
+            searchMenuClass: roleMenuController.searchMenuClass,
+            onClickCrear: () => { closeAllSubMenus(); roleMenuController.onClickCrear() },
+            onClickSearch: () => { closeAllSubMenus(); roleMenuController.onClickSearch() },
+            onClick: () => { closeAll(); roleMenuController.onClick() },
+            to: {
+                create: "/role/create/",
+                search: "/role/search/"
+            }
+        }
     }
 
-    const onClickServices = () => {
-        closeAll();
-        setServicesClass("menuOpen");
-        setServiceMenuOpen(!serviceMenuOpen);
-        setServiceIconColor("white");
+    const getServiceMenuProps = (): MenuBarProps => {
+        return {
+            name: 'Servicios',
+            accessPermissions: servicioMenuController.accessPermissions,
+            icon: <StorefrontIcon style={{ color: servicioMenuController.iconColor }} />,
+            menuClass: servicioMenuController.menuClass,
+            menuOpen: servicioMenuController.menuOpen,
+            crearMenuClass: servicioMenuController.crearMenuClass,
+            searchMenuClass: servicioMenuController.searchMenuClass,
+            onClickCrear: () => { closeAllSubMenus(); servicioMenuController.onClickCrear() },
+            onClickSearch: () => { closeAllSubMenus(); servicioMenuController.onClickSearch() },
+            onClick: () => { closeAll(); servicioMenuController.onClick() },
+            to: {
+                create: "/service/create/",
+                search: "/service/search/"
+            }
+        }
     }
 
-    const onClickProductos = () => {
-        closeAll();
-        setProductosClass("menuOpen");
-        setProductosMenuOpen(!productosMenuOpen);
-        setProductoIconColor("white");
+    const getProductMenuProps = (): MenuBarProps => {
+        return {
+            name: 'Productos',
+            accessPermissions: productoMenuController.accessPermissions,
+            icon: <BoxIcon style={{ color: productoMenuController.iconColor }} />,
+            menuClass: productoMenuController.menuClass,
+            menuOpen: productoMenuController.menuOpen,
+            crearMenuClass: productoMenuController.crearMenuClass,
+            searchMenuClass: productoMenuController.searchMenuClass,
+            onClickCrear: () => { closeAllSubMenus(); productoMenuController.onClickCrear() },
+            onClickSearch: () => { closeAllSubMenus(); productoMenuController.onClickSearch() },
+            onClick: () => { closeAll(); productoMenuController.onClick() },
+            to: {
+                create: "/product/create/",
+                search: "/product/search/"
+            }
+        }
     }
 
-    const closeAll = () => {
-        setPrincipalClass("menuClose");
-        setUsuariosClass("menuClose");
-        setUsuarioMenuOpen(false);
-        setUserIconColor("#37474F");
-        setRolesClass("menuClose");
-        setRoleMenuOpen(false);
-        setRoleIconColor("#37474F");
-        setServicesClass("menuClose");
-        setServiceMenuOpen(false);
-        setServiceIconColor("#37474F");
-        setProductosClass("menuClose");
-        setProductosMenuOpen(false);
-        setProductoIconColor("#37474F");
+    const getPrincipalProps = () => {
+        return {
+            className: principalClass,
+            onClick: () => { closeAll(); setPrincipalClass("menuOpen") },
+            to: "/",
+        }
     }
 
-    return (
-        <div style={{ width: 250, height: "100%", backgroundColor: 'white' }}>
-            <List sx={{ width: 250, bgcolor: "white", color: "#37474F" }}>
-                <ListItemButton className={principalClass} onClick={onClickPrincipal}
-                    component={Link} to="/">
-                    <ListItemText primary="Principal" />
-                </ListItemButton>
-                {!userAccessPermissions.empty &&
-                    <ListItemButton onClick={onClickUsuarios} className={usuariosClass}>
-                        <ListItemIcon>
-                            <Person style={{ color: userIconColor }} />
-                        </ListItemIcon>
-                        <ListItemText primary="Usuarios" />
-                        {usuarioMenuOpen ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                }
-
-                <Collapse in={usuarioMenuOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx={{ bgcolor: "#EBEDEE" }}>
-                        {userAccessPermissions.create &&
-                            <ListItemButton component={Link} to="/user/create/">
-                                <ListItemText primary="Crear" />
-                            </ListItemButton>
-                        }
-                        {userAccessPermissions.read &&
-                            <ListItemButton component={Link} to="/user/search/">
-                                <ListItemText primary="Consultar" />
-                            </ListItemButton>
-                        }
-
-                    </List>
-                </Collapse>
-                {!roleAccessPermissions.empty &&
-                    <ListItemButton onClick={onClickRoles} className={rolesClass}>
-                        <ListItemIcon>
-                            <ManageAccountsIcon style={{ color: roleIconColor }} />
-                        </ListItemIcon>
-                        <ListItemText primary="Roles" />
-                        {roleMenuOpen ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                }
-
-                <Collapse in={roleMenuOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx={{ bgcolor: "#EBEDEE" }}>
-                        {roleAccessPermissions.create &&
-                            <ListItemButton component={Link} to="/role/create/">
-                                <ListItemText primary="Crear" />
-                            </ListItemButton>
-                        }
-                        {roleAccessPermissions.read &&
-                            <ListItemButton component={Link} to="/role/search/">
-                                <ListItemText primary="Consultar" />
-                            </ListItemButton>
-                        }
-                    </List>
-                </Collapse>
-
-                {!serviceAccessPermissions.empty &&
-                    <ListItemButton onClick={onClickServices} className={servicesClass}>
-                        <ListItemIcon>
-                            <StorefrontIcon style={{ color: serviceIconColor }} />
-                        </ListItemIcon>
-                        <ListItemText primary="Servicios" />
-                        {serviceMenuOpen ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                }
-
-                <Collapse in={serviceMenuOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx={{ bgcolor: "#EBEDEE" }}>
-                        {serviceAccessPermissions.create &&
-                            <ListItemButton component={Link} to="/service/create/">
-                                <ListItemText primary="Crear" />
-                            </ListItemButton>
-                        }
-                        {serviceAccessPermissions.read &&
-                            <ListItemButton component={Link} to="/service/search/">
-                                <ListItemText primary="Consultar" />
-                            </ListItemButton>
-                        }
-                    </List>
-                </Collapse>
-
-                {!productAccessPermissions.empty &&
-                    <ListItemButton onClick={onClickProductos} className={productosClass}>
-                        <ListItemIcon>
-                            <BoxIcon style={{ color: productoIconColor }} />
-                        </ListItemIcon>
-                        <ListItemText primary="Productos" />
-                        {productosMenuOpen ? <ExpandLess /> : <ExpandMore />}
-                    </ListItemButton>
-                }
-                <Collapse in={productosMenuOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx={{ bgcolor: "#EBEDEE" }}>
-                        {productAccessPermissions.create &&
-                            <ListItemButton component={Link} to="/product/create/">
-                                <ListItemText primary="Crear" />
-                            </ListItemButton>
-                        }
-                        {productAccessPermissions.read &&
-                            <ListItemButton component={Link} to="/product/search/">
-                                <ListItemText primary="Consultar" />
-                            </ListItemButton>
-                        }
-                    </List>
-                </Collapse>
-            </List>
-        </div>
-    );
+    return {
+        principalClass,
+        usuarioMenuController,
+        roleMenuController,
+        servicioMenuController,
+        productoMenuController,
+        closeAll,
+        onClickPrincipal,
+        usuarioMenuProps: getUsuarioMenuProps(),
+        pricipalMenuProps: getPrincipalProps(),
+        roleMenuProps: getRoleMenuProps(),
+        serviceMenuProps: getServiceMenuProps(),
+        productoMenuProps: getProductMenuProps(),
+    }
 }

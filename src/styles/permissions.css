@@ -1,52 +1,57 @@
 .not-selected{
-    background-color: rgb(100, 100, 100) !important;
-    color: white !important;
+    background-color: #FAE2E1 !important;
+    color: black !important;
     border: none !important;
-    border-radius: 5px !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
 }
 
 .not-selected:hover{
-    background-color: rgb(150, 150, 150) !important;
+    background-color: #eac8c7 !important;
 }
 
 .view-permission{
     background-color: #3DC94B !important;
     color: white !important;
     border: none !important;
-    border-radius: 5px !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
 }
 
 .view-permission:hover{
-    background-color: #2FAA38 !important;
+    background-color: #2c9b3a !important;
 }
 
 .create-permission {
-    background-color: #16417C !important;
+    background-color: #29AAE1 !important;
     color: white !important;
     border: none !important;
-    border-radius: 5px !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
 }
 
 .create-permission:hover {
-    background-color: #26518f !important;
+    background-color: #1882af !important;
 }
 
 .edit-permission {
-    background-color: #FFC107 !important;
+    background-color: #FBB03B !important;
     color: white !important;
     border: none !important;
-    border-radius: 5px !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
 }
 
 .edit-permission:hover {
-    background-color: #FFA000 !important;
+    background-color: #df8e02 !important;
 }
 
 .delete-permission {
-    background-color: #DC3545 !important;
+    background-color: #F44565 !important;
     color: white !important;
     border: none !important;
-    border-radius: 5px !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
 }
 
 .delete-permission:hover {
@@ -54,12 +59,13 @@
 }
 
 .movil-permission{
-    background-color: #C9285D !important;
+    background-color: #F44565 !important;
     color: white !important;
     border: none !important;
-    border-radius: 5px !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
 }
 
 .movil-permission:hover{
-    background-color: #AF234A !important;
+    background-color: #C82333 !important;
 }

@@ -16,10 +16,8 @@ import { SearchRole } from "./pages/SearchRole";
 import { RoleInfo } from "./pages/RoleInfo";
 import { CreateService } from "./pages/CreateService";
 import { SearchService } from "./pages/SearchService";
-import { ServiceForm } from "./pages/ServiceForm";
 import { ServiceTypeInfo } from "./pages/ServiceTypeInfo";
 import { ServiceInfo } from "./pages/ServiceInfo";
-import { EditServiceForm } from "./pages/EditServiceForm";
 import { CreateProduct } from "./pages/CreateProduct";
 import { SearchProduct } from "./pages/SearchProduct";
 import { EditProduct } from "./pages/EditProduct";
@@ -50,10 +48,8 @@ function App() {
             <Route path="role/search/:roleId" element={<RoleInfo/>}/>
             <Route path="service/create/" element={<CreateService/>}/>
             <Route path="service/search/" element={<SearchService/>}/>
-            <Route path="service/form/create/" element={<ServiceForm/>}/>
             <Route path="service/:type" element={<ServiceTypeInfo/>}/>
             <Route path="service/search/:id" element={<ServiceInfo/>}/>
-            <Route path="service/form/:id" element={<EditServiceForm/>}/>
             <Route path="product/create/" element={<CreateProduct/>}/>
             <Route path="product/search/" element={<SearchProduct/>}/>
             <Route path="product/search/:id" element={<EditProduct/>}/>

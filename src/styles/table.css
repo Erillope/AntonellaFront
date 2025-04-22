@@ -5,3 +5,51 @@
 .header .MuiTableSortLabel-icon {
     color: white !important;
 }
+
+.custom-pagination {
+    background-color: #F3F3F3;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+}
+
+.custom-pagination-item {
+    border-radius: 50% !important;
+    min-width: 32px;
+    height: 32px;
+    margin: 0 4px;
+    font-weight: 500;
+    color: #555 !important;
+}
+
+.custom-pagination-item.selected {
+    color: #fff !important;
+    background-color: #F44565 !important;
+}
+
+.custom-pagination-item:hover {
+    background-color: #FAE2E1 !important;
+    border: 1px solid #AF234A;
+}
+
+.custom-pagination-item.selected:hover {
+    background-color: #C9285D !important;
+    border: 1px solid black;
+}
+
+
+.custom-pagination-item:hover:not(.ellipsis) {
+    background-color: #FAE2E1;
+    border: 1px solid #AF234A;
+}
+
+.custom-pagination-item.selected:hover:not(.ellipsis) {
+    background-color: #C9285D !important;
+    border: 1px solid black;
+}
+
+.custom-pagination-item.ellipsis {
+    color: #aaa;
+    cursor: default;
+    pointer-events: none;
+}

@@ -3,3 +3,5 @@ export const SERVER_BACK_URL = "https://erillope.pythonanywhere.com/"
 
 export const BACK_URL = SERVER_BACK_URL
 export const API_URL = BACK_URL + "api/";
+
+export const movilCategories = ['Cabello', 'Uñas', 'Spa', 'Maquillaje']

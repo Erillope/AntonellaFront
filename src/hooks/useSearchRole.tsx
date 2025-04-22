@@ -1,26 +1,18 @@
-import { AccessPermission, RoleApi } from "../api/role_api";
-import { useState } from "react";
+import { RoleApi } from "../api/role_api";
+import { useEffect, useState } from "react";
 import { AuthUserApi } from "../api/user_api";
-
-export interface RoleData {
-    id: string;
-    name: string;
-    accesses: AccessPermission[];
-    numUsers: number;
-}
+import { useInputTextField } from "../components/inputs/InputTextField";
+import { RoleData } from "../components/tables/RoleTable";
 
 export const useSearchRole = () => {
-    const [order, setOrder] = useState<"asc" | "desc">("asc");
     const [allRoles, setAllRoles] = useState<RoleData[]>([]);
     const [roles, setRoles] = useState<RoleData[]>([]);
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [searchRole, setSearchRole] = useState<string>("");
+    const searchRoleController = useInputTextField()
     const roleApi = new RoleApi();
     const userApi = new AuthUserApi();
 
-    const init = () => {
-        const fetchRoles = async () => {
+    useEffect(() => {
+        const init = async () => {
             const roles = await roleApi.getRoles();
             roles.sort((a, b) => a.name.localeCompare(b.name));
             const rolesData: RoleData[] = await Promise.all(
@@ -34,36 +26,22 @@ export const useSearchRole = () => {
             setAllRoles(rolesData);
             setRoles(rolesData);
         }
-        fetchRoles();
-    }
+        init();
+    }, [])
 
-    const handleSort = () => {
-        setOrder(order === "asc" ? "desc" : "asc");
-        setRoles(roles.reverse());
-    };
-
-    const filterRole = (searchRole: string) => {
-        setSearchRole(searchRole);
-        if (searchRole === "") {
+    const filterRole = () => {
+        if (searchRoleController.isEmpty()) {
             setRoles(allRoles);
             return;
         }
-        const filteredRoles = allRoles.filter((role) => role.name.toLowerCase().startsWith(searchRole.toLowerCase()));
+        const filteredRoles = allRoles.filter((role) => role.name.toLowerCase().includes(searchRoleController.value.toLowerCase()));
         setRoles(filteredRoles);
-        setPage(0);
-        setRowsPerPage(5);
     }
 
+    useEffect(filterRole, [searchRoleController.value])
+
     return {
-        order,
         roles,
-        page,
-        rowsPerPage,
-        searchRole,
-        init,
-        handleSort,
-        filterRole,
-        setPage,
-        setRowsPerPage
+        searchRoleProps: searchRoleController.getProps(),
     }
 }

@@ -1,18 +1,14 @@
-import { useEffect } from "react"
-import { useService } from "../hooks/useService"
-import { SearchServiceTable } from "../components/SearchServiceTable"
+import { Box } from "@mui/material"
+import { ServiceTable } from "../components/tables/ServiceTable"
+import { useSearchService } from "../hooks/useSearchService"
 import { useNavigate } from "react-router-dom"
 
 export const SearchService = () => {
     const navigate = useNavigate()
-    const { initSearch, typeInfo } = useService({})
-
-    useEffect(initSearch, [])
-    
+    const { servicesTypeInfo } = useSearchService()
     return (
-        <div style={{ width: '100%', marginTop: '20px'}}>
-            <SearchServiceTable servicesInfo={typeInfo}
-            onViewAction={(type: string) => navigate(`/service/${type}`)}/>
-        </div>
+        <Box width="90%" gap={2} display="flex" flexDirection="column">
+            <ServiceTable serviceTypes={servicesTypeInfo} onViewAction={(type) => navigate(`/service/${type}`)} />
+        </Box>
     )
 }

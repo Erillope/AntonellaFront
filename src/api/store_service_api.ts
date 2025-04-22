@@ -1,8 +1,8 @@
 import { Time } from "./types"
-import { API_URL, BACK_URL } from "./config";
+import { API_URL } from "./config";
 import { AbsctractApi } from "./abstract_api";
 import axios from "axios";
-import { toDate } from "./date";
+import { toDate, removeHeaderFromImage, capitalizeFirstLetter, addDomainToUrl } from "./utils";
 
 const storeServiceApiUrl = API_URL + "store_service/";
 
@@ -14,7 +14,7 @@ export interface CreateStoreService {
     prices: Price[];
     duration: Time;
     images: string[];
-    questions?: Question[];
+    questions: Question[];
 }
 
 export interface UpdateStoreService {
@@ -52,8 +52,8 @@ export interface Price {
 export interface Question {
     id: string;
     title: string;
-    inputType: string;
-    choiceType?: string;
+    inputType: 'TEXT' | 'IMAGE' | 'CHOICE';
+    choiceType?: 'TEXT' | 'IMAGE';
     choices?: Choice[];
 }
 
@@ -88,6 +88,7 @@ export class StoreServiceApi extends AbsctractApi {
     async createStoreService(storeServiceData: CreateStoreService): Promise<StoreService | undefined> {
         try {
             const requestData = this.mapCreateStoreService(storeServiceData);
+            console.log(requestData)
             const response = await axios.post(storeServiceApiUrl, requestData);
             return this.map(response.data.data);
         } catch (error) {
@@ -165,8 +166,8 @@ export class StoreServiceApi extends AbsctractApi {
             id: data.id,
             name: data.name,
             description: data.description,
-            type: data.type,
-            subType: data.subtype,
+            type: capitalizeFirstLetter(data.type),
+            subType: capitalizeFirstLetter(data.subtype),
             prices: data.prices.map((price: any) => {
                 return {
                     name: price.name,
@@ -178,8 +179,8 @@ export class StoreServiceApi extends AbsctractApi {
                 hours: parseInt(durationInfo[0]),
                 minutes: parseInt(durationInfo[1])
             },
-            images: data.images.map((image: string) => BACK_URL + image),
-            questions: data.questions.map((questionData: any) => this.mapQuestion(questionData)),
+            images: data.images.map(addDomainToUrl),
+            questions: data.questions.map(this.mapQuestion.bind(this)),
             createdDate: toDate(data.created_date),
             status: data.status
         }
@@ -200,7 +201,7 @@ export class StoreServiceApi extends AbsctractApi {
                 else{
                     return {
                         option: choice.option,
-                        image: BACK_URL + choice.image
+                        image: choice.image && addDomainToUrl(choice.image)
                     }
                 }
             }) : undefined
@@ -211,8 +212,8 @@ export class StoreServiceApi extends AbsctractApi {
         return {
             name: data.name,
             description: data.description,
-            type: data.type,
-            subtype: data.subType,
+            type: data.type.toUpperCase(),
+            subtype: data.subType.toUpperCase(),
             prices: data.prices.map((price) => {
                 return {
                     name: price.name,
@@ -221,8 +222,8 @@ export class StoreServiceApi extends AbsctractApi {
                 }
             }),
             duration: data.duration.hours.toString() + ":" + data.duration.minutes.toString(),
-            images: data.images.map((image) => image.split(',')[1]),
-            questions: data.questions ? data.questions.map((question) => this.mapCreateQuestion(question)) : undefined
+            images: data.images.map(removeHeaderFromImage),
+            questions: data.questions.map(this.mapCreateQuestion.bind(this))
         }
     }
 
@@ -231,20 +232,17 @@ export class StoreServiceApi extends AbsctractApi {
             id: data.id,
             name: data.name,
             description: data.description,
-            type: data.type,
-            subtype: data.subType,
-            prices: data.prices ? data.prices.map((price) => {
+            type: data.type?.toUpperCase(),
+            subtype: data.subType?.toUpperCase(),
+            prices: data.prices?.map((price) => {
                 return {
                     name: price.name,
                     min_price: price.minPrice,
                     max_price: price.maxPrice
                 }
-            }) : undefined,
+            }),
             duration: data.duration ? (data.duration.hours.toString() + ":" + data.duration.minutes.toString()) : undefined,
-            images: data.images ? data.images.map((image) => {
-                if (image.split(',')[1]){return image.split(',')[1]}
-                else{return image.replace(BACK_URL, "")}
-            }) : undefined,
+            images: data.images?.map(removeHeaderFromImage),
             status: data.status
         }
     }
@@ -260,7 +258,6 @@ export class StoreServiceApi extends AbsctractApi {
     private mapCreateQuestion(question: CreateQuestion): any {
         return {
             service_id: question.serviceId,
-            id: question.id,
             title: question.title,
             input_type: question.inputType,
             choice_type: question.choiceType,
@@ -274,14 +271,9 @@ export class StoreServiceApi extends AbsctractApi {
         }
         if (type == 'IMAGE'){
             return choices.map((choice) => {
-                let image = choice.image
-                if (image){
-                    if (image.split(',')[1]){image = image.split(',')[1]}
-                    else{image = image.replace(BACK_URL, "")}
-                }
                 return {
                     option: choice.option,
-                    image: image
+                    image: choice.image && removeHeaderFromImage(choice.image)
                 }
             })
         }

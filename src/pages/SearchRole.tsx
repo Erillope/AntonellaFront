@@ -1,23 +1,17 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useSearchRole } from "../hooks/useSearchRole";
-import { TextInputField } from "../components/inputField/TextInputField";
-import { SearchRoleTable } from "../components/SearchRoleTable";
-import { SearchRoleBox } from "../components/SearchRoleBox";
+import { RoleTable } from "../components/tables/RoleTable";
+import { InputTextField2 } from "../components/inputs/InputTextField";
+import { useNavigate } from "react-router-dom";
+import { Box } from "@mui/material";
 
 export const SearchRole = () => {
     const navigate = useNavigate();
-    const { order, roles, page, rowsPerPage, searchRole, init, handleSort, filterRole, setPage, setRowsPerPage } = useSearchRole();
-
-    useEffect(init, [])
+    const { searchRoleProps, roles } = useSearchRole();
 
     return (
-        <SearchRoleBox>
-            <TextInputField labelText="Nombre del rol" value={searchRole} onValueChange={filterRole}
-                style={{ width: "50%" }} />
-            <SearchRoleTable order={order} handleSort={handleSort} roles={roles} page={page}
-                rowsPerPage={rowsPerPage} setPage={setPage} setRowsPerPage={setRowsPerPage}
-                onViewAction={(id) => navigate(`/role/search/${id}`)} />
-        </SearchRoleBox>
+        <Box width="90%" gap={2} display="flex" flexDirection="column">
+            <InputTextField2 labelText="Nombre del rol" width="50%" {...searchRoleProps}/>
+            <RoleTable roles={roles} onViewAction={(id: string) => navigate(`/role/search/${id}`)}/>
+        </Box>
     );
 }

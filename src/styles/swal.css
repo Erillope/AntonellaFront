@@ -1,3 +1,16 @@
-.swal-custom{
-    z-index: 4000 !important;
+.swal-custom {
+    background-color: #FAE2E1;
+    border-radius: 30px;
+}
+
+.swal-confirm-button {
+    background-color: #F44565;
+    color: white ;
+    border-radius: 10px;
+    width: 100px;
+}
+
+.swal-icon {
+    width: 75px !important;
+    height: 75px !important;
 }

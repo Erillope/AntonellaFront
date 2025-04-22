@@ -1,7 +1,7 @@
 import axios from "axios";
 import { API_URL } from "./config";
 import { AbsctractApi } from "./abstract_api";
-import { toDate } from "./date";
+import { toDate } from "./utils";
 
 const tokenApiUrl = API_URL + "token/";
 

@@ -2,7 +2,7 @@ import axios from "axios";
 import { API_URL } from "./config";
 import { AbsctractApi } from "./abstract_api";
 import Cookies from "js-cookie";
-import { toDate, toDateString } from "./date";
+import { addDomainToUrl, capitalizeFirstLetter, toDate, toDateString, removeHeaderFromImage } from "./utils";
 import { v4 as uuidv4 } from "uuid";
 
 const userApiUrl = API_URL + "user/";
@@ -62,6 +62,9 @@ export interface UpdateUserProps {
 }
 
 export class AuthUserApi extends AbsctractApi {
+    getPermissionVerifier() {
+        throw new Error("Method not implemented.");
+    }
     protected errors: { [key: string]: string }= {
         'PHONE_NUMBER_NOT_REGISTERED': 'ModelNotFoundException',
         'ICORRECT_PASSWORD': 'IncorrectPasswordException',
@@ -94,9 +97,9 @@ export class AuthUserApi extends AbsctractApi {
 
     async createUser(userData: CreateUserProps): Promise<User | undefined> {
         const request = this.userDataMap(userData);
-        const uuid = uuidv4();
-        const password = uuid.split('-')[0].toUpperCase() + uuid.split('-').slice(1).join('-');
+        const password = uuidv4()+'A123';
         request['password'] = password;
+        console.log(request)
         try{
             const response = await axios.post(userApiUrl, request);
             return this.map(response.data.data);
@@ -206,16 +209,16 @@ export class AuthUserApi extends AbsctractApi {
             id: data.id,
             dni: data.dni,
             address: data.address,
-            photo: data.photo,
+            photo: addDomainToUrl(data.photo),
             phoneNumber: data.phone_number,
             email: data.email,
             name: data.name,
             status: data.status,
-            gender: data.gender,
+            gender: capitalizeFirstLetter(data.gender),
             birthdate: toDate(data.birthdate),
             createdDate: toDate(data.created_date),
             roles: data.roles,
-            categories: data.categories
+            categories: data.categories && data.categories.map((category: string) => capitalizeFirstLetter(category)),
         }
     }
 
@@ -225,8 +228,14 @@ export class AuthUserApi extends AbsctractApi {
             'email': data.email,
             'name': data.name,
             'birthdate': toDateString(data.birthdate),
-            'gender': data.gender,
-            "employee_data": data.employeeData
+            'gender': data.gender.toUpperCase(),
+            "employee_data": data.employeeData?{
+                'dni': data.employeeData.dni,
+                'address': data.employeeData.address,
+                'photo': data.employeeData.photo.split(',')[1],
+                'roles': data.employeeData.roles,
+                'categories': data.employeeData.categories.map((category: string) => category.toUpperCase())
+            } : undefined
         }
     }
 
@@ -246,14 +255,14 @@ export class AuthUserApi extends AbsctractApi {
             'phone_number': data.phoneNumber,
             'email': data.email,
             'name': data.name,
-            'gendre': data.gender,
+            'gender': data.gender?.toUpperCase(),
             'birthdate': data.birthdate? toDateString(data.birthdate): undefined,
             'status': data.status,
             'dni': data.dni,
             'address': data.address,
-            'photo': data.photo,
+            'photo': removeHeaderFromImage(data.photo ?? ''),
             'roles': data.roles,
-            'categories': data.categories
+            'categories': data.categories?.map((category: string) => category.toUpperCase())
         }
     }
 }

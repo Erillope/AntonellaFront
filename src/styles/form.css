@@ -43,18 +43,16 @@
 }
 
 .form-control {
-    padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-self: flex-start;
-    row-gap: 30px;
 }
 
 .input-group {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
-    justify-content: flex-start;
     row-gap: 30px;
+    margin-bottom: 30px;
 }
 
 .buttons-box{

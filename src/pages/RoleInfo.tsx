@@ -1,49 +1,29 @@
 import { useParams } from "react-router-dom"
 import { useRole } from "../hooks/useRole"
-import { useEffect } from "react"
-import { UpdateRoleForm } from "../components/UpdateRoleForm"
-import { TextInputField } from "../components/inputField/TextInputField"
-import { MovilPermission } from "../components/inputField/SelectPermissions"
-import { RolePermissionsTable } from "../components/RolePermissionsTable"
-import { useRoleFormActions } from "../hooks/useRoleFormActions"
+import { Box, Typography } from "@mui/material";
+import { ActionForm } from "../components/forms/ActionForm";
+import { InputTextField2 } from "../components/inputs/InputTextField";
+import { MovilPermission } from "../components/inputs/PermissionsInput";
+import { RolePermissionsTable } from "../components/tables/RolePermissionsTable";
+import { confirmDeleteRoleMessage } from "../utils/alerts";
 
 export const RoleInfo = () => {
     const { roleId } = useParams()
-    const { register, handleSubmit, errors, updateRole, setCitasPermissions, setUsuariosPermissions,
-        setServiciosPermissions, setProductosPermissions, setRolesPermissions, setNotificacionesPermissions, setChatsPermissions, setPagosPermissions, setMovilPermissions, roleNameError, initEdit,
-        roleName, setRoleName, movilPermissions, citasPermissions, chatsPermissions,
-        pagosPermissions, productosPermissions, rolesPermissions, usuariosPermissions,
-        serviciosPermissions, notificacionesPermissions, formRef, editable,
-        deletePermission, discartChanges, deleteRole, role } = useRole();
-
-    const { notHaveReadpermissionAction, notFoundRoleAction, handleUpdateRole,
-        handleDeleteRole } = useRoleFormActions({ updateRole, deleteRole})
-
-    useEffect(() => initEdit(roleId ?? '', notHaveReadpermissionAction, notFoundRoleAction), [])
+    const { nameProps, movilProps, permissionsProps, updateRole, mode, setMode, discartChanges,
+        permissions, deleteRole, isSuperAdminRole
+    } = useRole({ mode: 'read', roleName: roleId });
 
     return (
-        <UpdateRoleForm handleSubmit={() => handleSubmit(handleUpdateRole)} formRef={formRef}
-            deletePermission={deletePermission} editable={editable}
-            discartChanges={() => discartChanges(role)} confirmDeleteRole={handleDeleteRole}>
-            <TextInputField register={register} errors={errors} name="roleName" style={{ width: "50%" }}
-                inputError={roleNameError} value={roleName} onValueChange={setRoleName} disabled={!editable}
-                labelText="Nombre del rol" requiredErrorText="El nombre del rol es requerido" />
-            <MovilPermission onSelectMovilPermissions={setMovilPermissions} value={movilPermissions}
-            disabled={!editable}/>
-            <RolePermissionsTable
-                onSelectCitasPermissions={setCitasPermissions}
-                onSelectUsuariosPermissions={setUsuariosPermissions}
-                onSelectServiciosPermissions={setServiciosPermissions}
-                onSelectProductosPermissions={setProductosPermissions}
-                onSelectRolesPermissions={setRolesPermissions}
-                onSelectNotificacionesPermissions={setNotificacionesPermissions}
-                onSelectChatsPermissions={setChatsPermissions}
-                onSelectPagosPermissions={setPagosPermissions}
-                citasPermissions={citasPermissions} usuariosPermissions={usuariosPermissions}
-                serviciosPermissions={serviciosPermissions} productosPermissions={productosPermissions}
-                rolesPermissions={rolesPermissions} notificacionesPermissions={notificacionesPermissions}
-                chatsPermissions={chatsPermissions} pagosPermissions={pagosPermissions} disabled={!editable}
-            />
-        </UpdateRoleForm>
+        <ActionForm width='90%' handleSubmit={updateRole} mode={mode} discartChanges={discartChanges}
+            edit={() => setMode('update')} allowEdit={permissions?.edit && !isSuperAdminRole()} allowDelete={permissions?.delete}
+            delete={() => confirmDeleteRoleMessage(deleteRole)}>
+            <InputTextField2 labelText='Nombre del rol' width='50%' {...nameProps}
+                disabled={mode === 'read'}/>
+            <Box display='flex' width='100%' justifyContent='space-between' marginBottom={-2}>
+                <Typography sx={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Permisos</Typography>
+                <MovilPermission {...movilProps} disabled={mode === 'read'}/>
+            </Box>
+            <RolePermissionsTable permissions={permissionsProps} disabled={mode === 'read'}/>
+        </ActionForm>
     )
 }
