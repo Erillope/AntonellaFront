@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { PasswordInputField } from "../components/inputs/InputTextField";
 import { useResetPassword } from "../hooks/useResetPassword";
-import { FormBox, SubmitButton } from "../components/forms/formBox";
+import { FormBox, SubmitButton } from "../components/forms/FormBox";
 
 export const ResetPassword = () => {
     const navigate = useNavigate();

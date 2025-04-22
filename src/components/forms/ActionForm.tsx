@@ -1,5 +1,5 @@
 import { Box, Button } from "@mui/material";
-import { SubmitButton, FormBox, FormBoxProps } from "./formBox";
+import { SubmitButton, FormBox, FormBoxProps } from "./FormBox";
 
 export interface ActionFormProps extends FormBoxProps {
     mode?: "create" | "read" | "update";

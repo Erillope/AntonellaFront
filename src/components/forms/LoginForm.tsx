@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SubmitButton, FormBox, FormBoxProps } from "./formBox";
+import { SubmitButton, FormBox, FormBoxProps } from "./FormBox";
 
 
 export function LoginForm(props: FormBoxProps) {
