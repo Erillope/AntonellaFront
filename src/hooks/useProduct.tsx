@@ -115,6 +115,13 @@ export const useProduct = (props?: UseProductProps) => {
         stockAdditionalController.setValue('0')
     }
 
+    useEffect(() => {
+        const subCategory = subCategories[categoryController.value.toUpperCase()]
+        if (subCategory && subCategory.includes(subCategoryController.value.toUpperCase())) {
+            subCategoryController.setValue(subCategoryController.value)
+        }
+    }, [initData])
+
     const getCreateProductData = (): CreateProduct => {
         return {
             type: categoryController.value,
