@@ -10,13 +10,13 @@ const headers: HeaderInfo[] = [
 
 const getTypeLabel = (questionType: 'TEXT' | 'IMAGE' | 'CHOICE', choiceType: 'TEXT' | 'IMAGE'|'') => {
     if (questionType === 'TEXT') {
-        return 'Selección texto'
+        return 'Campo de texto'
     }
     if (questionType === 'IMAGE') {
-        return 'Selección imagen'
+        return 'Subir imágenes'
     }
     if (questionType === 'CHOICE') {
-        return choiceType === 'TEXT' ? 'Campo de texto' : 'Subir imágenes'
+        return choiceType === 'TEXT' ? 'Selección texto' : 'Selección imagen'
     }
 }
 
@@ -40,6 +40,7 @@ interface QuestionTableProps {
 
 export const QuestionTable = (props: QuestionTableProps) => {
     const buildRows = (question: Question): RowComponent => {
+        console.log(question)
         return {
             cells: [
                 <Box display='flex' alignItems='flex-start' width='100%'>{question.title}</Box>,
