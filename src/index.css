@@ -1,15 +1,21 @@
 *{
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .MuiInputBase-root.Mui-disabled {
-  background-color: white !important; /* Fondo blanco */
-  border-color: black !important; /* Borde negro */
+  background-color: white !important;
+  border-color: black !important; 
 }
 
 .MuiInputBase-input.Mui-disabled {
-  -webkit-text-fill-color: black !important; /* Texto negro */
+  -webkit-text-fill-color: black !important;
   opacity: 1 !important;
+}
+
+input:-webkit-autofill {
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: black !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 :root {

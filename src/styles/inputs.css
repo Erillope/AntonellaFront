@@ -1,6 +1,14 @@
 .inputTextField .MuiOutlinedInput-root {
     border-radius: 30px;
+    height: 40px;
     background-color: #FAE2E1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inputTextField .MuiInputLabel-root {
+    margin-top: -6px;
 }
 
 .inputTextField .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
@@ -65,7 +73,6 @@
 .inputTextLabel {
     color: black;
     padding-left: 10px;
-    font-size: 12px !important;
 }
 
 .inputBox {
@@ -243,29 +250,29 @@
     color: white !important;
     border: none !important;
     border-radius: 10px !important;
-    width: 50% ;
+    width: 50%;
     cursor: pointer !important;
 }
 
-.delete-image-button{
+.delete-image-button {
     background-color: transparent !important;
     width: 24px !important;
     height: 24px !important;
     color: white !important;
 }
 
-.delete-image-button:hover{
+.delete-image-button:hover {
     background-color: #f44565b0 !important;
     color: white !important;
 }
 
-.delete-image-button2{
+.delete-image-button2 {
     width: 24px !important;
     height: 24px !important;
     color: #F44565 !important;
 }
 
-.delete-image-button2:hover{
+.delete-image-button2:hover {
     background-color: #F44565 !important;
     color: white !important;
 }

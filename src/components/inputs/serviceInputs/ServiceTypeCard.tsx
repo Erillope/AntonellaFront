@@ -37,7 +37,7 @@ interface ServiceCardProps {
 const ServiceCard: React.FC<ServiceCardProps> = ({ service, onViewAction }) => {
     return (
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center"
-            bgcolor={'#E0E0E0'} width={150}
+            bgcolor={'#E0E0E0'} width={150} height={250}
             sx={{
                 cursor: "pointer",
                 padding: 2,
@@ -51,19 +51,23 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onViewAction }) => {
             <Box sx={{ width: 150, height: 150, borderRadius: "8px", overflow: "hidden", marginBottom: 1 }}>
                 <Avatar src={service.images[0]} variant="square" sx={{ width: "100%", height: "100%" }} />
             </Box>
-            <h3 style={{ fontSize: '14px', margin: '8px 0', textAlign: 'center', color:'black'}}>{service.name}</h3>
-            <Typography style={{
-                fontSize: '12px', color: '#666', textAlign: 'center',
-                display: '-webkit-box',
-                overflow: 'hidden',
-                WebkitBoxOrient: 'vertical',
-                WebkitLineClamp: 3,
-                textOverflow: 'ellipsis',
-                width: '150px',
-            }}>{service.description}</Typography>
-            <Typography style={{ fontSize: '12px', color: '#F44565', textAlign: 'center' }}>
-                ${service.prices[0].minPrice} - ${service.prices[0].maxPrice}
-            </Typography>
+            <Box height={'50%'} display="flex" flexDirection={'column'} justifyContent="space-between" alignItems="center">
+                <Box>
+                    <h3 style={{ fontSize: '14px', margin: '8px 0', textAlign: 'center', color: 'black' }}>{service.name}</h3>
+                    <Typography style={{
+                        fontSize: '12px', color: '#666', textAlign: 'center',
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 3,
+                        textOverflow: 'ellipsis',
+                        width: '150px',
+                    }}>{service.description}</Typography>
+                </Box>
+                <Typography style={{ fontSize: '12px', color: '#F44565', textAlign: 'center' }}>
+                    ${service.prices[0].minPrice} - ${service.prices[0].maxPrice}
+                </Typography>
+            </Box>
         </Box>
     )
 }

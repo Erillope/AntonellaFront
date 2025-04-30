@@ -53,7 +53,7 @@ function DynamicAutocomplete(props: DynamicAutocompleteProps) {
                             ...params,
                             sx: {
                                 "& .MuiFilledInput-root input": {
-                                    paddingBottom: "25px !important",
+                                    marginTop: "-15px !important",
                                 },
                             }
                         }}

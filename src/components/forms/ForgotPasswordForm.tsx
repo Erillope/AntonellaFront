@@ -30,7 +30,7 @@ function InstructionsMessage() {
 function HaveAccountLink() {
     return (
         <div>
-            <Link to="/login/"
+            <Link to="/login/" style={{ fontSize: '14px' }}
                 className="link">¿Ya tienes una cuenta? Inicia sesión aquí</Link>
         </div>
     )

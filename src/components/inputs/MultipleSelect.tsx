@@ -29,12 +29,14 @@ export function MultipleSelect(props: MultipleSelectProps) {
     return (
         <InputBox labelText={props.labelText} disabled={props.disabled} width={props.width ?? '100%'}
             centerLabel={props.centerLabel}>
-            <Box display="grid" gridTemplateColumns={`repeat(${props.columns ?? 2}, 1fr)`} gap={1}
-                bgcolor={'#f3f3f3'} borderRadius={3} paddingLeft={2}>
-                {props.values && props.values.map((value, index) => (
-                    <CheckInput checked={includeValue(value)} disabled={props.disabled} labelText={value}
-                        onChecked={() => selectValue(value)} key={index}/>
-                ))}
+            <Box display='flex' alignItems='center' justifyContent='center' width='100%' bgcolor={'#f3f3f3'} borderRadius={3}>
+                <Box display="grid" gridTemplateColumns={`repeat(${props.columns ?? 2}, 1fr)`} gap={1}
+                    paddingLeft={2}>
+                    {props.values && props.values.map((value, index) => (
+                        <CheckInput checked={includeValue(value)} disabled={props.disabled} labelText={value}
+                            onChecked={() => selectValue(value)} key={index} />
+                    ))}
+                </Box>
             </Box>
             {!!props.error && props.error.length > 0 &&
                 <FormHelperText className="helperText">{props.error}</FormHelperText>

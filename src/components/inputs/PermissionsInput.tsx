@@ -21,22 +21,22 @@ export const SelectPermissions = (props: SelectPermissionsProps) => {
     return (
         <Box display='flex' flexDirection='row' gap={2} width='100%' justifyContent='center'>
             <Button className={props.permissions?.includes("READ") ? "view-permission" : "not-selected"}
-                disabled={props.disabled} onClick={props.onClickRead}>
+                disabled={props.disabled} onClick={props.onClickRead} sx={{ paddingRight: 2, paddingLeft: 2}}>
                 Visualizar
                 <Visibility />
             </Button>
             <Button className={props.permissions?.includes("CREATE") ? "create-permission" : "not-selected"}
-                disabled={props.disabled} onClick={props.onClickCreate}>
+                disabled={props.disabled} onClick={props.onClickCreate} sx={{ paddingRight: 2, paddingLeft: 2}}>
                 Crear
                 <AddBoxIcon />
             </Button>
             <Button className={props.permissions?.includes("EDIT") ? "edit-permission" : "not-selected"}
-                disabled={props.disabled} onClick={props.onClickEdit}>
+                disabled={props.disabled} onClick={props.onClickEdit} sx={{ paddingRight: 2, paddingLeft: 2}}>
                 Editar
                 <CreateIcon />
             </Button>
             <Button className={props.permissions?.includes("DELETE") ? "delete-permission" : "not-selected"}
-                disabled={props.disabled} onClick={props.onClickDelete}>
+                disabled={props.disabled} onClick={props.onClickDelete} sx={{ paddingRight: 2, paddingLeft: 2}}>
                 Eliminar
                 <DeleteIcon />
             </Button>

@@ -22,7 +22,7 @@ export const CreateUserHeader: React.FC<CreateUserHeaderProps> = ({ userType, on
 const HeaderMessage = () => {
     return (
         <div style={{ width: "70%", flex: "1 0 70%" }}>
-            <p style={{ fontWeight: "bold" }}>
+            <p style={{ fontWeight: "bold", fontSize: '14px' }}>
                 Por favor, complete los campos a continuación para registrar un nuevo usuario. Asegúrese de proporcionar información precisa para garantizar un proceso exitoso.
             </p>
         </div>
@@ -39,7 +39,7 @@ const UserTypeButton: React.FC<CreateUserHeaderProps> = ({ userType, onChangeUse
 
     return (
         <div style={{ flex: "1 0 30%", display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-            <Button  endIcon={icon} onClick={changeUserType} sx={{ backgroundColor: "#F44565", color: 'white', borderRadius: 5}}>
+            <Button  endIcon={icon} onClick={changeUserType} sx={{ backgroundColor: "#F44565", color: 'white', borderRadius: 5, paddingLeft: 2, paddingRight: 2 }}>
                 Crear {userType == 'cliente' ? 'Empleado' : 'Cliente'}
             </Button>
         </div>

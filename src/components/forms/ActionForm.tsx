@@ -42,7 +42,7 @@ function SubmitChildrens(props: SubmitChildrensProps) {
             {props.mode === 'update' &&
                 <>
                     <SubmitButton className="login-button" text="Guardar Cambios"
-                        style={{width: '15%' }} />
+                        style={{width: '20%' }} />
                     <ActionButton text="Descartar cambios" onClick={props.discartChanges} />
                     {props.allowDelete && <ActionButton text="Eliminar" onClick={props.delete} />}
                 </>
@@ -58,7 +58,7 @@ function SubmitChildrens(props: SubmitChildrensProps) {
 
 export function ActionButton(props: { text: string; onClick?: () => void; }) {
     return (
-        <Box width='15%'>
+        <Box width='20%'>
             <Button className={"login-button"} onClick={props.onClick} style={{ width: '100%' }}>
                 {props.text}
             </Button>

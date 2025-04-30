@@ -51,13 +51,14 @@ function UsertInfo(props: { user: User }) {
 
 function UserContact(props: { user: User }) {
     return (
-        <Box display='flex' alignItems='flex-start' width='50%' flexDirection='column'>
-            <Box display='flex' alignItems='center'>
-                <PhoneIcon style={{ color: "#F44565", marginRight: 5 }} />
+        <Box display='flex' alignItems='flex-start' width='50%' flexDirection='column'
+            sx={{ translate: "40% 0"}}>
+            <Box display='flex' alignItems='center' fontSize={12}>
+                <PhoneIcon style={{ color: "#F44565", marginRight: 5, fontSize: 16 }} />
                 {props.user.phoneNumber}
             </Box>
-            <Box display='flex' alignItems='center'>
-                <EmailIcon style={{ color: "#F44565", marginRight: 5 }} />
+            <Box display='flex' alignItems='center' fontSize={12}>
+                <EmailIcon style={{ color: "#F44565", marginRight: 5, fontSize: 16 }} />
                 {props.user.email}
             </Box>
         </Box>

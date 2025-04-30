@@ -6,7 +6,7 @@ export function LoginForm(props: FormBoxProps) {
     const submitChildren = props.submitChildren ?? <SubmitButton className="login-button" text="Ingresar" />;
 
     return (
-        <FormBox {...props} width={props.width ?? '50%'} submitChildren={submitChildren}>
+        <FormBox {...props} width={props.width ?? '55%'} submitChildren={submitChildren}>
             {props.children}
             <ForgotPasswordLink />
         </FormBox>
@@ -16,8 +16,8 @@ export function LoginForm(props: FormBoxProps) {
 
 function ForgotPasswordLink() {
     return (
-        <div style={{ width: '60%' }}>
-            <Link to="/password/reset/"
+        <div style={{ width: '100%' }}>
+            <Link to="/password/reset/" style={{ fontSize: '14px'}}
                 className="link">¿Has olvidado tu contraseña?</Link>
         </div>
     )

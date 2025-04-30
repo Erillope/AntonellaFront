@@ -34,7 +34,7 @@ export const ServiceFormSubmitChildrens = (props: ServiceFormSubmitChildrensProp
                 <>
                     <ActionButton text="Formulario" onClick={props.toForm} />
                     <SubmitButton text="Guardar cambios"
-                        style={{ width: '15%' }} />
+                        style={{ width: '20%' }} />
                     <ActionButton text="Descartar cambios" onClick={props.discartChanges} />
                     {props.allowDelete && <ActionButton text="Eliminar" onClick={props.delete} />}
                 </>

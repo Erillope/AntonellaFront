@@ -15,7 +15,7 @@ const AlertMessage = ({ message, title, type }: { message: string, title: string
         <Box textAlign='center' paddingTop={2}>
             {type == 'loading' ? <CircularProgress style={{color: '#F44565'}}/> :
             <img src={icon} className='swal-icon' />}
-            <h3 style={{ marginTop: '10px', fontSize: '20px', color: 'black' }}>{title}</h3>
+            <h3 style={{ marginTop: '10px', fontSize: '25px', color: 'black' }}>{title}</h3>
             <h3 style={{ fontSize: '15px' }}>{message}</h3>
         </Box>
     )
