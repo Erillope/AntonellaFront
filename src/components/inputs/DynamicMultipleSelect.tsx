@@ -32,19 +32,21 @@ export function DynamicMultipleSelect(props: DynamicMultipleSelectProps) {
     )
 }
 
-interface DynamicAutocompleteProps extends DynamicMultipleSelectProps {
+export interface DynamicAutocompleteProps extends DynamicMultipleSelectProps {
     selectedValue?: string;
     onSelect?: (value: string) => void;
+    showAllOptions?: boolean;
 }
 
-function DynamicAutocomplete(props: DynamicAutocompleteProps) {
+export function DynamicAutocomplete(props: DynamicAutocompleteProps) {
     return (
         <>
             <Autocomplete
                 disablePortal
                 fullWidth
                 value={props.selectedValue}
-                options={props.values?.filter((value) => !props.selectedValues?.includes(value)) ?? []}
+                options={ props.showAllOptions ? props.values ?? [] :
+                    props.values?.filter((value) => !props.selectedValues?.includes(value)) ?? []}
                 onChange={(_, value) => { if (value) { props.onSelect?.(value); props.onAdd?.(value) } }}
                 renderInput={(params) => (
                     <InputTextField2
@@ -106,6 +108,7 @@ export const useDynamicMultipleSelect = () => {
     const [selectedValues, setSelectedValues] = React.useState<string[]>([]);
     const [values, setValues] = React.useState<string[]>([]);
     const [error, setError] = React.useState<string>('');
+    const [selectedValue, setSelectedValue] = React.useState<string>('');
 
     const getProps = (): DynamicMultipleSelectProps => {
         return {
@@ -117,8 +120,18 @@ export const useDynamicMultipleSelect = () => {
         }
     }
 
+    const getAutocompleteProps = (): DynamicAutocompleteProps => {
+        return {
+            selectedValue: selectedValue,
+            onSelect: (value) => { setSelectedValue(value)},
+            values: values,
+            selectedValues: selectedValues,
+            error: error,
+        }
+    }
+
     const isEmpty = () => selectedValues.length === 0;
-    const clearInput = () => setSelectedValues([])
+    const clearInput = () => {setSelectedValues([]); setSelectedValue('')}
     const clearError = () => setError('');
 
     return {
@@ -132,5 +145,8 @@ export const useDynamicMultipleSelect = () => {
         isEmpty,
         clearInput,
         clearError,
+        getAutocompleteProps,
+        selectedValue,
+        setSelectedValue,
     }
 }

@@ -18,7 +18,8 @@ export interface InputTextFieldProps {
     inputSlotProps?: {
         endAdornment: JSX.Element;
     };
-    textFieldProps?: TextFieldProps 
+    textFieldProps?: TextFieldProps;
+    bgColor?: string;
 }
 
 export function InputTextField<Variant extends InputTextFieldProps>(props: Variant) {
@@ -106,7 +107,7 @@ export function InputTextField2(props: InputTextFieldProps) {
                     "& .MuiFilledInput-root": {
                         color: !!props.disabled ? "#999999" : "black",
                         pointerEvents: !!props.disabled ? "none" : "auto",
-                        backgroundColor: !!props.disabled ? "transparent" : "#f3f3f3",
+                        backgroundColor: !!props.disabled ? "transparent" : props.bgColor ?? "#f3f3f3",
                     },
                 }}
                 {...props.textFieldProps}
@@ -131,6 +132,44 @@ export function NumberInputField(props: InputTextFieldProps) {
                 }
             }}
 
+        />
+    )
+}
+
+export const DecimalInputField = (props: InputTextFieldProps) => {
+    const isDecimal = (value: string) => {
+        const regex = /^\d+(\.\d*)?$/;
+        return regex.test(value);
+    }
+
+    return (
+        <InputTextField2
+            {...props}
+            value={(props.value && isDecimal(props.value)) ? props.value : ''}
+            onValueChange={(value) => {
+                if (isDecimal(value) || value === '') {
+                    props.onValueChange && props.onValueChange(value);
+                }
+            }}
+        />
+    )
+}
+
+export const PercentageInputField = (props: InputTextFieldProps) => {
+    const isPercentage = (value: string) => {
+        const regex = /^(100(\.(0{0,2})?)?|([1-9]?[0-9])(\.(\d{0,2})?)?)$/;
+        return regex.test(value);
+    }
+
+    return (
+        <DecimalInputField
+            {...props}
+            value={(props.value && isPercentage(props.value)) ? props.value : ''}
+            onValueChange={(value) => {
+                if (isPercentage(value) || value === '') {
+                    props.onValueChange && props.onValueChange(value);
+                }
+            }}
         />
     )
 }

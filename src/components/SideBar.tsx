@@ -2,6 +2,7 @@ import { useState, useEffect, JSX } from "react";
 import { List, ListItemButton, ListItemIcon, ListItemText, Collapse } from "@mui/material";
 import { Link } from "react-router-dom";
 import { ExpandLess, ExpandMore, Person } from "@mui/icons-material";
+import { CalendarMonth } from "@mui/icons-material"
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import "../styles/sideBar.css";
 import { PermissionVerifier, Permissions } from "../api/verifyPermissions";
@@ -19,6 +20,7 @@ export const SideBar = () => {
                 sx={{ borderRadius: 2}}>
                 <ListItemText primary="Principal" />
             </ListItemButton>
+            <MenuBar {...sideBarController.citaMenuProps} />
             <MenuBar {...sideBarController.usuarioMenuProps} />
             <MenuBar {...sideBarController.roleMenuProps} />
             <MenuBar {...sideBarController.serviceMenuProps} />
@@ -139,6 +141,7 @@ const useSideBar = () => {
     const roleMenuController = useMenuBar()
     const servicioMenuController = useMenuBar()
     const productoMenuController = useMenuBar()
+    const citaMenuController = useMenuBar();
 
     useEffect(() => {
         const fetchPermissions = async () => {
@@ -146,10 +149,12 @@ const useSideBar = () => {
             const roleAccessPermissions = await permissionVerifier.getRoleAccessPermissions();
             const serviceAccessPermissions = await permissionVerifier.getServiceAccessPermissions();
             const productAccessPermissions = await permissionVerifier.getProductAccessPermissions();
+            const citaAccessPermissions = await permissionVerifier.getCitasAccessPermissions();
             usuarioMenuController.setAccessPermissions(userAccessPermissions);
             roleMenuController.setAccessPermissions(roleAccessPermissions);
             servicioMenuController.setAccessPermissions(serviceAccessPermissions);
             productoMenuController.setAccessPermissions(productAccessPermissions);
+            citaMenuController.setAccessPermissions(citaAccessPermissions);
         }
         fetchPermissions();
     }, [])
@@ -160,6 +165,7 @@ const useSideBar = () => {
         roleMenuController.close()
         servicioMenuController.close()
         productoMenuController.close()
+        citaMenuController.close();
     }
 
     const closeAllSubMenus = () => {
@@ -167,6 +173,7 @@ const useSideBar = () => {
         roleMenuController.closeSubMenus()
         servicioMenuController.closeSubMenus()
         productoMenuController.closeSubMenus()
+        citaMenuController.closeSubMenus();
     }
 
     const onClickPrincipal = () => {
@@ -250,6 +257,25 @@ const useSideBar = () => {
         }
     }
 
+    const getCitasMenuProps = (): MenuBarProps => {
+        return {
+            name: 'Citas',
+            accessPermissions: citaMenuController.accessPermissions,
+            icon: <CalendarMonth style={{ color: citaMenuController.iconColor }} />,
+            menuClass: citaMenuController.menuClass,
+            menuOpen: citaMenuController.menuOpen,
+            crearMenuClass: citaMenuController.crearMenuClass,
+            searchMenuClass: citaMenuController.searchMenuClass,
+            onClickCrear: () => { closeAllSubMenus(); citaMenuController.onClickCrear() },
+            onClickSearch: () => { closeAllSubMenus(); citaMenuController.onClickSearch() },
+            onClick: () => { closeAll(); citaMenuController.onClick() },
+            to: {
+                create: "/citas/create/",
+                search: "/citas/search/"
+            }
+        }
+    }
+
     const getPrincipalProps = () => {
         return {
             className: principalClass,
@@ -271,5 +297,6 @@ const useSideBar = () => {
         roleMenuProps: getRoleMenuProps(),
         serviceMenuProps: getServiceMenuProps(),
         productoMenuProps: getProductMenuProps(),
+        citaMenuProps: getCitasMenuProps(),
     }
 }

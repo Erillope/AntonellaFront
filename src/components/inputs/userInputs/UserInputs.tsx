@@ -19,6 +19,7 @@ export interface UserInputsProps {
     movilProps?: MultipleSelectProps;
     photoProps?: ImageInputProps;
     statusProps?: SwitchInputProps;
+    paymentTypeProps?: SelectInputProps;
     creationDate?: string;
     userType?: 'cliente' | 'empleado'
     disabled?: boolean;
@@ -55,7 +56,12 @@ export function UserInputs(props: UserInputsProps) {
                             <MultipleSelect labelText="Aplicativo Móvil" {...props.movilProps}
                                 disabled={props.disabled} centerLabel={true}/>}
                     </Box>
-                    <ImageInput labelText="Foto de perfil" {...props.photoProps} disabled={props.disabled} />
+                    <Box display="flex" flexDirection="column" gap={3} width="100%">
+                        <ImageInput labelText="Foto de perfil" {...props.photoProps} disabled={props.disabled} />
+                        {props.showCategories &&
+                            <SelectInput labelText="Tipo de pago" disabled={props.disabled} {...props.paymentTypeProps}/>
+                        }
+                    </Box>
                 </Box>
             }
             {props.showExtraInfo &&

@@ -12,6 +12,7 @@ export interface User {
     dni?: string | null;
     address?: string | null;
     photo?: string | null;
+    paymentType?: "porcentaje" | "salario" | "mixto";
     phoneNumber: string;
     email: string;
     name: string;
@@ -35,6 +36,7 @@ export interface CreateUserProps {
         photo: string;
         roles: string[];
         categories: string[];
+        paymentType: string;
     }
 }
 
@@ -59,6 +61,7 @@ export interface UpdateUserProps {
     photo?: string;
     roles?: string[];
     categories?: string[];
+    paymentType?: string;
 }
 
 export class AuthUserApi extends AbsctractApi {
@@ -99,7 +102,6 @@ export class AuthUserApi extends AbsctractApi {
         const request = this.userDataMap(userData);
         const password = uuidv4()+'A123';
         request['password'] = password;
-        console.log(request)
         try{
             const response = await axios.post(userApiUrl, request);
             return this.map(response.data.data);
@@ -219,6 +221,33 @@ export class AuthUserApi extends AbsctractApi {
             createdDate: toDate(data.created_date),
             roles: data.roles,
             categories: data.categories && data.categories.map((category: string) => capitalizeFirstLetter(category)),
+            paymentType: data.payment_type? this.paymentTypeClientMap(data.payment_type): undefined
+        }
+    }
+
+    private paymentTypeServerMap(paymentType: string): string {
+        switch (paymentType.toLowerCase()) {
+            case 'porcentaje':
+                return 'PERCENT';
+            case 'salario':
+                return 'SALARY';
+            case 'mixto':
+                return 'MIXED';
+            default:
+                return 'NONE';
+        }
+    }
+
+    private paymentTypeClientMap(paymentType: string): "porcentaje" | "salario" | "mixto" {
+        switch (paymentType.toUpperCase()) {
+            case 'PERCENT':
+                return 'porcentaje';
+            case 'SALARY':
+                return 'salario';
+            case 'MIXED':
+                return 'mixto';
+            default:
+                return "porcentaje";
         }
     }
 
@@ -234,7 +263,8 @@ export class AuthUserApi extends AbsctractApi {
                 'address': data.employeeData.address,
                 'photo': data.employeeData.photo.split(',')[1],
                 'roles': data.employeeData.roles,
-                'categories': data.employeeData.categories.map((category: string) => category.toUpperCase())
+                'categories': data.employeeData.categories.map((category: string) => category.toUpperCase()),
+                'payment_type': this.paymentTypeServerMap(data.employeeData.paymentType)
             } : undefined
         }
     }
@@ -262,7 +292,8 @@ export class AuthUserApi extends AbsctractApi {
             'address': data.address,
             'photo': removeHeaderFromImage(data.photo ?? ''),
             'roles': data.roles,
-            'categories': data.categories?.map((category: string) => category.toUpperCase())
+            'categories': data.categories?.map((category: string) => category.toUpperCase()),
+            'payment_type': data.paymentType? this.paymentTypeServerMap(data.paymentType): undefined
         }
     }
 }

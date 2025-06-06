@@ -243,3 +243,15 @@ export const questionsNotCreatedMessage = () => {
     const message = "Por favor cree al menos una pregunta para el servicio.";
     showAlert({message, title, type: 'error'});
 }
+
+export const successItemAddedMessage = () => {
+    const title = "Item añadido";
+    const message = "El item ha sido añadido exitosamente.";
+    showAlert({message, title, type: 'ok'});
+}
+
+export const confirmDeleteItemMessage = (action: () => void) => {
+    const title = "Eliminar Item";
+    const message = "¿Está seguro que desea eliminar este item?";
+    confirmDeleteAlert(title, message, action);
+}

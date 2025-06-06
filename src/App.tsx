@@ -21,6 +21,7 @@ import { ServiceInfo } from "./pages/ServiceInfo";
 import { CreateProduct } from "./pages/CreateProduct";
 import { SearchProduct } from "./pages/SearchProduct";
 import { EditProduct } from "./pages/EditProduct";
+import { CreateCita } from "./pages/CreateCita";
 
 function App() {
 
@@ -53,6 +54,8 @@ function App() {
             <Route path="product/create/" element={<CreateProduct/>}/>
             <Route path="product/search/" element={<SearchProduct/>}/>
             <Route path="product/search/:id" element={<EditProduct/>}/>
+            <Route path="citas/create/" element={<CreateCita/>}/>
+            <Route path="citas/search/" element={<div>Citas Search Page</div>}/>
           </Route>
         </Route>
 

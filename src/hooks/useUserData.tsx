@@ -11,7 +11,7 @@ import { CreateUserProps, UpdateUserProps, User } from "../api/user_api";
 import { validatePhoneNumber, validateEmail, validateUserName, validateBirthDate, validateDni } from "../utils/validators";
 import { UserInputsProps } from "../components/inputs/userInputs/UserInputs";
 import { useSwitchInput } from "../components/inputs/SwitchInput";
-
+import { capitalizeFirstLetter } from "../api/utils";
 
 export const useUserData = () => {
     const phoneController = useInputTextField();
@@ -24,6 +24,7 @@ export const useUserData = () => {
     const addressController = useInputTextField();
     const movilController = useMultipleSelect();
     const photoController = useImageInput();
+    const paymentTypeController = useSelectInput({ values: ['Porcentaje', 'Salario', 'Mixto'] });
     const statusController = useSwitchInput()
 
     const [creationUserType, setCreationUserType] = useState<"empleado" | "cliente">('cliente');
@@ -44,6 +45,7 @@ export const useUserData = () => {
             }
             if (!isOpen) {
                 movilController.clearInput()
+                paymentTypeController.clearInput();
             }
             setIsCategoriesOpen(isOpen);
         }
@@ -66,6 +68,7 @@ export const useUserData = () => {
         genderController.setValue(user.gender ?? '');
         birthdateController.setValue(user.birthdate ?? new Date());
         movilController.setSelectedValues(user.categories ?? []);
+        paymentTypeController.setValue(user.paymentType ?? 'Porcentaje');
         photoController.setValue(user.photo ?? '');
         statusController.setActive(user.status === 'ENABLE');
     }
@@ -83,6 +86,7 @@ export const useUserData = () => {
                 photo: photoController.value,
                 categories: movilController.selectedValues,
                 roles: rolesController.selectedValues,
+                paymentType: paymentTypeController.value.toLowerCase(),
             }
 
         }
@@ -102,13 +106,14 @@ export const useUserData = () => {
             roles: rolesController.selectedValues,
             categories: movilController.selectedValues,
             status: statusController.active ? 'ENABLE' : 'DISABLE',
+            paymentType: paymentTypeController.value.toLowerCase(),
         }
     }
 
-    const validateData = () => {
+    const validateData = (type: 'cliente' | 'empleado') => {
         clearErrors();
         let isValid = validateClientUserData();
-        if (creationUserType === 'empleado') { isValid = validateEmployeeData() && isValid }
+        if (type === 'empleado') { isValid = validateEmployeeData() && isValid }
         return isValid
     }
 
@@ -204,6 +209,7 @@ export const useUserData = () => {
         rolesController.clearInput();
         genderController.clearInput();
         birthdateController.clearInput();
+        paymentTypeController.setValue('Porcentaje');
         movilController.clearInput();
         photoController.clearInput();
     }
@@ -222,7 +228,11 @@ export const useUserData = () => {
             photoProps: photoController.getProps(),
             statusProps: statusController.getProps(),
             showCategories: isCategoriesOpen,
-            creationDate: creationDate
+            creationDate: creationDate,
+            paymentTypeProps: {
+                ...paymentTypeController.getProps(),
+                value: capitalizeFirstLetter(paymentTypeController.value),
+            },
         }
     }
 
@@ -236,6 +246,7 @@ export const useUserData = () => {
         initData,
         isCategoriesOpen,
         creationUserType,
-        setCreationUserType
+        setCreationUserType,
+        paymentTypeController,
     }
 }
