@@ -40,7 +40,6 @@ interface QuestionTableProps {
 
 export const QuestionTable = (props: QuestionTableProps) => {
     const buildRows = (question: Question): RowComponent => {
-        console.log(question)
         return {
             cells: [
                 <Box display='flex' alignItems='flex-start' width='100%'>{question.title}</Box>,

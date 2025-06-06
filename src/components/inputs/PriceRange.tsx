@@ -29,9 +29,9 @@ export const PriceRange = (props: PriceRangeProps) => {
             }
             {defaultType === 'long' &&
                 <>
-                    <PriceRangeInput labelText="$ Precio cabello corto" {...props.shortProps} disabled={props.disabled} />
-                    <PriceRangeInput labelText="$ Precio cabello medio" {...props.mediumProps} disabled={props.disabled} />
-                    <PriceRangeInput labelText="$ Precio cabello largo" {...props.longProps} disabled={props.disabled} />
+                    <PriceRangeInput labelText="$ Precio corto" {...props.shortProps} disabled={props.disabled} />
+                    <PriceRangeInput labelText="$ Precio medio" {...props.mediumProps} disabled={props.disabled} />
+                    <PriceRangeInput labelText="$ Precio largo" {...props.longProps} disabled={props.disabled} />
                 </>
             }
             {!!props.error && props.error.length > 0 &&

@@ -19,7 +19,7 @@ export const useUser = (props?: useUserProps) => {
     const [user, setUser] = useState<User>();
     const [permissions, setPermissions] = useState<Permissions>();
     const {initRoles, getCreateUserData, validateData, clearInputs, getUpdateUserData,
-        initData, isCategoriesOpen, creationUserType, setCreationUserType, getUserInputProps
+        initData, isCategoriesOpen, creationUserType, setCreationUserType, getUserInputProps, paymentTypeController
     } = useUserData();
 
     useEffect(() => {
@@ -32,9 +32,15 @@ export const useUser = (props?: useUserProps) => {
         init();
     }, [])
 
+    useEffect(() => {
+        if (isCategoriesOpen && mode === 'create') {
+            paymentTypeController.setValue('porcentaje');
+        }
+    }, [isCategoriesOpen])
+
     const createUser = async () => {
         const userData = getCreateUserData();
-        if (!validateData()) return;
+        if (!validateData(creationUserType)) return;
         loadingMessage('Creando usuario...');
         const user = await authApi.createUser(userData);
         if (!user) {
@@ -46,7 +52,8 @@ export const useUser = (props?: useUserProps) => {
 
     const updateUser = async () => {
         const userData = getUpdateUserData(user?.id ?? '');
-        if (!validateData()) return;
+        const userType = userData.dni ? 'empleado' : 'cliente';
+        if (!validateData(userType)) return;
         const updatedUser = await authApi.updateUser(userData);
         if (!updatedUser) {
             verifyAlreadyExistUser(userData.email??'', userData.phoneNumber??'', userData.dni);

@@ -9,6 +9,10 @@ export const toDateString = (date: Date): string => {
     return date.toISOString().split('T')[0];
 }
 
+export const toDateTimeString = (date: Date): string => {
+    return date.toISOString().replace('T', ' ').split('.')[0];
+}
+
 export const capitalizeFirstLetter = (string: string): string => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }

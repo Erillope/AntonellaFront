@@ -47,4 +47,8 @@ export class PermissionVerifier {
     async getProductAccessPermissions(): Promise<Permissions> {
         return await this.getLoggedUserPermissions("PRODUCTOS");
     }
+
+    async getCitasAccessPermissions(): Promise<Permissions> {
+        return await this.getLoggedUserPermissions("CITAS");
+    }
 }
