@@ -13,6 +13,7 @@ import { ServiceItem } from "../api/cita_api"
 import { Item } from "../components/tables/ItemsTable"
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from "dayjs"
+import { notSelectedItemMessage } from "../utils/alerts"
 
 export interface EmployeeSchedule {
     employeeId: string;
@@ -21,6 +22,7 @@ export interface EmployeeSchedule {
 
 export const useCita = () => {
     const clientEmailController = useDynamicMultipleSelect()
+    const paymentTypeController = useSelectInput()
     const serviceTypeController = useSelectInput()
     const serviceNameController = useDynamicMultipleSelect()
     const priceController = useInputTextField()
@@ -37,8 +39,10 @@ export const useCita = () => {
     const [viewItemId, setViewItemId] = useState<string>('');
     const [mode, setMode] = useState<'create' | 'edit'>('create');
 
-    const addServiceItem = () => {
-        if (!validateServiceItemData()) return;
+    useEffect(() => {paymentTypeController.setValues(['Efectivo', 'Tarjeta'])}, [])
+
+    const addServiceItem = (): boolean => {
+        if (!validateServiceItemData()) return false;
         setServiceItems(prevItems => [...prevItems, getServiceItem()]);
         const schedule = calendarController.values.filter(s => s.color !== 'gray').map(s => {
             return {
@@ -54,6 +58,7 @@ export const useCita = () => {
             }
         })
         setSchedule(prev => [...prev, ...newSchedule]);
+        return true;
     }
 
     const getServiceItem = (): ServiceItem => {
@@ -372,6 +377,27 @@ export const useCita = () => {
         return result;
     };
 
+    const createOrder = () => {
+        validateOrder();
+    }
+
+    const validateOrder = (): boolean => {
+        let isValid = true;
+        if (serviceItems.length === 0) {
+            notSelectedItemMessage();
+            isValid = false;
+        }
+        if (clientEmailController.selectedValue === "") {
+            clientEmailController.setError("Seleccione un cliente");
+            isValid = false;
+        }
+        if (paymentTypeController.value === "") {
+            paymentTypeController.setError("Seleccione un método de pago");
+            isValid = false;
+        }
+        return isValid;
+    }
+
     return {
         getCreateCitaProps,
         initNewServiceItem: () => {
@@ -400,6 +426,9 @@ export const useCita = () => {
         },
         getItems,
         initServiceItem,
-        serviceItems
+        serviceItems,
+        clientEmailProps: clientEmailController.getAutocompleteProps(),
+        paymentTypeProps: paymentTypeController.getProps(),
+        createOrder
     }
 }

@@ -255,3 +255,9 @@ export const confirmDeleteItemMessage = (action: () => void) => {
     const message = "¿Está seguro que desea eliminar este item?";
     confirmDeleteAlert(title, message, action);
 }
+
+export const notSelectedItemMessage = () => {
+    const title = "Item no seleccionado";
+    const message = "Por favor seleccione un item para editar o eliminar.";
+    showAlert({message, title, type: 'error'});
+}

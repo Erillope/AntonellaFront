@@ -40,7 +40,7 @@ export interface DynamicAutocompleteProps extends DynamicMultipleSelectProps {
 
 export function DynamicAutocomplete(props: DynamicAutocompleteProps) {
     return (
-        <>
+        <Box display={'flex'} flexDirection='column' width={props.width ?? "100%"} >
             <Autocomplete
                 disablePortal
                 fullWidth
@@ -72,7 +72,7 @@ export function DynamicAutocomplete(props: DynamicAutocompleteProps) {
             {!!props.error && props.error.length > 0 &&
                 <FormHelperText className="helperText">{props.error}</FormHelperText>
             }
-        </>
+        </Box>
     )
 }
 

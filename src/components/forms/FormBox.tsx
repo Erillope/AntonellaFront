@@ -28,9 +28,9 @@ export function FormBox(props: FormBoxProps) {
 }
 
 
-export function SubmitButton(props: { className?: string; text?: string; style?: React.CSSProperties;  }) {
+export function SubmitButton(props: { className?: string; text?: string; style?: React.CSSProperties; onClick?: () => void; }) {
     return (
-        <Button type="submit" className={props.className ?? "login-button"} style={props.style}>
+        <Button type={props.onClick !==undefined ? undefined: "submit"} className={props.className ?? "login-button"} style={props.style} onClick={props.onClick}>
             {props.text}
         </Button>
     )

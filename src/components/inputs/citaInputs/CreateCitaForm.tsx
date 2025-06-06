@@ -14,7 +14,7 @@ export interface CreateCitaFormProps {
     percentageProps?: PercentPaymentProps
     employeePaymentsProps?: EmployeePaymentsProps;
     calendarProps?: CalendarInputProps;
-    onCreateSubmit?: () => void;
+    onCreateSubmit?: () => boolean;
     onEditSubmit?: () => void;
     onDiscard?: () => void;
     onDelete?: () => void;
@@ -23,7 +23,7 @@ export interface CreateCitaFormProps {
 
 export const CreateCitaForm = (props: CreateCitaFormProps) => {
     return (
-        <ActionForm width="100%" handleSubmit={props.mode === 'create' ? props.onCreateSubmit : props.onEditSubmit} mode={props.mode === 'create' ? 'create' : 'update'} discartChanges={props.onDiscard}
+        <ActionForm width="100%" onClick={props.mode === 'create' ? props.onCreateSubmit : props.onEditSubmit} mode={props.mode === 'create' ? 'create' : 'update'} discartChanges={props.onDiscard}
         allowDelete={props.mode === 'edit'} delete={props.onDelete}>
             <Box width={'90%'} display='flex' flexDirection='row' gap={2} p={2} height={'100%'} padding={5}>
                 <Box display='flex' flexDirection='column' gap={2} width={'100%'}>
