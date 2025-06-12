@@ -7,9 +7,18 @@ import { ActionForm } from "../components/forms/ActionForm"
 import { Box } from "@mui/material"
 
 export const CreateService = () => {
+    const { serviceInputProps, saveServiceInCache } = useService()
+
+    return (
+        <ServiceForm width="90%" handleSubmit={saveServiceInCache}>
+            <ServiceInputs {...serviceInputProps}/>
+        </ServiceForm>
+    )
+}
+
+const _ = () => {
     const { serviceInputProps, validate, getQuestionFormProps, createService } = useService()
     const [inForm, setInForm] = useState(false)
-
     return (
         <>
             {!inForm ?
@@ -17,7 +26,7 @@ export const CreateService = () => {
                     <ServiceInputs {...serviceInputProps} />
                 </ServiceForm>
                 :
-                <ActionForm width="90%" handleSubmit={createService}>
+                <ActionForm width="90%" handleSubmit={() => {}}>
                     <Box marginBottom={3}>
                         <ServiceQuestionForm {...getQuestionFormProps()} />
                     </Box>

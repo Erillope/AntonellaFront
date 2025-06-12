@@ -1,4 +1,4 @@
-import { AuthUserApi } from "./user_api";
+import { AuthUserApi, User } from "./user_api";
 import { RoleApi } from "./role_api";
 
 export interface Permissions {
@@ -14,16 +14,20 @@ export class PermissionVerifier {
     private roleApi = new RoleApi();
     private loggedUser = this.userApi.getLoggedUser();
 
+    async getUserPermissions(user: User, access: string): Promise<Permissions> {
+        const permissions = await this.roleApi.getUserPermissions(user, access);
+        return {
+            empty: permissions.size === 0,
+            read: permissions.has("READ"),
+            create: permissions.has("CREATE"),
+            edit: permissions.has("EDIT"),
+            delete: permissions.has("DELETE"),
+        }
+    }
+
     async getLoggedUserPermissions(access: string): Promise<Permissions> {
         if (this.loggedUser) {
-            const permissions = await this.roleApi.getUserPermissions(this.loggedUser, access);
-            return {
-                empty: permissions.size === 0,
-                read: permissions.has("READ"),
-                create: permissions.has("CREATE"),
-                edit: permissions.has("EDIT"),
-                delete: permissions.has("DELETE"),
-            }
+            return await this.getUserPermissions(this.loggedUser, access);
         }
         return {} as Permissions;
     }
@@ -50,5 +54,13 @@ export class PermissionVerifier {
 
     async getCitasAccessPermissions(): Promise<Permissions> {
         return await this.getLoggedUserPermissions("CITAS");
+    }
+
+    async hasNotAdminPermissions(user: User): Promise<boolean> {
+        return (await this.getUserPermissions(user, "USUARIOS")).empty &&
+            (await this.getUserPermissions(user, "ROLES")).empty &&
+            (await this.getUserPermissions(user, "SERVICIOS")).empty &&
+            (await this.getUserPermissions(user, "PRODUCTOS")).empty &&
+            (await this.getUserPermissions(user, "CITAS")).empty;
     }
 }

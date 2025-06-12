@@ -10,7 +10,7 @@ export const UserInfo = () => {
     return (
         <ActionForm width='90%' handleSubmit={updateUser} mode={mode} discartChanges={discartChanges}
             edit={() => setMode('update')} allowEdit={permissions?.edit}>
-            <UserInputs {...userInputProps} userType={user?.dni? 'empleado' : 'cliente'}
+            <UserInputs {...userInputProps} userType={user?.address? 'empleado' : 'cliente'}
                 disabled={mode === 'read'} showExtraInfo={true}/>
         </ActionForm>
     )

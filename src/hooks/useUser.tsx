@@ -44,7 +44,7 @@ export const useUser = (props?: useUserProps) => {
         loadingMessage('Creando usuario...');
         const user = await authApi.createUser(userData);
         if (!user) {
-            verifyAlreadyExistUser(userData.email, userData.phoneNumber, userData.employeeData?.dni);
+            verifyAlreadyExistUser(userData.email, userData.phoneNumber, userData.dni);
             return;
         }
         successUserCreationMessage(clearInputs)
@@ -52,7 +52,7 @@ export const useUser = (props?: useUserProps) => {
 
     const updateUser = async () => {
         const userData = getUpdateUserData(user?.id ?? '');
-        const userType = userData.dni ? 'empleado' : 'cliente';
+        const userType = userData.address ? 'empleado' : 'cliente';
         if (!validateData(userType)) return;
         const updatedUser = await authApi.updateUser(userData);
         if (!updatedUser) {
@@ -74,7 +74,7 @@ export const useUser = (props?: useUserProps) => {
     const initUser = async () => {
         const user = await authApi.getUser(props?.userId ?? '');
         setUser(user);
-        if (!user) return;
+        if (!user) {navigate('/'); return};
         initData(user);
     }
 

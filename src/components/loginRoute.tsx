@@ -8,7 +8,8 @@ export const LoginRoute = () => {
     const [isValid, setIsValid] = useState<boolean | null>(null);
     useEffect(() => {
         const fetchIsValid = async () => {
-            setIsValid(await authApi.isValidUserCookie());
+            let isValid = await authApi.isValidUserCookie();
+            setIsValid(isValid);
         }
         fetchIsValid();
     }, []);

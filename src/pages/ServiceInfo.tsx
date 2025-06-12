@@ -20,7 +20,7 @@ export const ServiceInfo = () => {
             {!inForm ?
                 <ServiceForm width="90%" mode={mode} allowEdit={permissions?.edit} edit={() => setMode('update')} discartChanges={discartChanges} handleSubmit={updateService} allowDelete={permissions?.delete} delete={() => confirmDeleteServiceMessage(deleteService)}
                     toForm={() => setInForm(true)}>
-                    <ServiceInputs {...serviceInputProps} disabled={mode === 'read'} />
+                    <ServiceInputs {...serviceInputProps} disabled={mode === 'read'} showExtraInfo/>
                 </ServiceForm>
                 :
                 <ActionForm width="90%" allowEdit={permissions?.edit} edit={() => setMode('update')} discartChanges={discartChanges} mode={mode} handleSubmit={saveQuestions}>

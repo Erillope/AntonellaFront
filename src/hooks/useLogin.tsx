@@ -1,7 +1,8 @@
 import Cookies from "js-cookie";
 import { AuthUserApi, User } from '../api/user_api'
 import { useInputTextField } from "../components/inputs/InputTextField";
-import { verifyUserMessage, closeAlert } from "../utils/alerts";
+import { verifyUserMessage, closeAlert, invalidUserMessage } from "../utils/alerts";
+import { PermissionVerifier } from "../api/verifyPermissions";
 
 interface useLoginProps {
     afterLogin: () => void;
@@ -11,6 +12,7 @@ export const useLogin = (props: useLoginProps) => {
     const phoneNumberController = useInputTextField();
     const passwordController = useInputTextField();
     const authApi = new AuthUserApi();
+    const permissionVerifier = new PermissionVerifier();
 
     const setCookie = (user: User) => {
         Cookies.set('user', JSON.stringify(user), { expires: 1 });
@@ -22,6 +24,7 @@ export const useLogin = (props: useLoginProps) => {
         const user = await authApi.signIn(phoneNumberController.value, passwordController.value);
         closeAlert();
         if (!user) {verifyErrors(); return}
+        if (!!!user.roles || await permissionVerifier.hasNotAdminPermissions(user)) {invalidUserMessage(); return}
         setCookie(user);
         props.afterLogin();
     }

@@ -171,6 +171,7 @@ export const useCita = () => {
     useEffect(() => employeePaymentsController.setTotalPayment(percentageController.value), [percentageController.value])
 
     const getCreateCitaProps = (): CreateCitaFormProps => {
+        const service = allServices.find(s => s.name.toLowerCase() === serviceNameController.selectedValue.toLowerCase());
         return {
             serviceTypeProps: {
                 ...serviceTypeController.getProps(),
@@ -242,7 +243,10 @@ export const useCita = () => {
             onDiscard: () => initServiceItem(viewItemId),
             onDelete: () => deleteServiceItem(viewItemId),
             mode: mode,
-            
+            priceRange: service? {
+                min: service?.prices[0].minPrice,
+                max: service?.prices[service.prices.length-1].maxPrice
+            }: undefined
         }
     }
 
@@ -344,6 +348,20 @@ export const useCita = () => {
         }
         if (employeePaymentsController.employeePayments.reduce((acc, payment) => acc + payment.paymentPercentage, 0) !== 100 && employeePaymentsController.employeePayments.filter(payment => payment.paymentType !== "salario").length > 0) {
             employeePaymentsController.setError("La suma de los porcentajes de pago debe ser 100%");
+            isValid = false;
+        }
+        const service = allServices.find(s => s.name.toLowerCase() === serviceNameController.selectedValue.toLowerCase());
+        const price = parseFloat(priceController.value);
+        if (price < (service?.prices[0].minPrice ?? 0) || price > (service?.prices[service.prices.length - 1].maxPrice ?? Infinity)) {
+            priceController.setError("El precio se escapa del rango sugerido")
+            isValid = false;
+        }
+
+        const now = new Date();
+        const selectedSchedules = calendarController.values.filter(s => s.color !== 'gray');
+        const marginMs = 10 * 60 * 1000;
+        if (selectedSchedules.some(s => s.start.getTime() <= now.getTime() - marginMs)) {
+            calendarController.setError("No puede seleccionar horarios en el pasado");
             isValid = false;
         }
         return isValid

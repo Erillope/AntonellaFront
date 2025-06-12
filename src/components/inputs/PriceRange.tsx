@@ -152,6 +152,12 @@ export const usePriceRange = () => {
             if (_error.length > 0) {setError(_error); return false}
             _error = completeControl.validate()
             if (_error.length > 0) {setError(_error); return false}
+            if (parseFloat(completeControl.minControl.value) <= parseFloat(basicControl.minControl.value)){
+                _error = 'El precio mínimo del precio completo no puede ser menor o igual al del precio básico'
+            }
+            if (parseFloat(completeControl.maxControl.value) <= parseFloat(basicControl.maxControl.value)){
+                _error = 'El precio máximo del precio completo no puede ser menor o igual al del precio básico'
+            }
         }
         else {
             _error = shortControl.validate()
@@ -160,6 +166,18 @@ export const usePriceRange = () => {
             if (_error.length > 0) {setError(_error); return false}
             _error = longControl.validate()
             if (_error.length > 0) {setError(_error); return false}
+            if (parseFloat(longControl.minControl.value) <= parseFloat(mediumControl.minControl.value)) {
+                _error = 'El precio mínimo del precio largo no puede ser menor o igual al del precio medio'
+            }
+            if (parseFloat(mediumControl.minControl.value) <= parseFloat(shortControl.minControl.value)) {
+                _error = 'El precio mínimo del precio medio no puede ser menor o igual al del precio corto'
+            }
+            if (parseFloat(longControl.maxControl.value) <= parseFloat(mediumControl.maxControl.value)) {
+                _error = 'El precio máximo del precio largo no puede ser menor o igual al del precio medio'
+            }
+            if (parseFloat(mediumControl.maxControl.value) <= parseFloat(shortControl.maxControl.value)) {
+                _error = 'El precio máximo del precio medio no puede ser menor o igual al del precio corto'
+            }
         }
         setError(_error)
         return _error.length == 0

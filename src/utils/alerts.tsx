@@ -221,7 +221,7 @@ export const successServiceCreatedMessage = () => {
 
 export const confirmDeleteServiceMessage = (action: () => void) => {
     const title = "Eliminar Servicio";
-    const message = "¿Está seguro que desea eliminar el servicio?";
+    const message = "¿Está seguro que desea eliminar el servicio? Antes se verificará si existen ordenes asociadas al servicio.";
     confirmDeleteAlert(title, message, action);
 }
 
@@ -259,5 +259,11 @@ export const confirmDeleteItemMessage = (action: () => void) => {
 export const notSelectedItemMessage = () => {
     const title = "Item no seleccionado";
     const message = "Por favor seleccione un item para editar o eliminar.";
+    showAlert({message, title, type: 'error'});
+}
+
+export const invalidUserMessage = () => {
+    const title = "Usuario inválido";
+    const message = "Este usuario no tiene permisos para ingresar al administrador.";
     showAlert({message, title, type: 'error'});
 }

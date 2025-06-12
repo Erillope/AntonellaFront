@@ -195,6 +195,18 @@ export const useProduct = (props?: UseProductProps) => {
             nameController.setError('El nombre no es válido')
             isValid = false
         }
+        if (parseFloat(priceController.value) <= 0) {
+            priceController.setError('El precio debe ser mayor a 0')
+            isValid = false
+        }
+        if (parseInt(stockController.value) <= 0) {
+            stockController.setError('El stock debe ser mayor a 0')
+            isValid = false
+        }
+        if (parseFloat(volumeController.value) <= 0) {
+            volumeController.setError('El volumen debe ser mayor a 0')
+            isValid = false
+        }
         return isValid
     }
 

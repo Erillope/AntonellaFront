@@ -1,6 +1,6 @@
 const passwordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$/
 const phoneNumberRegex = /^(0)?9\d{8}$/
-const userNameRegex = /^(?=.{4,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/
+const userNameRegex = /^(?=.{4,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ._]+(?<![_.])$/
 const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/
 const dniRegex = /^\d{10}$/
 const roleNameRegex = /^[a-zA-Z0-9_]{3,20}$/
@@ -17,7 +17,9 @@ export const validatePhoneNumber = (phoneNumber: string): boolean => {
 }
 
 export const validateUserName = (userName: string): boolean => {
-    return userNameRegex.test(userName);
+    const names = userName.trim().split(" ");
+    
+    return names.length <= 4 && names.every(name => userNameRegex.test(name));
 }
 
 export const validateEmail = (email: string): boolean => {

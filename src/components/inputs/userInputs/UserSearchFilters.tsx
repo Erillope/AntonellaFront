@@ -20,7 +20,7 @@ export function UserSearchFilters(props: UserSearchFiltersProps) {
                 </Box>
                 <Box display='flex' flexDirection='row' gap={5} width='100%'>
                     <InputTextField2 labelText="Celular" {...props.phoneProps}/>
-                    <InputTextField2 labelText="Cedula" {...props.dniProps}/>
+                    <InputTextField2 labelText="Cédula" {...props.dniProps}/>
                 </Box>
             </Box>
             <Box display='flex' flexDirection='column' gap={2} width='50%'>

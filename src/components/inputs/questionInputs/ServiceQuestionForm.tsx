@@ -39,7 +39,6 @@ export const ServiceQuestionForm = (props: ServiceQuestionForm) => {
         confirmDeleteQuestionMessage(() => props.deleteQuestion?.(selectedQuestionId ?? ''))
         setOpen(false)
     }
-
     return (
         <Box>
             <AddQuestionInput setType={props.setQuestionType} newQuestionProps={props.newQuestionProps}
@@ -48,7 +47,7 @@ export const ServiceQuestionForm = (props: ServiceQuestionForm) => {
             <ModalBox open={open} setOpen={setOpen}>
                 <Box display={"flex"} flexDirection="column" gap={1} p={2} width={"90%"} height={'100%'}>
                     <Question {...props.selectedQuestionProps ?? {} as any} disabled={props.disabled} />
-                    {props.disabled === false &&
+                    {!props.disabled &&
                         <Box display={"flex"} flexDirection="row" gap={2} width='100%' justifyContent="center" alignItems="center">
                             <Button className={'login-button'} onClick={onUpdateQuestion}
                                 style={{ width: '20%', marginLeft: '20px' }}

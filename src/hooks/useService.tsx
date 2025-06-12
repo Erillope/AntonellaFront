@@ -15,6 +15,7 @@ import { ServiceInputsProps } from "../components/inputs/serviceInputs/ServiceIn
 import { AuthUserApi, User } from "../api/user_api";
 import { useListImageInput } from "../components/inputs/ListImageInput";
 import { useQuestionForm } from "./useQuestionForm";
+import { useSwitchInput } from "../components/inputs/SwitchInput";
 
 interface UseServiceProps {
     mode?: 'create' | 'update' | 'read'
@@ -39,6 +40,7 @@ export const useService = (props?: UseServiceProps) => {
     const descriptionController = useInputTextField()
     const priceRangeController = usePriceRange()
     const listImageController = useListImageInput()
+    const statusController = useSwitchInput()
 
     const [permissions, setPermissions] = useState<Permissions>()
     const [mode, setMode] = useState<'create' | 'update' | 'read'>(props?.mode ?? 'create')
@@ -54,6 +56,13 @@ export const useService = (props?: UseServiceProps) => {
             if (!permissions.create && mode === 'create') { navigate('/') }
             if (!permissions.read && mode === 'read') { navigate('/') }
             if (permissions.read && mode === 'read') { await initService() }
+            if (mode === 'create'){
+                const localService = localStorage.getItem('service')
+                if (localService) {
+                    const serviceData = JSON.parse(localService) as StoreService
+                    initData(serviceData)
+                }
+            }
         }
         init()
     }, [])
@@ -75,16 +84,25 @@ export const useService = (props?: UseServiceProps) => {
         else { priceRangeController.setType('default') }
     }, [categoryController.value])
 
-    const createService = async () => {
-        const data = getCreateServiceData()
-        if (data.questions.length === 0) {questionsNotCreatedMessage(); return}
+    const createService = async (questions: Question[]) => {
+        const data = getCreateServiceData(questions)
+        if (data.questions && data.questions.length === 0) {questionsNotCreatedMessage(); return}
         loadingMessage('Creando servicio...')
         const service = await storeServiceApi.createStoreService(data)
         if (service) {
             successServiceCreatedMessage()
             setService(service)
+            localStorage.removeItem('service')
+            localStorage.removeItem('questions')
             navigate(`/service/search/`)
         }
+    }
+
+    const saveServiceInCache = () => {
+        if (!validate()) return
+        const data = getCreateServiceData()
+        localStorage.setItem('service', JSON.stringify(data))
+        navigate(`/service/create/form/`)
     }
 
     const updateService = async () => {
@@ -171,10 +189,12 @@ export const useService = (props?: UseServiceProps) => {
             priceRangeProps: priceRangeController.getProps(),
             imageProps: listImageController.getProps(),
             users: users,
+            statusProps: statusController.getProps(),
+            creationDate: service?.createdDate ?? new Date(),
         }
     }
 
-    const getCreateServiceData = (): CreateStoreService => {
+    const getCreateServiceData = (questions?: Question[]): CreateStoreService => {
         return {
             name: nameController.value,
             description: descriptionController.value,
@@ -183,7 +203,7 @@ export const useService = (props?: UseServiceProps) => {
             prices: priceRangeController.getData(),
             duration: durationController.getData(),
             images: listImageController.images,
-            questions: getQuestions(),
+            questions: questions,
         }
     }
 
@@ -215,16 +235,20 @@ export const useService = (props?: UseServiceProps) => {
             nameController.setError('El nombre es requerido')
             isValid = false
         }
-        isValid = durationController.validate()
+        if (!durationController.validate()) {
+            isValid = false
+        }
         if (descriptionController.isEmpty()) {
             descriptionController.setError('La descripción es requerida')
             isValid = false
         }
-        isValid = priceRangeController.validate()
+        if (!priceRangeController.validate()) {
+            isValid = false
+        }
         if (listImageController.isEmpty()) {
             listImageController.setError('Las imágenes son requeridas')
             isValid = false
-        }
+        }        
         return isValid
     }
 
@@ -256,6 +280,7 @@ export const useService = (props?: UseServiceProps) => {
         priceRangeController.setData(service?.prices ?? [], servicePriceType)
         listImageController.setImages(service?.images ?? [])
         initQuestions(service?.questions ?? [])
+        statusController.setActive(service?.status === 'ENABLE')
     }
 
     useEffect(() => {
@@ -278,6 +303,7 @@ export const useService = (props?: UseServiceProps) => {
         discartChanges: () => initData(service as StoreService),
         updateService,
         deleteService,
-        saveQuestions
+        saveQuestions,
+        saveServiceInCache
     }
 }

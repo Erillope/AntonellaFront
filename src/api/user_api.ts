@@ -30,10 +30,10 @@ export interface CreateUserProps {
     name: string;
     gender: string;
     birthdate: Date;
+    dni: string;
+    photo?: string;
     employeeData?: {
-        dni: string;
         address: string;
-        photo: string;
         roles: string[];
         categories: string[];
         paymentType: string;
@@ -104,6 +104,7 @@ export class AuthUserApi extends AbsctractApi {
         request['password'] = password;
         try{
             const response = await axios.post(userApiUrl, request);
+            await this.forgotPassword(userData.email);
             return this.map(response.data.data);
 
         }
@@ -149,7 +150,7 @@ export class AuthUserApi extends AbsctractApi {
     }
     
     getLoggedUser(): User | undefined {
-        const userData = JSON.parse(Cookies.get("user") ?? "");
+        const userData = JSON.parse(Cookies.get("user") ?? "{}");
         if (userData === null) return undefined;
         if (userData.id === undefined) return undefined;
         return userData;
@@ -169,7 +170,8 @@ export class AuthUserApi extends AbsctractApi {
         if (userData === null) return false;
         if (userData.id === undefined) return false;
         const user = await this.getUser(userData.id);
-        return !!user;
+        if (!user) return false;
+        return true;
     }
 
     async filterUsers(filterData: FilterUserProps): Promise<User[]> {
@@ -258,10 +260,10 @@ export class AuthUserApi extends AbsctractApi {
             'name': data.name,
             'birthdate': toDateString(data.birthdate),
             'gender': data.gender.toUpperCase(),
+            'dni': data.dni,
+            'photo': data.photo ? data.photo.split(',')[1] : undefined,
             "employee_data": data.employeeData?{
-                'dni': data.employeeData.dni,
                 'address': data.employeeData.address,
-                'photo': data.employeeData.photo.split(',')[1],
                 'roles': data.employeeData.roles,
                 'categories': data.employeeData.categories.map((category: string) => category.toUpperCase()),
                 'payment_type': this.paymentTypeServerMap(data.employeeData.paymentType)
@@ -288,11 +290,11 @@ export class AuthUserApi extends AbsctractApi {
             'gender': data.gender?.toUpperCase(),
             'birthdate': data.birthdate? toDateString(data.birthdate): undefined,
             'status': data.status,
-            'dni': data.dni,
-            'address': data.address,
-            'photo': removeHeaderFromImage(data.photo ?? ''),
-            'roles': data.roles,
-            'categories': data.categories?.map((category: string) => category.toUpperCase()),
+            'dni': data.dni === "" ? undefined : data.dni,
+            'address': data.address === "" ? undefined : data.address,
+            'photo': data.photo? removeHeaderFromImage(data.photo): undefined,
+            'roles': data.roles ? data.roles.map((role: string) => role.toUpperCase()): undefined,
+            'categories': data.categories? data.categories.map((category: string) => category.toUpperCase()): undefined,
             'payment_type': data.paymentType? this.paymentTypeServerMap(data.paymentType): undefined
         }
     }

@@ -14,7 +14,7 @@ export interface CreateStoreService {
     prices: Price[];
     duration: Time;
     images: string[];
-    questions: Question[];
+    questions?: Question[];
 }
 
 export interface UpdateStoreService {
@@ -223,7 +223,7 @@ export class StoreServiceApi extends AbsctractApi {
             }),
             duration: data.duration.hours.toString() + ":" + data.duration.minutes.toString(),
             images: data.images.map(removeHeaderFromImage),
-            questions: data.questions.map(this.mapCreateQuestion.bind(this))
+            questions: data.questions?.map(this.mapCreateQuestion.bind(this))
         }
     }
 

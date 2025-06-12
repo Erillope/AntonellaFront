@@ -19,9 +19,11 @@ export interface CreateCitaFormProps {
     onDiscard?: () => void;
     onDelete?: () => void;
     mode?: 'create' | 'edit';
+    priceRange?: { min?: number; max?: number };
 }
 
 export const CreateCitaForm = (props: CreateCitaFormProps) => {
+    const price = props.priceRange ? `sugerido (${props.priceRange.min} - ${props.priceRange.max})` : '';
     return (
         <ActionForm width="100%" onClick={props.mode === 'create' ? props.onCreateSubmit : props.onEditSubmit} mode={props.mode === 'create' ? 'create' : 'update'} discartChanges={props.onDiscard}
         allowDelete={props.mode === 'edit'} delete={props.onDelete}>
@@ -29,7 +31,7 @@ export const CreateCitaForm = (props: CreateCitaFormProps) => {
                 <Box display='flex' flexDirection='column' gap={2} width={'100%'}>
                     <SelectInput labelText="Tipo de servicio" {...props.serviceTypeProps}/>
                     <DynamicAutocomplete labelText="Nombre del servicio" {...props.serviceNameProps}/>
-                    <NumberInputField labelText="Precio" {...props.priceProps}/>
+                    <NumberInputField labelText={`Precio ${price}`} {...props.priceProps}/>
                     <PercentPayment {...props.percentageProps}/>
                     <EmployeePayments {...props.employeePaymentsProps}/>
                 </Box>

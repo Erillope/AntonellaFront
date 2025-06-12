@@ -19,7 +19,7 @@ export const useUserData = () => {
     const nameController = useInputTextField();
     const dniController = useInputTextField();
     const rolesController = useDynamicMultipleSelect();
-    const genderController = useSelectInput({ values: ['Masculino', 'Femenino'] });
+    const genderController = useSelectInput({ values: ['Masculino', 'Femenino', 'Otro'] });
     const birthdateController = useDateInput();
     const addressController = useInputTextField();
     const movilController = useMultipleSelect();
@@ -80,10 +80,10 @@ export const useUserData = () => {
             name: nameController.value,
             gender: genderController.value,
             birthdate: birthdateController.value,
+            dni: dniController.value,
+            photo: photoController.isEmpty() ? undefined : photoController.value,
             employeeData: creationUserType === 'cliente' ? undefined : {
-                dni: dniController.value,
                 address: addressController.value,
-                photo: photoController.value,
                 categories: movilController.selectedValues,
                 roles: rolesController.selectedValues,
                 paymentType: paymentTypeController.value.toLowerCase(),
@@ -151,6 +151,10 @@ export const useUserData = () => {
             birthdateController.setError('La fecha de nacimiento es inválida');
             isValid = false;
         }
+        if (dniController.isEmpty()) {
+            dniController.setError('El DNI es requerido');
+            isValid = false;
+        }
         return isValid
     }
 
@@ -158,10 +162,6 @@ export const useUserData = () => {
         let isValid = true;
         if (photoController.isEmpty()) {
             photoController.setError('La foto de perfil es requerida');
-            isValid = false;
-        }
-        if (dniController.isEmpty()) {
-            dniController.setError('El DNI es requerido');
             isValid = false;
         }
         if (addressController.isEmpty()) {

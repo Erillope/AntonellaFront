@@ -28,7 +28,11 @@ export const useQuestionForm = () => {
         const newVoidQuestion: CreateQuestionInfo = { id: uuidv4(), type: 'choiceImage', choices: [{ id: uuidv4() }] }
         setVoidQuestion(newVoidQuestion)
     }
+    useEffect(() => {
+        const questions = JSON.parse(localStorage.getItem('questions') || '[]') as CreateQuestionInfo[]
+        setQuestions(questions)
 
+    }, [])
     useEffect(initNewQuestion, [])
 
     const addTitle = (title: string, id: string) => {
@@ -113,7 +117,10 @@ export const useQuestionForm = () => {
     }
 
     const deleteQuestion = (id: string) => {
-        setQuestions(prev => prev.filter(q => q.id !== id))
+        const updatedQuestions = questions.filter(q => q.id !== id)
+        setQuestions(updatedQuestions)
+        localStorage.setItem('questions', JSON.stringify(updatedQuestions))
+        console.log('Question deleted:', JSON.parse(localStorage.getItem('questions') || '[]'))
     }
 
     const addQuestion = (): boolean => {
@@ -121,6 +128,7 @@ export const useQuestionForm = () => {
         const _questions = [...questions, voidQuestion]
         setQuestions(_questions)
         initNewQuestion()
+        localStorage.setItem('questions', JSON.stringify(_questions))
         return true
     }
 
@@ -218,6 +226,10 @@ export const useQuestionForm = () => {
             isValid = false
         }
         if (voidQuestion.type === 'choiceImage') {
+            if (choice.option === undefined || choice.option === ''){
+                setChoiceOptionError('La opción es requerida', voidQuestion.id, choice.id)
+                isValid = false
+            }
             if (choice.image === undefined || choice.image === '') {
                 setChoiceImageError('La imagen es requerida', voidQuestion.id, choice.id)
                 isValid = false
@@ -279,7 +291,7 @@ export const useQuestionForm = () => {
 
     const updateQuestion = (id: string) => {
         if (!validateQuestion()) return false
-        setQuestions(prev => prev.map(q => {
+        const updatedQuestions = questions.map(q => {
             if (q.id === id) {
                 return {...voidQuestion, id: id, titleError: '', choices: voidQuestion.choices?.map(c => {
                     return {
@@ -290,7 +302,9 @@ export const useQuestionForm = () => {
                 })}
             }
             return q
-        }))
+        })
+        setQuestions(updatedQuestions)
+        localStorage.setItem('questions', JSON.stringify(updatedQuestions))
         return true
     }
 
