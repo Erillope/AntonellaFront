@@ -23,6 +23,7 @@ import { SearchProduct } from "./pages/SearchProduct";
 import { EditProduct } from "./pages/EditProduct";
 import { CreateCita } from "./pages/CreateCita";
 import { CreateServiceForm } from "./pages/CreateServiceForm";
+import { ServiceInfoForm } from "./pages/ServiceInfoForm";
 
 function App() {
 
@@ -51,6 +52,7 @@ function App() {
             <Route path="service/create/" element={<CreateService/>}/>
             <Route path="service/search/" element={<SearchService/>}/>
             <Route path="service/create/form/" element={<CreateServiceForm/>}/>
+            <Route path="service/search/form/:id" element={<ServiceInfoForm/>}/>
             <Route path="service/:type" element={<ServiceTypeInfo/>}/>
             <Route path="service/search/:id" element={<ServiceInfo/>}/>
             <Route path="product/create/" element={<CreateProduct/>}/>

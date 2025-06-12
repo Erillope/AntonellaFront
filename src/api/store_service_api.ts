@@ -88,7 +88,6 @@ export class StoreServiceApi extends AbsctractApi {
     async createStoreService(storeServiceData: CreateStoreService): Promise<StoreService | undefined> {
         try {
             const requestData = this.mapCreateStoreService(storeServiceData);
-            console.log(requestData)
             const response = await axios.post(storeServiceApiUrl, requestData);
             return this.map(response.data.data);
         } catch (error) {
