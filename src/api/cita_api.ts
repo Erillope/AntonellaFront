@@ -1,3 +1,9 @@
+import { API_URL } from "./config";
+import { AbsctractApi } from "./abstract_api";
+import axios from "axios";
+import { fromDayTimeString, toDateString, toTimeString } from "./utils";
+
+const orderApiUrl = API_URL + "order/";
 
 export interface DateInfo {
     start: Date;
@@ -24,13 +30,106 @@ export interface ServiceItem {
     paymentPercentage: number;
 }
 
+export interface OrderStatus {
+    status: 'CONFIRMADO' | 'NO_CONFIRMADO';
+    progressStatus: 'PENDIENTE' | 'EN_PROGRESO' | 'FINALIZADO';
+    paymentStatus: 'PENDIENTE' | 'PAGADO';
+    paymentType: 'EFECTIVO' | 'TARJETA';
+}
+
 export interface CreateOrder {
-    clientEmail: string;
-    serviceItems: ServiceItem[];
-    status: {
-        status: 'CONFIRMADO' | 'NO_CONFIRMADO'
-        progressStatus: 'PENDIENTE' | 'EN_PROGRESO' | 'FINALIZADO'
-        paymentStatus: 'PENDIENTE' | 'PAGADO'
-        paymentType: 'EFECTIVO' | 'TARJETA'
+    clientId: string;
+    status: OrderStatus;
+}
+
+export interface OrderDto {
+    id: string;
+    clientId: string;
+    status: OrderStatus;
+}
+
+
+export class OrderApi extends AbsctractApi {
+
+    async createOrder(order: CreateOrder): Promise<OrderDto | undefined> {
+        try {
+            const requestData = this.mapCreateOrder(order);
+            const response = await axios.post(orderApiUrl, requestData);
+            return this.map(response.data.data);
+        } catch (error) {
+            this.catchError(error);
+        }
+    }
+
+    async addServiceItem(serviceItem: ServiceItem): Promise<ServiceItem | undefined> {
+        try {
+            const requestData = this.mapCreateServiceItem(serviceItem);
+            const response = await axios.post(orderApiUrl + "service-item/", requestData);
+            return this.mapServiceItem(response.data.data);
+        } catch (error) {
+            this.catchError(error);
+        }
+    }
+
+    private mapCreateOrder(order: CreateOrder): any {
+        return {
+            client_id: order.clientId,
+            status: {
+                status: order.status.status,
+                progress_status: order.status.progressStatus,
+                payment_status: order.status.paymentStatus,
+                payment_type: order.status.paymentType
+            }
+        }
+    }
+
+    private mapCreateServiceItem(serviceItem: ServiceItem): any {
+        return {
+            order_id: serviceItem.orderId,
+            service_id: serviceItem.serviceId,
+            date_info: {
+                day: toDateString(serviceItem.dateInfo.start),
+                start: toTimeString(serviceItem.dateInfo.start),
+                end: toTimeString(serviceItem.dateInfo.end)
+            },
+            status: serviceItem.status,
+            base_price: serviceItem.basePrice,
+            payments: serviceItem.payments.map(payment => ({
+                employee_id: payment.employeeId,
+                percentage: payment.percentage / 100,
+            })),
+            payment_percentage: serviceItem.paymentPercentage / 100
+        }
+    }
+
+    private map(order: any): OrderDto {
+        return {
+            id: order.id,
+            clientId: order.client_id,
+            status: {
+                status: order.status.status,
+                progressStatus: order.status.progress_status,
+                paymentStatus: order.status.payment_status,
+                paymentType: order.status.payment_type
+            }
+        }
+    }
+
+    private mapServiceItem(serviceItem: any): ServiceItem {
+        return {
+            orderId: serviceItem.order_id,
+            serviceId: serviceItem.service_id,
+            paymentPercentage: serviceItem.payment_percentage*100,
+            dateInfo: {
+                start: fromDayTimeString(serviceItem.date_info.day, serviceItem.date_info.start_time),
+                end: fromDayTimeString(serviceItem.date_info.day, serviceItem.date_info.end_time)
+            },
+            status: serviceItem.status,
+            basePrice: serviceItem.base_price,
+            payments: serviceItem.payments.map((payment: any) => ({
+                employeeId: payment.employee_id,
+                percentage: payment.percentage*100,
+            })),
+        }
     }
 }

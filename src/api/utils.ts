@@ -13,6 +13,18 @@ export const toDateTimeString = (date: Date): string => {
     return date.toISOString().replace('T', ' ').split('.')[0];
 }
 
+export const toTimeString = (date: Date): string => {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
+export const fromDayTimeString = (day: string, time: string): Date => {
+    const [year, month, dayOfMonth] = day.split("-").map(Number);
+    const [hours, minutes] = time.split(":").map(Number);
+    return new Date(year, month - 1, dayOfMonth, hours, minutes);
+}
+
 export const capitalizeFirstLetter = (string: string): string => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }

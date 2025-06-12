@@ -267,3 +267,9 @@ export const invalidUserMessage = () => {
     const message = "Este usuario no tiene permisos para ingresar al administrador.";
     showAlert({message, title, type: 'error'});
 }
+
+export const successOrderCreatedMessage = () => {
+    const title = "Orden creada";
+    const message = "La orden ha sido creada exitosamente.";
+    showAlert({message, title, type: 'ok'});
+}

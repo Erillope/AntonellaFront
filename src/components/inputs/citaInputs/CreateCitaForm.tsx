@@ -15,7 +15,7 @@ export interface CreateCitaFormProps {
     employeePaymentsProps?: EmployeePaymentsProps;
     calendarProps?: CalendarInputProps;
     onCreateSubmit?: () => boolean;
-    onEditSubmit?: () => void;
+    onEditSubmit?: () => boolean;
     onDiscard?: () => void;
     onDelete?: () => void;
     mode?: 'create' | 'edit';

@@ -9,11 +9,12 @@ import { useEffect, useState } from "react"
 import { StoreService, StoreServiceApi } from "../api/store_service_api"
 import { usePercentPayment } from "../components/inputs/citaInputs/PercentPayment"
 import { AuthUserApi, User } from "../api/user_api"
-import { ServiceItem } from "../api/cita_api"
 import { Item } from "../components/tables/ItemsTable"
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from "dayjs"
-import { notSelectedItemMessage } from "../utils/alerts"
+import { notSelectedItemMessage, successOrderCreatedMessage } from "../utils/alerts"
+import { CreateOrder, OrderApi, ServiceItem } from "../api/cita_api"
+import { useSwitchInput } from "../components/inputs/SwitchInput"
 
 export interface EmployeeSchedule {
     employeeId: string;
@@ -29,17 +30,22 @@ export const useCita = () => {
     const percentageController = usePercentPayment()
     const employeePaymentsController = useEmployeePayments()
     const calendarController = useCalendar()
+    const progressControler = useSelectInput()
+    const orderStatusController = useSwitchInput()
+    const orderPaymentStatusController = useSwitchInput()
     const serviceApi = new StoreServiceApi()
     const userApi = new AuthUserApi()
+    const orderApi = new OrderApi()
     const [allEmployees, setAllEmployees] = useState<User[]>([]);
     const [allServices, setAllServices] = useState<StoreService[]>([]);
+    const [allUsers, setAllUsers] = useState<User[]>([]);
     const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
     const [schedule, setSchedule] = useState<{ employeeId: string, dateValues: DateValue[] }[]>([]);
     const [discartedSchedule, setDiscardedSchedule] = useState<{ employeeId: string, dateValues: DateValue[] }[]>([]);
     const [viewItemId, setViewItemId] = useState<string>('');
     const [mode, setMode] = useState<'create' | 'edit'>('create');
 
-    useEffect(() => {paymentTypeController.setValues(['Efectivo', 'Tarjeta'])}, [])
+    useEffect(() => { paymentTypeController.setValues(['Efectivo', 'Tarjeta']); progressControler.setValues(['Pendiente', 'En progreso', 'Finalizado']) }, [])
 
     const addServiceItem = (): boolean => {
         if (!validateServiceItemData()) return false;
@@ -116,6 +122,24 @@ export const useCita = () => {
             end: item.dateInfo.end,
             color: '#F87171'
         }])
+        discartedSchedule.forEach(s => {
+            setSchedule(prev => prev.map(d => {
+                if (d.employeeId === s.employeeId) {
+                    return {
+                        employeeId: d.employeeId,
+                        dateValues: [...d.dateValues, ...s.dateValues.map(v => {
+                            return {
+                                start: v.start,
+                                end: v.end,
+                                color: 'gray'
+                            }
+                        })]
+                    }
+                }
+                return d;
+            }))
+        })
+        setDiscardedSchedule([]);
     }
 
     const init = () => {
@@ -138,9 +162,10 @@ export const useCita = () => {
     const initAllUsers = async () => {
         const allUsers = await userApi.filterUsers({ orderBy: "name", orderDirection: "ASC" });
         if (allUsers) {
-            setAllEmployees(allUsers.filter(user => !!user.dni));
+            setAllUsers(allUsers);
+            setAllEmployees(allUsers.filter(user => !!user.address));
             clientEmailController.setValues(
-                allUsers.filter(user => user.dni === undefined).map(user => user.email)
+                allUsers.filter(user => user.address === undefined).map(user => user.email)
             );
         }
     }
@@ -218,6 +243,24 @@ export const useCita = () => {
                     const employeeSchedule = schedule.filter(s => selectedEmployees.includes(s.employeeId));
                     let _schedule = joinSchedules(employeeSchedule.map(s => s.dateValues).flat());
 
+                    const pink = calendarController.values.find(s => s.color !== 'gray');
+                    if (pink) {
+                        _schedule = _schedule.filter(s => !(s.start.getTime() === pink.start.getTime() && s.end.getTime() === pink.end.getTime()));
+                        setSchedule(schedule.map(s => {
+                            if (s.dateValues.some(d => d.start.getTime() === pink.start.getTime() && d.end.getTime() === pink.end.getTime())) {
+                                if (!discartedSchedule.some(d => d.employeeId === s.employeeId)) {
+                                    setDiscardedSchedule(prev => [...prev, {
+                                        employeeId: s.employeeId,
+                                        dateValues: [pink]
+                                    }])
+                                }
+                            }
+                            return {
+                                employeeId: s.employeeId,
+                                dateValues: s.dateValues.filter(d => !(d.start.getTime() === pink.start.getTime() && d.end.getTime() === pink.end.getTime()))
+                            }
+                        }))
+                    }
                     calendarController.setValues(_schedule);
                 },
             },
@@ -243,37 +286,41 @@ export const useCita = () => {
             onDiscard: () => initServiceItem(viewItemId),
             onDelete: () => deleteServiceItem(viewItemId),
             mode: mode,
-            priceRange: service? {
+            priceRange: service ? {
                 min: service?.prices[0].minPrice,
-                max: service?.prices[service.prices.length-1].maxPrice
-            }: undefined
+                max: service?.prices[service.prices.length - 1].maxPrice
+            } : undefined
         }
     }
 
-    const updateServiceItem = (itemId: string) => {
-        if (!validateServiceItemData()) return;
+    const updateServiceItem = (itemId: string): boolean => {
+        if (!validateServiceItemData()) return false;
         const oldItem = serviceItems.find(i => i.id === itemId);
-        if (!oldItem) return;
+        if (!oldItem) return false;
         const item = getServiceItem();
+        let _schedule = [...schedule]
         item.payments.map(p => p.employeeId).forEach(e => {
-            const oldEmployeeSchedule = schedule.filter(s => s.employeeId === e).map(s => s.dateValues).flat();
+            const oldEmployeeSchedule = _schedule.filter(s => s.employeeId === e).map(s => s.dateValues).flat();
             if (!oldEmployeeSchedule) return;
             let updatedEmployeeSchedule = oldEmployeeSchedule.filter(s => !(s.start.getTime() === oldItem.dateInfo.start.getTime() && s.end.getTime() === oldItem.dateInfo.end.getTime()));
             updatedEmployeeSchedule = [...updatedEmployeeSchedule, {
                 start: item.dateInfo.start,
                 end: item.dateInfo.end,
                 color: 'gray'
-                }
+            }
             ]
-            let newSchedule = schedule.filter(s => s.employeeId !== e);
+            let newSchedule = _schedule.filter(s => s.employeeId !== e);
             newSchedule = [...newSchedule, {
                 employeeId: e,
                 dateValues: updatedEmployeeSchedule
             }];
-            setSchedule(newSchedule);
+            _schedule = [...newSchedule]
 
         })
+        setSchedule(_schedule);
+        setDiscardedSchedule([])
         setServiceItems(prevItems => prevItems.map(i => i.id === itemId ? item : i));
+        return true;
     }
 
     const deleteServiceItem = (itemId: string) => {
@@ -371,7 +418,7 @@ export const useCita = () => {
         return serviceItems.map(item => {
             return {
                 id: item.id ?? '',
-                name: item.name??'',
+                name: item.name ?? '',
                 type: item.type ?? '',
             }
         })
@@ -395,8 +442,44 @@ export const useCita = () => {
         return result;
     };
 
-    const createOrder = () => {
+    const createOrder = async () => {
         validateOrder();
+        let progresStatus = progressControler.value.toUpperCase();
+        if (progresStatus === 'EN PROGRESO') {
+            progresStatus = 'EN_PROGRESO';
+        }
+        const order: CreateOrder = {
+            clientId: allUsers.find(user => user.email === clientEmailController.selectedValue)?.id ?? '',
+            status: {
+                status: orderStatusController.active ? 'CONFIRMADO' : 'NO_CONFIRMADO',
+                progressStatus: progresStatus as 'PENDIENTE' | 'EN_PROGRESO' | 'FINALIZADO',
+                paymentStatus: orderPaymentStatusController.active ? 'PAGADO' : 'PENDIENTE',
+                paymentType: paymentTypeController.value.toUpperCase() as 'EFECTIVO' | 'TARJETA'
+            }
+        }
+        const _order = await orderApi.createOrder(order)
+        if (!_order) return;
+        await addServiceItemsToOrder(_order.id);
+        successOrderCreatedMessage()
+        clearForm();
+    }
+
+    const addServiceItemsToOrder = async (orderId: string) => {
+        for (const item of serviceItems) {
+            item.orderId = orderId
+            const payments = item.payments.map(payment => {
+                return {
+                    employeeId: allEmployees.find(e => e.email === payment.employeeId)?.id ?? '',
+                    percentage: payment.percentage,
+                    employeeName: payment.employeeName,
+                    paymentType: payment.paymentType ?? 'porcentaje'
+                }
+            })
+            await orderApi.addServiceItem({
+                ...item,
+                payments: payments,
+            })
+        }
     }
 
     const validateOrder = (): boolean => {
@@ -414,6 +497,24 @@ export const useCita = () => {
             isValid = false;
         }
         return isValid;
+    }
+
+    const clearForm = () => {
+        clearErrors()
+        clientEmailController.clearInput();
+        paymentTypeController.clearInput();
+        progressControler.clearInput();
+        orderStatusController.setActive(false);
+        orderPaymentStatusController.setActive(false);
+        setServiceItems([]);
+        setSchedule([]);
+        setDiscardedSchedule([]);
+    }
+
+    const clearErrors = () => {
+        clientEmailController.clearError();
+        paymentTypeController.clearError();
+        progressControler.clearError();
     }
 
     return {
@@ -447,6 +548,9 @@ export const useCita = () => {
         serviceItems,
         clientEmailProps: clientEmailController.getAutocompleteProps(),
         paymentTypeProps: paymentTypeController.getProps(),
-        createOrder
+        createOrder,
+        progressProps: progressControler.getProps(),
+        orderStatusProps: orderStatusController.getProps(),
+        orderPaymentStatusProps: orderPaymentStatusController.getProps(),
     }
 }
