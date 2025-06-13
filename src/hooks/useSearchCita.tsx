@@ -40,6 +40,7 @@ export const useSearchCita = () => {
 
 
     return {
-        ordersInfo
+        ordersInfo,
+        orders
     }
 }

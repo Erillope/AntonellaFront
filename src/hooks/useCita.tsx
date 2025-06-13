@@ -461,7 +461,7 @@ export const useCita = () => {
         if (!_order) return;
         await addServiceItemsToOrder(_order.id);
         successOrderCreatedMessage()
-        //clearForm();
+        clearForm();
     }
 
     const addServiceItemsToOrder = async (orderId: string) => {
