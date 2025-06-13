@@ -4,13 +4,14 @@ import { useSearchCita } from "../hooks/useSearchCita"
 import { SelectInput } from "../components/inputs/SelectInput"
 import { DateInput } from "../components/inputs/DateInput"
 import { InputTextField2 } from "../components/inputs/InputTextField"
+import { SwitchInput } from "../components/inputs/SwitchInput"
 
 
 export const SearchOrderItem = () => {
     const searchCitaController = useSearchCita()
 
     return (
-        <Box width="90%" gap={5} display="flex" flexDirection="column">
+        <Box width="90%" gap={2} display="flex" flexDirection="column">
             <Box display='flex' flexDirection='row' width='100%' gap={3}>
                 <Box display='flex' flexDirection='column' width='100%' gap={3}>
                     <InputTextField2 labelText="Cliente" {...searchCitaController.clientProps}/>
@@ -24,6 +25,7 @@ export const SearchOrderItem = () => {
                     </Box>
                 </Box>
             </Box>
+            <SwitchInput labelText="Mostrar solo citas no verificadas" {...searchCitaController.onlyVerifiedController}/>
             <Box paddingBottom={5}>
                 <OrderItemTable info={searchCitaController.ordersInfo} />
             </Box>

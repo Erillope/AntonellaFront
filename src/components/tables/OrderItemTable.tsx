@@ -44,6 +44,8 @@ export const OrderItemTable = (props: OrderItemTableProps) => {
 
 
 const ServiceInfoCell = ({ serviceItem }: { serviceItem: ServiceItem}) => {
+    const priceText = serviceItem.basePrice !== undefined ? `$${serviceItem.basePrice}` : 'Precio no definido';
+
     return (
         <Box display='flex' flexDirection='row' width='100%' gap={0}>
             <Box display='flex' flexDirection='column' width='100%' gap={1}>
@@ -59,7 +61,7 @@ const ServiceInfoCell = ({ serviceItem }: { serviceItem: ServiceItem}) => {
                     <AccessTimeIcon />
                     <Typography variant="body1">{toTimeString(serviceItem.dateInfo.start)}</Typography>
                 </Box>
-                <Typography variant="body1" color="#F44565" fontWeight={"bold"}>${serviceItem.basePrice}</Typography>
+                <Typography variant="body1" color="#F44565" fontWeight={"bold"}>{priceText}</Typography>
             </Box>
         </Box>
     )

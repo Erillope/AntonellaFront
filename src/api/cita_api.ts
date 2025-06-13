@@ -7,7 +7,7 @@ const orderApiUrl = API_URL + "order/";
 
 export interface DateInfo {
     start: Date;
-    end: Date;
+    end?: Date;
 }
 
 export interface Payment {
@@ -25,9 +25,9 @@ export interface ServiceItem {
     serviceId: string;
     dateInfo: DateInfo;
     status: 'PENDIENTE' | 'EN_PROGRESO' | 'FINALIZADO'
-    basePrice: number;
+    basePrice?: number;
     payments: Payment[];
-    paymentPercentage: number;
+    paymentPercentage?: number;
 }
 
 export interface OrderStatus {
@@ -109,7 +109,7 @@ export class OrderApi extends AbsctractApi {
             date_info: {
                 day: toDateString(serviceItem.dateInfo.start),
                 start: toTimeString(serviceItem.dateInfo.start),
-                end: toTimeString(serviceItem.dateInfo.end)
+                end: toTimeString(serviceItem.dateInfo.end??new Date())
             },
             status: serviceItem.status,
             base_price: serviceItem.basePrice,
@@ -117,7 +117,7 @@ export class OrderApi extends AbsctractApi {
                 employee_id: payment.employeeId,
                 percentage: payment.percentage / 100,
             })),
-            payment_percentage: serviceItem.paymentPercentage / 100
+            payment_percentage: serviceItem.paymentPercentage && serviceItem.paymentPercentage / 100,
         }
     }
 
@@ -136,20 +136,21 @@ export class OrderApi extends AbsctractApi {
     }
 
     private mapServiceItem(serviceItem: any): ServiceItem {
-        return {
+        const s: ServiceItem = {
             orderId: serviceItem.order_id,
             serviceId: serviceItem.service_id,
-            paymentPercentage: serviceItem.payment_percentage*100,
+            paymentPercentage: serviceItem.payment_percentage !== null ? serviceItem.payment_percentage * 100 : undefined,
             dateInfo: {
                 start: fromDayTimeString(serviceItem.date_info.day, serviceItem.date_info.start_time),
-                end: fromDayTimeString(serviceItem.date_info.day, serviceItem.date_info.end_time)
+                end: serviceItem.date_info.end_time !==null ? fromDayTimeString(serviceItem.date_info.day, serviceItem.date_info.end_time): undefined,
             },
             status: serviceItem.status,
-            basePrice: serviceItem.base_price,
+            basePrice: serviceItem.base_price !== null ? serviceItem.base_price : undefined,
             payments: serviceItem.payments.map((payment: any) => ({
                 employeeId: payment.employee_id,
-                percentage: payment.percentage*100,
+                percentage: payment.percentage !== null ? payment.percentage * 100 : undefined,
             })),
         }
+        return s   
     }
 }

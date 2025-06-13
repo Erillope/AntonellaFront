@@ -7,6 +7,7 @@ import { useSelectInput } from "../components/inputs/SelectInput";
 import { useDateInput } from "../components/inputs/DateInput";
 import { movilCategories } from "../api/config";
 import { useInputTextField } from "../components/inputs/InputTextField";
+import { useSwitchInput } from "../components/inputs/SwitchInput";
 
 export const useSearchCita = () => {
     const [allOrdersInfo, setAllOrdersInfo] = useState<OrderItemInfo[]>([]);
@@ -19,6 +20,7 @@ export const useSearchCita = () => {
     const orderApi = new OrderApi();
     const userApi = new AuthUserApi();
     const serviceApi = new StoreServiceApi()
+    const onlyVerifiedController = useSwitchInput()
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -32,7 +34,7 @@ export const useSearchCita = () => {
             if (!orders) return;
             const ordersInfo = await Promise.all(
                 orders.map(async order => {
-                    const serviceItems = await orderApi.getServiceItems(order.id) ?? [];
+                    let serviceItems = await orderApi.getServiceItems(order.id) ?? [];
                     const user = await userApi.getUser(order.clientId) ?? {} as User;
                     return await Promise.all(
                         serviceItems.map(async serviceItem => {
@@ -53,16 +55,19 @@ export const useSearchCita = () => {
     }, [])
 
     const filterOrders = () => {
-        const filteredOrders = allOrdersInfo
+        let filteredOrders = allOrdersInfo
             .filter(item => includesName(item))
             .filter(item => includesType(item))
             .filter(item => isGreaterThanStartDate(item))
             .filter(item => isLessThanEndDate(item))
             .filter(item => includesStatus(item));
+        if (onlyVerifiedController.active) {
+            filteredOrders = filteredOrders.filter(item => item.serviceItem.basePrice === undefined)
+        }
         setOrdersInfo(filteredOrders);
     }
 
-    useEffect(filterOrders, [clientController.value, statusController.value, serviceTypeController.value, startDate.value, endDate.value]);
+    useEffect(filterOrders, [clientController.value, statusController.value, serviceTypeController.value, startDate.value, endDate.value, onlyVerifiedController.active]);
 
     const includesName = (item: OrderItemInfo): boolean => {
         if (clientController.isEmpty()) return true
@@ -100,5 +105,6 @@ export const useSearchCita = () => {
         serviceTypeProps: serviceTypeController.getProps(),
         startDateProps: startDate.getProps(),
         endDateProps: endDate.getProps(),
+        onlyVerifiedController: onlyVerifiedController.getProps(),
     }
 }

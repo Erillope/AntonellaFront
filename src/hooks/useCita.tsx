@@ -99,8 +99,8 @@ export const useCita = () => {
         serviceTypeController.setValue(item.type ?? '');
         serviceNameController.setValues(allServices.filter(service => service.type.toLowerCase() === item.type?.toLowerCase()).map(service => service.name));
         serviceNameController.setSelectedValue(item.name ?? '');
-        priceController.setValue(item.basePrice.toString());
-        percentageController.percentContoller.setValue(item.paymentPercentage.toFixed(2));
+        priceController.setValue(item.basePrice!.toString());
+        percentageController.percentContoller.setValue(item.paymentPercentage!.toFixed(2));
         employeePaymentsController.setAllEmployees(allEmployees.filter(e => e.categories?.includes(item.type ?? '')));
         employeePaymentsController.setSelectedValue('');
         employeePaymentsController.setEmployeePayments(item.payments.map(payment => ({
@@ -119,7 +119,7 @@ export const useCita = () => {
         const _schedule = joinSchedules(employeeSchedule.map(s => s.dateValues).flat());
         calendarController.setValues([..._schedule, {
             start: item.dateInfo.start,
-            end: item.dateInfo.end,
+            end: item.dateInfo.end!,
             color: '#F87171'
         }])
         discartedSchedule.forEach(s => {
@@ -302,10 +302,10 @@ export const useCita = () => {
         item.payments.map(p => p.employeeId).forEach(e => {
             const oldEmployeeSchedule = _schedule.filter(s => s.employeeId === e).map(s => s.dateValues).flat();
             if (!oldEmployeeSchedule) return;
-            let updatedEmployeeSchedule = oldEmployeeSchedule.filter(s => !(s.start.getTime() === oldItem.dateInfo.start.getTime() && s.end.getTime() === oldItem.dateInfo.end.getTime()));
+            let updatedEmployeeSchedule = oldEmployeeSchedule.filter(s => !(s.start.getTime() === oldItem.dateInfo.start.getTime() && s.end.getTime() === oldItem.dateInfo.end!.getTime()));
             updatedEmployeeSchedule = [...updatedEmployeeSchedule, {
                 start: item.dateInfo.start,
-                end: item.dateInfo.end,
+                end: item.dateInfo.end!,
                 color: 'gray'
             }
             ]
@@ -330,7 +330,7 @@ export const useCita = () => {
             if (item.payments.map(p => p.employeeId).includes(s.employeeId)) {
                 return {
                     employeeId: s.employeeId,
-                    dateValues: s.dateValues.filter(d => !(d.start.getTime() === item.dateInfo.start.getTime() && d.end.getTime() === item.dateInfo.end.getTime()))
+                    dateValues: s.dateValues.filter(d => !(d.start.getTime() === item.dateInfo.start.getTime() && d.end.getTime() === item.dateInfo.end?.getTime()))
                 }
             }
             else {
