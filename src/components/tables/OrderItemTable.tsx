@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material"
-import { OrderDto, ServiceItem } from "../../api/cita_api"
+import { ServiceItem } from "../../api/cita_api"
 import { User } from "../../api/user_api"
 import { HeaderInfo, ManageActionCell, RowComponent, TableView } from "./TableView"
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -17,7 +17,6 @@ const headers: HeaderInfo[] = [
 
 export interface OrderItemInfo {
     serviceItem: ServiceItem
-    order: OrderDto
     user: User
 }
 
@@ -29,7 +28,7 @@ export const OrderItemTable = (props: OrderItemTableProps) => {
     const buildRows = (orderItemInfo: OrderItemInfo): RowComponent => {
         return {
             cells: [
-                <ServiceInfoCell serviceItem={orderItemInfo.serviceItem} order={orderItemInfo.order} />,
+                <ServiceInfoCell serviceItem={orderItemInfo.serviceItem} />,
                 <ClientInfoCell user={orderItemInfo.user} />,
                 <Box display='flex' alignItems='center' justifyContent='center' width='100%'
                     bgcolor={statusInfo[orderItemInfo.serviceItem.status].color}
@@ -44,7 +43,7 @@ export const OrderItemTable = (props: OrderItemTableProps) => {
 }
 
 
-const ServiceInfoCell = ({ serviceItem, order }: { serviceItem: ServiceItem, order: OrderDto }) => {
+const ServiceInfoCell = ({ serviceItem }: { serviceItem: ServiceItem}) => {
     return (
         <Box display='flex' flexDirection='row' width='100%' gap={0}>
             <Box display='flex' flexDirection='column' width='100%' gap={1}>
@@ -54,7 +53,7 @@ const ServiceInfoCell = ({ serviceItem, order }: { serviceItem: ServiceItem, ord
             <Box display='flex' flexDirection='column' width='100%' gap={1}>
                 <Box display='flex' flexDirection='row' width='100%' gap={1}>
                     <CalendarMonthIcon />
-                    <Typography variant="body1">{toDateString(order.createdDate)}</Typography>
+                    <Typography variant="body1">{toDateString(serviceItem.dateInfo.start)}</Typography>
                 </Box>
                 <Box display='flex' flexDirection='row' width='100%' gap={1}>
                     <AccessTimeIcon />
