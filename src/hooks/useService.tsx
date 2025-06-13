@@ -85,7 +85,8 @@ export const useService = (props?: UseServiceProps) => {
     }, [categoryController.value])
 
     const createService = async (questions: Question[]) => {
-        const data = getCreateServiceData(questions)
+        const data = JSON.parse(localStorage.getItem('service') ?? '{}') as CreateStoreService
+        data.questions = questions
         if (data.questions && data.questions.length === 0) {questionsNotCreatedMessage(); return}
         loadingMessage('Creando servicio...')
         const service = await storeServiceApi.createStoreService(data)

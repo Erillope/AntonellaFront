@@ -1,7 +1,7 @@
 import { API_URL } from "./config";
 import { AbsctractApi } from "./abstract_api";
 import axios from "axios";
-import { fromDayTimeString, toDateString, toTimeString } from "./utils";
+import { fromDayTimeString, toDate, toDateString, toTimeString } from "./utils";
 
 const orderApiUrl = API_URL + "order/";
 
@@ -46,10 +46,29 @@ export interface OrderDto {
     id: string;
     clientId: string;
     status: OrderStatus;
+    createdDate: Date;
 }
 
 
 export class OrderApi extends AbsctractApi {
+
+    async getOrders(): Promise<OrderDto[] | undefined> {
+        try {
+            const response = await axios.get(orderApiUrl);
+            return response.data.data.map((order: any) => this.map(order));
+        } catch (error) {
+            this.catchError(error);
+        }
+    }
+
+    async getServiceItems(orderId: string): Promise<ServiceItem[] | undefined> {
+        try {
+            const response = await axios.get(orderApiUrl + "service-item/", { params: {order_id: orderId} });
+            return response.data.data.map((serviceItem: any) => this.mapServiceItem(serviceItem));
+        } catch (error) {
+            this.catchError(error);
+        }
+    }
 
     async createOrder(order: CreateOrder): Promise<OrderDto | undefined> {
         try {
@@ -111,7 +130,8 @@ export class OrderApi extends AbsctractApi {
                 progressStatus: order.status.progress_status,
                 paymentStatus: order.status.payment_status,
                 paymentType: order.status.payment_type
-            }
+            },
+            createdDate: toDate(order.created_date),
         }
     }
 

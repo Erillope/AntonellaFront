@@ -461,7 +461,7 @@ export const useCita = () => {
         if (!_order) return;
         await addServiceItemsToOrder(_order.id);
         successOrderCreatedMessage()
-        clearForm();
+        //clearForm();
     }
 
     const addServiceItemsToOrder = async (orderId: string) => {
@@ -494,6 +494,10 @@ export const useCita = () => {
         }
         if (paymentTypeController.value === "") {
             paymentTypeController.setError("Seleccione un método de pago");
+            isValid = false;
+        }
+        if (progressControler.value === "") {
+            progressControler.setError("Seleccione un estado de progreso");
             isValid = false;
         }
         return isValid;
