@@ -73,7 +73,7 @@ export const useService = (props?: UseServiceProps) => {
         subCategoryController.setValues(options.map(o => capitalizeFirstLetter(o)))
         subCategoryController.clearInput()
         const initUsers = async () => {
-            const users = await apiUser.filterUsers({ orderBy: "name", orderDirection: "ASC" })
+            const users = await apiUser.filterUsers({})
             const userCategories = users.filter(user => user.categories?.includes(categoryController.value))
             setUsers(userCategories)
         }

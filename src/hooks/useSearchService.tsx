@@ -24,7 +24,7 @@ export const useSearchService = () => {
             if (!permissions.read) { navigate('/'); return }
             const services = await storeServiceApi.getAll()
             const subCategories = await configApi.getCategoriesConfig()
-            const user = await userApi.filterUsers({ orderBy: "name", orderDirection: "ASC" })
+            const user = await userApi.filterUsers({ })
             setSubCategories(subCategories)
             if (user) {
                 setUsers(user)

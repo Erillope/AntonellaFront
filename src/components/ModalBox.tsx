@@ -5,13 +5,15 @@ interface ModalBoxProps {
     children?: React.ReactNode
     open?: boolean
     setOpen?: (open: boolean) => void
+    width?: string
+    height?: string
 }
 
 export const ModalBox = (props: ModalBoxProps) => {
 
     return (
         <Modal open={props.open??false}>
-            <Box bgcolor='white' width='70%' maxHeight='100%' position='absolute' top='50%' left='50%'
+            <Box bgcolor='white' width={props.width ?? '70%'} maxHeight='100%' position='absolute' top='50%' left='50%' height={props.height}
                 sx={{ transform: 'translate(-50%, -50%)' }} borderRadius={2} boxShadow={24}
                 display={"flex"} flexDirection="column" alignItems="center" overflow={"auto"}>
                 <IconButton onClick={() => props.setOpen?.(false)}

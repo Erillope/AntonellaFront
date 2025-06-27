@@ -121,6 +121,26 @@ export class StoreServiceApi extends AbsctractApi {
         }
     }
 
+    async getByType(type: string): Promise<StoreService[] | undefined> {
+        try {
+            const response = await axios.get(storeServiceApiUrl, { params: { type } });
+            return response.data.data.map((data: any) => this.map(data));
+        }
+        catch (error) {
+            this.catchError(error);
+        }
+    }
+
+    async getByName(name: string): Promise<StoreService[] | undefined> {
+        try {
+            const response = await axios.get(storeServiceApiUrl, { params: { name } });
+            return response.data.data.map((data: any) => this.map(data));
+        }
+        catch (error) {
+            this.catchError(error);
+        }
+    }
+
     async update(storeServiceData: UpdateStoreService): Promise<StoreService | undefined> {
         try {
             const requestData = this.mapUpdateStoreService(storeServiceData);

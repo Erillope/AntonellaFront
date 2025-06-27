@@ -19,6 +19,7 @@ export interface CalendarInputProps {
     onRemove?: (start: Date, end: Date) => void;
     selectable?: boolean;
     error?: string;
+    height?: string;
 }
 
 export function Calendar(props: CalendarInputProps) {
@@ -26,7 +27,7 @@ export function Calendar(props: CalendarInputProps) {
     const [currentDate, setCurrentDate] = useState(new Date());
 
     return (
-        <Box height={'80%'} width={'100%'} display='flex' flexDirection='column'>
+        <Box minHeight={props.height??'80%'} width={'100%'} display='flex' flexDirection='column'>
             <CalendarHeader
                 currentDate={currentDate}
                 calendarRef={calendarRef}

@@ -27,7 +27,7 @@ export const ListImageInput = (props: ListImageInputProps) => {
                     <Badge
                         overlap="circular"
                         key={index}
-                        sx={{ width: '20%' }}
+                        sx={{ width: '150px' }}
                         anchorOrigin={{ vertical: "top", horizontal: "right" }}
                         badgeContent={
                             <IconButton className="delete-image-button"
@@ -37,7 +37,7 @@ export const ListImageInput = (props: ListImageInputProps) => {
                             </IconButton>
                         }
                     >
-                        <Avatar key={index} src={image} variant="square" sx={{ width: '100%', height: '100%', borderRadius: '8px' }} />
+                        <Avatar key={index} src={image} variant="square" sx={{ width: '150px', height: '100%', borderRadius: '8px' }} />
                     </Badge>
                 ))}
             </Box>
@@ -66,7 +66,7 @@ const DropZoneBox = (props: ListImageInputProps) => {
     return (
         <Box
             {...getRootProps()}
-            sx={{ cursor: props.disabled ? "" : "pointer", minWidth: '20%', height: '100%' }}>
+            sx={{ cursor: props.disabled ? "" : "pointer", minWidth: '20%', height: '100%', width: '150px' }}>
             <input {...getInputProps()} disabled={props.disabled} />
             <DropImageBox color="#DFDFDF" height="80%" />
         </Box>

@@ -41,11 +41,12 @@ export interface CreateUserProps {
 }
 
 export interface FilterUserProps {
-    fields?: { [key: string]: string };
-    orderBy: string;
+    serviceCategory?: string;
+    name?: string;
+    exactName?: string;
+    onlyClients?: boolean;
     offset?: number;
     limit?: number;
-    orderDirection: "ASC" | "DESC";
 }
 
 export interface UpdateUserProps {
@@ -177,7 +178,7 @@ export class AuthUserApi extends AbsctractApi {
     async filterUsers(filterData: FilterUserProps): Promise<User[]> {
         const request = this.mapFilterRequest(filterData);
         try {
-            const response = await axios.get(userApiUrl+"filter/", {params: request});
+            const response = await axios.post(userApiUrl+"filter/", request);
             return response.data.data.map((user: any) => this.map(user));
         }
         catch (error) {
@@ -273,11 +274,12 @@ export class AuthUserApi extends AbsctractApi {
 
     private mapFilterRequest(data: FilterUserProps): any {
         return {
-            'fields': data.fields,
-            'order_by': data.orderBy,
+            'service_category': data.serviceCategory?.toUpperCase(),
+            'name': data.name?.toUpperCase(),
+            'exact_name': data.exactName,
+            'only_clients': data.onlyClients ?? false,
             'offset': data.offset,
             'limit': data.limit,
-            'order_direction': data.orderDirection
         }
     }
 

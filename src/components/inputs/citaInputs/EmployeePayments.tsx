@@ -8,7 +8,7 @@ import { PercentageInputField } from "../InputTextField";
 export interface EmployeePaymentInfo {
     employeeEmail: string;
     employeeName: string;
-    paymentPercentage: number;
+    paymentPercentage?: number;
     paymentType: "porcentaje" | "salario" | "mixto";
 }
 
@@ -17,8 +17,8 @@ export interface EmployeePaymentsProps {
     employeePayments?: EmployeePaymentInfo[];
     totalPayment?: number;
     onChangePercentage?: (employeeEmail: string, newPercentage: number) => void;
-    onAdd?: (employeeEmail: string) => void;
-    onDelete?: (employeeEmail: string) => void;
+    onAdd?: (employeeName: string) => void;
+    onDelete?: (employeeName: string) => void;
     error?: string;
     selectedValue?: string;
     setSelectedValue?: (value: string) => void;
@@ -28,7 +28,7 @@ export const EmployeePayments = (props: EmployeePaymentsProps) => {
     return (
         <Box gap={2} display='flex' flexDirection='column'>
             <DynamicAutocomplete labelText="Empleados" values={props.allEmployees} selectedValue={props.selectedValue} onSelect={props.setSelectedValue} onAdd={props.onAdd} error={props.error}
-                selectedValues={props.employeePayments?.map((e => e.employeeEmail))} />
+                selectedValues={props.employeePayments?.map((e => e.employeeName))} />
             {props.employeePayments && props.employeePayments.length > 0 &&
                 <EmployeeInfo {...props} onDelete={(e) => { props.onDelete?.(e); props.setSelectedValue?.('') }} />
             }
@@ -61,9 +61,9 @@ const EmployeeInfo = (props: EmployeePaymentsProps) => {
                         </Typography>
                         {payment.paymentType === "salario" ? <Typography variant="body2" sx={{ flex: "1 40%", color: 'black' }}>Salario</Typography> :
                             <Box display='flex' flexDirection='row' alignItems={'center'} marginTop={-2}>
-                                <PercentageInputField width="30%" value={payment.paymentPercentage.toFixed(0)} onValueChange={(value) => props.onChangePercentage?.(payment.employeeEmail, parseFloat(value))}/>
+                                <PercentageInputField width="30%" value={(payment.paymentPercentage??0).toFixed(0)} onValueChange={(value) => props.onChangePercentage?.(payment.employeeEmail, parseFloat(value))}/>
                                 <Typography variant="body2" sx={{ flex: "1 40%", color: 'black' }}>
-                                    {`% $${calcPayment(payment.paymentPercentage).toFixed(2)}`}
+                                    {`% $${calcPayment(payment.paymentPercentage??0).toFixed(2)}`}
                                 </Typography>
                             </Box>
                         }
@@ -109,6 +109,7 @@ export const useEmployeePayments = () => {
     }
 
     const deleteEmployeePayment = (employeeEmail: string) => {
+        console.log("Deleting employee payment for:", employeeEmail);
         const updatedPayments = employeePayments.filter(payment => payment.employeeEmail !== employeeEmail);
         const nonSalaryEmployees = updatedPayments.filter(payment => payment.paymentType !== "salario");
         const percentage = (100 / nonSalaryEmployees.length);
@@ -131,7 +132,7 @@ export const useEmployeePayments = () => {
 
     const getProps = (): EmployeePaymentsProps => {
         return {
-            allEmployees: allEmployees.map(e => e.email),
+            allEmployees: allEmployees.map(e => e.name),
             employeePayments,
             totalPayment,
             onAdd: addEmployeePayment,
@@ -144,7 +145,6 @@ export const useEmployeePayments = () => {
     }
 
     const clearInputs = () => {
-        setAllEmployees([]);
         setEmployeePayments([]);
         setTotalPayment(0);
         setSelectedValue('');

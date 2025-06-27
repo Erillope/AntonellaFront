@@ -22,6 +22,7 @@ export interface OrderItemInfo {
 
 export interface OrderItemTableProps {
     info?: OrderItemInfo[];
+    onViewAction?: (serviceItemId: string) => void;
 }
 
 export const OrderItemTable = (props: OrderItemTableProps) => {
@@ -35,7 +36,7 @@ export const OrderItemTable = (props: OrderItemTableProps) => {
                     color='white' height='30px' borderRadius={2}>
                     {statusInfo[orderItemInfo.serviceItem.status].text}
                 </Box>,
-                <ManageActionCell color="black" viewAction={() => {}} />
+                <ManageActionCell color="black" viewAction={() => props.onViewAction?.(orderItemInfo.serviceItem.id??'')} />
             ]
         }
     }
@@ -86,6 +87,6 @@ const ClientInfoCell = ({ user }: { user: User }) => {
 
 const statusInfo: {[status: string]: {color: string, text: string} } = {
     'PENDIENTE': {color: '#FBB03B', text: 'Pendiente'},
-    'EN PROGRESO': {color: '#39B44A', text: 'En progreso'},
+    'EN_PROGRESO': {color: '#39B44A', text: 'En progreso'},
     'FINALIZADO': {color: '#29AAE1', text: 'Finalizado'},
 }

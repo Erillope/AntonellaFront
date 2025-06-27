@@ -276,3 +276,31 @@
     background-color: #F44565 !important;
     color: white !important;
 }
+
+.choice-answer {
+    background-color: #ffe5ec !important;
+    display: flex;
+    flex-direction: column;
+    color: black !important;
+    border: none !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
+}
+
+.choice-answer:hover {
+    background-color: #f0bfcc !important;
+}
+
+.choice-selected-answer {
+    background-color: #F44565 !important;
+    display: flex;
+    flex-direction: column;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    gap: 5px !important;
+}
+
+.choice-selected-answer:hover {
+    background-color: rgb(223, 134, 158) !important;
+}

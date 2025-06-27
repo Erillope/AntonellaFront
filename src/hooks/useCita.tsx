@@ -1,354 +1,96 @@
-import { DateValue, useCalendar } from "../components/inputs/CalendarInput"
-import { CreateCitaFormProps } from "../components/inputs/citaInputs/CreateCitaForm"
+import { useEffect, useState } from "react"
+import { CalendarInputProps, DateValue, useCalendar } from "../components/inputs/CalendarInput"
 import { useEmployeePayments } from "../components/inputs/citaInputs/EmployeePayments"
+import { usePercentPayment } from "../components/inputs/citaInputs/PercentPayment"
 import { useDynamicMultipleSelect } from "../components/inputs/DynamicMultipleSelect"
 import { useInputTextField } from "../components/inputs/InputTextField"
 import { useSelectInput } from "../components/inputs/SelectInput"
+import { CitaFormInputsProps } from "../components/inputs/citaInputs/CitaForm"
 import { movilCategories } from "../api/config"
-import { useEffect, useState } from "react"
-import { StoreService, StoreServiceApi } from "../api/store_service_api"
-import { usePercentPayment } from "../components/inputs/citaInputs/PercentPayment"
-import { AuthUserApi, User } from "../api/user_api"
+import { StoreServiceApi, Question, StoreService } from "../api/store_service_api"
+import { AuthUserApi } from "../api/user_api"
+import { AnswerProps, ImageAnswerProps, ImageChoiceAnswerProps, TextAnswerProps, TextChoiceAnswerProps } from "../components/inputs/citaInputs/AnswerForm"
+import { OrderApi, ServiceItem } from "../api/cita_api"
+import { v4 as uuid } from 'uuid';
 import { Item } from "../components/tables/ItemsTable"
-import { v4 as uuidv4 } from 'uuid';
-import dayjs from "dayjs"
-import { notSelectedItemMessage, successOrderCreatedMessage } from "../utils/alerts"
-import { CreateOrder, OrderApi, ServiceItem } from "../api/cita_api"
 import { useSwitchInput } from "../components/inputs/SwitchInput"
+import { notSelectedItemMessage, successOrderCreatedMessage } from "../utils/alerts"
 
-export interface EmployeeSchedule {
-    employeeId: string;
-    schedule: DateValue[];
+export interface AnswerData {
+    itemId: string;
+    answers: AnswerProps[];
 }
 
-export const useCita = () => {
-    const clientEmailController = useDynamicMultipleSelect()
+export const useCita = (initId?: string) => {
+    const clientController = useDynamicMultipleSelect()
     const paymentTypeController = useSelectInput()
+    const orderStatusController = useSwitchInput()
+    const orderPaymentStatusController = useSwitchInput()
+    const clientConfirmedController = useSwitchInput()
     const serviceTypeController = useSelectInput()
     const serviceNameController = useDynamicMultipleSelect()
     const priceController = useInputTextField()
     const percentageController = usePercentPayment()
     const employeePaymentsController = useEmployeePayments()
-    const calendarController = useCalendar()
-    const progressControler = useSelectInput()
-    const orderStatusController = useSwitchInput()
-    const orderPaymentStatusController = useSwitchInput()
-    const serviceApi = new StoreServiceApi()
-    const userApi = new AuthUserApi()
-    const orderApi = new OrderApi()
-    const [allEmployees, setAllEmployees] = useState<User[]>([]);
-    const [allServices, setAllServices] = useState<StoreService[]>([]);
-    const [allUsers, setAllUsers] = useState<User[]>([]);
+    const calendarController = useCitaCalendar()
+    const [services, setServices] = useState<StoreService[]>()
+    const [newAnswers, setNewAnswers] = useState<AnswerProps[]>([])
+    const [answerError, setAnswerError] = useState<string>('');
     const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
-    const [schedule, setSchedule] = useState<{ employeeId: string, dateValues: DateValue[] }[]>([]);
-    const [discartedSchedule, setDiscardedSchedule] = useState<{ employeeId: string, dateValues: DateValue[] }[]>([]);
-    const [viewItemId, setViewItemId] = useState<string>('');
+    const [answersData, setAnswersData] = useState<AnswerData[]>([]);
+    const [serviceItemId, setServiceItemId] = useState<string | undefined>(undefined);
+    const [loadedAnswers, setLoadedAnswers] = useState<AnswerProps[]>([]);
     const [mode, setMode] = useState<'create' | 'edit'>('create');
+    const serviceApi = new StoreServiceApi();
+    const userApi = new AuthUserApi();
+    const citaApi = new OrderApi();
 
-    useEffect(() => { paymentTypeController.setValues(['Efectivo', 'Tarjeta']); progressControler.setValues(['Pendiente', 'En progreso', 'Finalizado']) }, [])
-
-    const addServiceItem = (): boolean => {
-        if (!validateServiceItemData()) return false;
-        setServiceItems(prevItems => [...prevItems, getServiceItem()]);
-        const schedule = calendarController.values.filter(s => s.color !== 'gray').map(s => {
-            return {
-                start: s.start,
-                end: s.end,
-                color: 'gray',
+    const init = async () => {
+        serviceTypeController.setValues(movilCategories);
+        const clients = await userApi.filterUsers({ onlyClients: true });
+        clientController.setValues(clients.map(c => c.name));
+        paymentTypeController.setValues(['Efectivo', 'Tarjeta'])
+        if (initId) {
+            setMode('edit');
+            setServiceItemId(initId);
+            const service = await citaApi.get(initId);
+            const storeService = await serviceApi.get(service?.serviceId || '');
+            if (service && storeService) {
+                service.type = storeService.type;
+                service.name = storeService.name;
+                await Promise.all(service.payments.map(async p => {
+                    p.employeeName = (await userApi.getUser(p.employeeId))?.name;
+                }))
+                initServiceItemData(service);
             }
-        })
-        const newSchedule = employeePaymentsController.employeePayments.map(p => {
-            return {
-                employeeId: p.employeeEmail,
-                dateValues: schedule,
-            }
-        })
-        setSchedule(prev => [...prev, ...newSchedule]);
-        return true;
-    }
-
-    const getServiceItem = (): ServiceItem => {
-        const calendarIdex = calendarController.values.length - 1;
-        return {
-            id: uuidv4(),
-            serviceId: allServices.find(service => service.name.toLowerCase() === serviceNameController.values[0].toLowerCase())?.id || "",
-            paymentPercentage: percentageController.percentContoller.value ? parseFloat(percentageController.percentContoller.value) : 0,
-            dateInfo: {
-                start: calendarController.values[calendarIdex].start,
-                end: calendarController.values[calendarIdex].end,
-            },
-            status: "PENDIENTE",
-            basePrice: parseFloat(priceController.value),
-            payments: employeePaymentsController.employeePayments.map(payment => ({
-                employeeId: payment.employeeEmail,
-                percentage: payment.paymentPercentage,
-                employeeName: payment.employeeName,
-                paymentType: payment.paymentType
-            })),
-            type: serviceTypeController.value,
-            name: allServices.find(service => service.name.toLowerCase() === serviceNameController.selectedValue.toLowerCase())?.name || "",
-        }
-    }
-
-    const initServiceItem = (itemId: string) => {
-        clearServiceItemsErrors()
-        const item = serviceItems.find(i => i.id === itemId);
-        setViewItemId(itemId);
-        setMode('edit');
-        if (!item) return;
-        serviceTypeController.setValue(item.type ?? '');
-        serviceNameController.setValues(allServices.filter(service => service.type.toLowerCase() === item.type?.toLowerCase()).map(service => service.name));
-        serviceNameController.setSelectedValue(item.name ?? '');
-        priceController.setValue(item.basePrice!.toString());
-        percentageController.percentContoller.setValue(item.paymentPercentage!.toFixed(2));
-        employeePaymentsController.setAllEmployees(allEmployees.filter(e => e.categories?.includes(item.type ?? '')));
-        employeePaymentsController.setSelectedValue('');
-        employeePaymentsController.setEmployeePayments(item.payments.map(payment => ({
-            employeeEmail: payment.employeeId,
-            employeeName: payment.employeeName ?? '',
-            paymentPercentage: payment.percentage,
-            paymentType: payment.paymentType ?? 'porcentaje'
-        })));
-        const selectedEmployees = item.payments.map(payment => payment.employeeId);
-        const employeeSchedule = schedule.filter(s => selectedEmployees.includes(s.employeeId)).map(s => {
-            return {
-                employeeId: s.employeeId,
-                dateValues: s.dateValues.filter(s => !dayjs(s.start).isSame(item.dateInfo.start) || !dayjs(s.end).isSame(item.dateInfo.end))
-            }
-        });
-        const _schedule = joinSchedules(employeeSchedule.map(s => s.dateValues).flat());
-        calendarController.setValues([..._schedule, {
-            start: item.dateInfo.start,
-            end: item.dateInfo.end!,
-            color: '#F87171'
-        }])
-        discartedSchedule.forEach(s => {
-            setSchedule(prev => prev.map(d => {
-                if (d.employeeId === s.employeeId) {
-                    return {
-                        employeeId: d.employeeId,
-                        dateValues: [...d.dateValues, ...s.dateValues.map(v => {
-                            return {
-                                start: v.start,
-                                end: v.end,
-                                color: 'gray'
-                            }
-                        })]
-                    }
-                }
-                return d;
-            }))
-        })
-        setDiscardedSchedule([]);
-    }
-
-    const init = () => {
-        const fetchInit = async () => {
-            serviceTypeController.setValues(movilCategories);
-            await initAllServices();
-            await initAllUsers();
-        }
-        fetchInit();
-    }
-
-    useEffect(init, [])
-
-    const initAllServices = async () => {
-        const allServices = await serviceApi.getAll();
-        if (allServices)
-            setAllServices(allServices);
-    }
-
-    const initAllUsers = async () => {
-        const allUsers = await userApi.filterUsers({ orderBy: "name", orderDirection: "ASC" });
-        if (allUsers) {
-            setAllUsers(allUsers);
-            setAllEmployees(allUsers.filter(user => !!user.address));
-            clientEmailController.setValues(
-                allUsers.filter(user => user.address === undefined).map(user => user.email)
-            );
-        }
-    }
-
-    const initConcreteService = (type: string) => {
-        const serviceType = type;
-        const concreteServices = allServices.filter(service => service.type.toLowerCase() === serviceType.toLowerCase());
-        serviceNameController.setValues(concreteServices.map(service => service.name));
-    }
-
-    const initConcreteUsers = (type: string) => {
-        const serviceType = type;
-        const employees = allEmployees.filter(e => e.categories?.includes(serviceType));
-        employeePaymentsController.setEmployeePayments([]);
-        employeePaymentsController.setSelectedValue('');
-        employeePaymentsController.setAllEmployees(employees);
-    }
-
-    const updatedServiceType = (type: string) => {
-        calendarController.setValues(calendarController.values.filter(s => s.color !== 'gray'))
-        serviceNameController.clearInput();
-        initConcreteService(type);
-        initConcreteUsers(type);
-    }
-
-    useEffect(() => percentageController.setPrice(priceController.value ? parseFloat(priceController.value) : 0), [priceController.value])
-
-    useEffect(() => employeePaymentsController.setTotalPayment(percentageController.value), [percentageController.value])
-
-    const getCreateCitaProps = (): CreateCitaFormProps => {
-        const service = allServices.find(s => s.name.toLowerCase() === serviceNameController.selectedValue.toLowerCase());
-        return {
-            serviceTypeProps: {
-                ...serviceTypeController.getProps(),
-                onSelect: (value: string) => {
-                    serviceTypeController.setValue(value);
-                    updatedServiceType(value);
-                }
-            },
-            serviceNameProps: serviceNameController.getAutocompleteProps(),
-            priceProps: priceController.getProps(),
-            percentageProps: percentageController.getProps(),
-            employeePaymentsProps: {
-                ...employeePaymentsController.getProps(),
-                onAdd: (employeeEmail: string) => {
-                    employeePaymentsController.addEmployeePayment(employeeEmail);
-                    const selectedEmployees = [...employeePaymentsController.employeePayments.map(payment => payment.employeeEmail), employeeEmail];
-                    const employeeSchedule = schedule.filter(s => selectedEmployees.includes(s.employeeId));
-                    let _schedule = joinSchedules(employeeSchedule.map(s => s.dateValues).flat());
-                    const pink = calendarController.values.find(s => s.color !== 'gray');
-                    let discarted = [...discartedSchedule];
-                    if (pink) {
-                        _schedule = _schedule.filter(s => !(s.start.getTime() === pink.start.getTime() && s.end.getTime() === pink.end.getTime()));
-                        setSchedule(schedule.map(s => {
-                            if (s.dateValues.some(d => d.start.getTime() === pink.start.getTime() && d.end.getTime() === pink.end.getTime())) {
-                                if (!discarted.some(d => d.employeeId === s.employeeId)) {
-                                    discarted = [...discarted, {
-                                        employeeId: s.employeeId,
-                                        dateValues: [pink]
-                                    }]
-                                }
-                            }
-                            return {
-                                employeeId: s.employeeId,
-                                dateValues: s.dateValues.filter(d => !(d.start.getTime() === pink.start.getTime() && d.end.getTime() === pink.end.getTime()))
-                            }
-                        }))
-                        setDiscardedSchedule(discarted);
-                    }
-                    calendarController.setValues(_schedule);
-                },
-                onDelete: (employeeEmail: string) => {
-                    employeePaymentsController.deleteEmployeePayment(employeeEmail);
-                    const selectedEmployees = employeePaymentsController.employeePayments.filter(payment => payment.employeeEmail !== employeeEmail).map(payment => payment.employeeEmail);
-                    const employeeSchedule = schedule.filter(s => selectedEmployees.includes(s.employeeId));
-                    let _schedule = joinSchedules(employeeSchedule.map(s => s.dateValues).flat());
-
-                    const pink = calendarController.values.find(s => s.color !== 'gray');
-                    if (pink) {
-                        _schedule = _schedule.filter(s => !(s.start.getTime() === pink.start.getTime() && s.end.getTime() === pink.end.getTime()));
-                        setSchedule(schedule.map(s => {
-                            if (s.dateValues.some(d => d.start.getTime() === pink.start.getTime() && d.end.getTime() === pink.end.getTime())) {
-                                if (!discartedSchedule.some(d => d.employeeId === s.employeeId)) {
-                                    setDiscardedSchedule(prev => [...prev, {
-                                        employeeId: s.employeeId,
-                                        dateValues: [pink]
-                                    }])
-                                }
-                            }
-                            return {
-                                employeeId: s.employeeId,
-                                dateValues: s.dateValues.filter(d => !(d.start.getTime() === pink.start.getTime() && d.end.getTime() === pink.end.getTime()))
-                            }
-                        }))
-                    }
-                    calendarController.setValues(_schedule);
-                },
-            },
-            calendarProps: {
-                values: calendarController.values,
-                onSelect: (start: Date, end: Date) => {
-                    calendarController.addValue(start, end);
-                },
-                onRemove: (start: Date, end: Date) => {
-                    const value = calendarController.values.find(v => v.start.getTime() === start.getTime() && v.end.getTime() === end.getTime());
-                    if (!value) return;
-
-                    const isEditable = value.color !== 'gray';
-                    if (isEditable) {
-                        calendarController.removeValue(start, end);
-                    }
-                },
-                selectable: isSelectable(),
-                error: calendarController.error,
-            },
-            onCreateSubmit: addServiceItem,
-            onEditSubmit: () => updateServiceItem(viewItemId),
-            onDiscard: () => initServiceItem(viewItemId),
-            onDelete: () => deleteServiceItem(viewItemId),
-            mode: mode,
-            priceRange: service ? {
-                min: service?.prices[0].minPrice,
-                max: service?.prices[service.prices.length - 1].maxPrice
-            } : undefined
-        }
-    }
-
-    const updateServiceItem = (itemId: string): boolean => {
-        if (!validateServiceItemData()) return false;
-        const oldItem = serviceItems.find(i => i.id === itemId);
-        if (!oldItem) return false;
-        const item = getServiceItem();
-        let _schedule = [...schedule]
-        item.payments.map(p => p.employeeId).forEach(e => {
-            const oldEmployeeSchedule = _schedule.filter(s => s.employeeId === e).map(s => s.dateValues).flat();
-            if (!oldEmployeeSchedule) return;
-            let updatedEmployeeSchedule = oldEmployeeSchedule.filter(s => !(s.start.getTime() === oldItem.dateInfo.start.getTime() && s.end.getTime() === oldItem.dateInfo.end!.getTime()));
-            updatedEmployeeSchedule = [...updatedEmployeeSchedule, {
-                start: item.dateInfo.start,
-                end: item.dateInfo.end!,
-                color: 'gray'
-            }
-            ]
-            let newSchedule = _schedule.filter(s => s.employeeId !== e);
-            newSchedule = [...newSchedule, {
-                employeeId: e,
-                dateValues: updatedEmployeeSchedule
-            }];
-            _schedule = [...newSchedule]
-
-        })
-        setSchedule(_schedule);
-        setDiscardedSchedule([])
-        setServiceItems(prevItems => prevItems.map(i => i.id === itemId ? item : i));
-        return true;
-    }
-
-    const deleteServiceItem = (itemId: string) => {
-        const item = serviceItems.find(i => i.id === itemId);
-        if (!item) return;
-        const employeeSchedule = schedule.map(s => {
-            if (item.payments.map(p => p.employeeId).includes(s.employeeId)) {
+            const answers = await citaApi.getAnswers(initId || '')
+            if (!answers) return;
+            let answerProps: AnswerProps[] = answers.map(a => {
+                const question = storeService?.questions.find(q => q.id === a.questionId)!;
+                const type = mapType(a.inputType, a.choiceType ?? 'TEXT');
+                const textAnswer = Array.isArray(a.answer) ? undefined : a.answer;
+                const images = Array.isArray(a.answer) ? a.answer : undefined;
                 return {
-                    employeeId: s.employeeId,
-                    dateValues: s.dateValues.filter(d => !(d.start.getTime() === item.dateInfo.start.getTime() && d.end.getTime() === item.dateInfo.end?.getTime()))
+                    type: type,
+                    ...mapAnswer(question, type, textAnswer, images)
                 }
-            }
-            else {
-                return s;
-            }
-        })
-        setSchedule(employeeSchedule);
-        setServiceItems(prevItems => prevItems.filter(i => i.id !== itemId));
-    }
-
-    const isSelectable = (): boolean => {
-        if (calendarController.values.filter(s => s.color === 'gray').length > 0) {
-            return calendarController.values.filter(s => s.color !== 'gray').length === 0;
+            });
+            setLoadedAnswers(answerProps);
         }
-        return calendarController.isEmpty();
     }
 
-    const clearServiceItem = () => {
+    useEffect(() => { init() }, [])
+
+    const initServiceItem = () => {
+        setMode('create');
+        clearServiceItemForm();
+        clearServiceItemError();
+        employeePaymentsController.setAllEmployees([]);
+        setAnswerError('');
+        setNewAnswers([]);
+    }
+
+    const clearServiceItemForm = () => {
         serviceTypeController.clearInput();
         serviceNameController.clearInput();
         priceController.clearInput();
@@ -357,61 +99,115 @@ export const useCita = () => {
         calendarController.clearInput();
     }
 
-    const clearServiceItemsErrors = () => {
-        serviceTypeController.setError("");
-        serviceNameController.setError("");
-        priceController.setError("");
-        percentageController.percentContoller.setError("");
+    const clearServiceItemError = () => {
+        serviceTypeController.clearError();
+        serviceNameController.clearError();
+        priceController.clearError();
+        percentageController.percentContoller.clearError();
         employeePaymentsController.clearError();
-        calendarController.clearError();
+        calendarController.calendarController.clearError();
     }
 
-    const validateServiceItemData = (): boolean => {
-        clearServiceItemsErrors();
-        let isValid = true;
-        if (serviceTypeController.value === "") {
-            serviceTypeController.setError("Seleccione un tipo de servicio");
-            isValid = false;
+    const getCitaProps = (): CitaFormInputsProps => {
+        const selectedServicie = services?.find(s => s.name === serviceNameController.selectedValue);
+        return {
+            serviceTypeProps: {
+                ...serviceTypeController.getProps(),
+                onSelect: onSelectServiceType,
+            },
+            serviceNameProps: {
+                ...serviceNameController.getAutocompleteProps(),
+                onSelect: onSelectServiceName,
+            },
+            priceProps: {
+                ...priceController.getProps(),
+                onValueChange: onChangePrice
+            },
+            percentageProps: percentageController.getProps(),
+            employeePaymentsProps: {
+                ...employeePaymentsController.getProps(),
+                onAdd: (employeeName: string) => {
+                    const employeeEmail = employeePaymentsController.allEmployees.find(e => e.name === employeeName)?.email ?? '';
+                    employeePaymentsController.addEmployeePayment(employeeEmail);
+                }
+            },
+            calendarProps: calendarController.getProps(),
+            priceRange: selectedServicie && {
+                min: selectedServicie.prices[0].minPrice,
+                max: selectedServicie.prices[selectedServicie.prices.length - 1]?.maxPrice
+            },
         }
-        if (serviceNameController.selectedValue === "") {
-            serviceNameController.setError("Seleccione un servicio");
-            isValid = false;
-        }
-        if (priceController.value === "") {
-            priceController.setError("Ingrese un precio");
-            isValid = false;
-        }
-        if (percentageController.percentContoller.value === "") {
-            percentageController.percentContoller.setError("Ingrese un porcentaje");
-            isValid = false;
-        }
-        if (employeePaymentsController.employeePayments.length === 0) {
-            employeePaymentsController.setError("Debe agregar al menos un empleado");
-            isValid = false;
-        }
-        if (calendarController.values.filter(s => s.color !== 'gray').length === 0) {
-            calendarController.setError("Seleccione un horario");
-            isValid = false;
-        }
-        if (employeePaymentsController.employeePayments.reduce((acc, payment) => acc + payment.paymentPercentage, 0) !== 100 && employeePaymentsController.employeePayments.filter(payment => payment.paymentType !== "salario").length > 0) {
-            employeePaymentsController.setError("La suma de los porcentajes de pago debe ser 100%");
-            isValid = false;
-        }
-        const service = allServices.find(s => s.name.toLowerCase() === serviceNameController.selectedValue.toLowerCase());
-        const price = parseFloat(priceController.value);
-        if (price < (service?.prices[0].minPrice ?? 0) || price > (service?.prices[service.prices.length - 1].maxPrice ?? Infinity)) {
-            priceController.setError("El precio se escapa del rango sugerido")
-            isValid = false;
-        }
+    }
 
-        const now = new Date();
-        const selectedSchedules = calendarController.values.filter(s => s.color !== 'gray');
-        const marginMs = 10 * 60 * 1000;
-        if (selectedSchedules.some(s => s.start.getTime() <= now.getTime() - marginMs)) {
-            calendarController.setError("No puede seleccionar horarios en el pasado");
-            isValid = false;
+    useEffect(() => {
+        const dates: DateValue[] = []
+        if (mode === 'create') {
+            if (employeePaymentsController.employeePayments.length === 0) { calendarController.clearOtherDates(); return; }
+            employeePaymentsController.employeePayments.map(p => p.employeeEmail).forEach(email => {
+                serviceItems.filter(item => item.payments.some(payment => payment.employeeId === email)).forEach(item => {
+                    dates.push({
+                        start: item.dateInfo.start,
+                        end: item.dateInfo.end ?? new Date(),
+                    })
+                })
+            })
+            calendarController.setOthers(dates);
         }
-        return isValid
+        if (mode === 'edit') {
+            if (employeePaymentsController.employeePayments.length === 0) { calendarController.clearOtherDates(); return; }
+            employeePaymentsController.employeePayments.map(p => p.employeeEmail).forEach(email => {
+                serviceItems.filter(item => item.payments.some(payment => payment.employeeId === email) && item.id !== serviceItemId).forEach(item => {
+                    dates.push({
+                        start: item.dateInfo.start,
+                        end: item.dateInfo.end ?? new Date(),
+                    })
+                })
+            })
+            calendarController.setOthers(dates);
+        }
+    }, [employeePaymentsController.employeePayments])
+
+    const addServiceItem = (): boolean => {
+        if (!validateServiceItem()) return false;
+        const serviceItem = getServiceItem();
+        const answers = getAnswers()
+        setServiceItems(prev => [...prev, serviceItem]);
+        setAnswersData(prev => [...prev, { itemId: serviceItem.id ?? '', answers: answers }]);
+        return true;
+    }
+
+    const getServiceItem = (): ServiceItem => {
+        return {
+            id: uuid(),
+            type: serviceTypeController.value,
+            name: serviceNameController.selectedValue,
+            serviceId: services?.find(s => s.name === serviceNameController.selectedValue)?.id || '',
+            dateInfo: {
+                start: calendarController.selectedDate?.start || new Date(),
+                end: calendarController.selectedDate?.end || new Date(),
+            },
+            status: 'PENDIENTE',
+            basePrice: parseFloat(priceController.value),
+            payments: employeePaymentsController.employeePayments.map(p => {
+                return {
+                    employeeId: p.employeeEmail,
+                    percentage: p.paymentPercentage??0,
+                    employeeName: p.employeeName,
+                    paymentType: p.paymentType
+                }
+            }),
+            paymentPercentage: percentageController.percentContoller.value ? parseFloat(percentageController.percentContoller.value) : 0,
+        }
+    }
+
+    const getAnswers = (): AnswerProps[] => {
+        if (mode === 'create') {
+            return newAnswers
+        }
+        if (mode === 'edit') {
+            return loadedAnswers
+        }
+        return []
     }
 
     const getItems = (): Item[] => {
@@ -422,6 +218,606 @@ export const useCita = () => {
                 type: item.type ?? '',
             }
         })
+    }
+
+    const createOrder = async () => {
+        if (!validateOrder()) return;
+        const client = (await userApi.filterUsers({ exactName: clientController.selectedValue ?? '', onlyClients: true }))[0]
+        const order = await citaApi.createOrder({
+            clientId: client.id,
+            status: {
+                status: orderStatusController.active ? 'CONFIRMADO' : 'NO_CONFIRMADO',
+                progressStatus: 'EN_PROGRESO',
+                paymentStatus: orderPaymentStatusController.active ? 'PENDIENTE' : 'PAGADO',
+                paymentType: paymentTypeController.value.toUpperCase() as 'EFECTIVO' | 'TARJETA',
+                clientConfirmed: clientConfirmedController.active ? 'CONFIRMADO' : 'NO_CONFIRMADO',
+            }
+        })
+        for (const item of serviceItems) {
+            const selectedService = services?.find(s => s.name === item.name);
+            const serviceItem = await citaApi.addServiceItem({
+                orderId: order?.id ?? '',
+                serviceId: selectedService?.id ?? '',
+                dateInfo: item.dateInfo,
+                status: item.status,
+                basePrice: item.basePrice,
+                payments: await Promise.all(
+                    item.payments.map(async p => {
+                        return {
+                            employeeId: (await userApi.getUser(p.employeeId))?.id ?? '',
+                            percentage: p.percentage,
+                        };
+                    })
+                ),
+                paymentPercentage: item.paymentPercentage,
+            })
+            for (const answer of answersData) {
+                for (const a of answer.answers) {
+                    const text = a.textAnswer?.answer || a.textChoiceAnswer?.selected || a.imageChoiceAnswer?.selected || ''
+                    await citaApi.createAnswer({
+                        clientId: client.id,
+                        questionId: a.textAnswer?.questionId || a.imageAnswer?.questionId || a.textChoiceAnswer?.questionId || a.imageChoiceAnswer?.questionId || '',
+                        serviceItemId: serviceItem?.id ?? '',
+                        answer: {
+                            text: text.trim() === '' ? undefined : text,
+                            images: a.imageAnswer?.images,
+                        }
+                    })
+                }
+            }
+        }
+        successOrderCreatedMessage();
+        clearOrderErrors();
+        clearOrder()
+    }
+
+    const clearOrder = () => {
+        clientController.clearInput();
+        paymentTypeController.clearInput();
+        orderStatusController.setActive(false);
+        orderPaymentStatusController.setActive(false);
+        clientConfirmedController.setActive(false);
+    }
+
+    const validateOrder = (): boolean => {
+        clearOrderErrors();
+        let isValid = true;
+        if (clientController.selectedValue.trim() === '') {
+            clientController.setError('Debe seleccionar un cliente');
+            isValid = false;
+        }
+        if (paymentTypeController.value === '') {
+            paymentTypeController.setError('Debe seleccionar un metodo de pago');
+            isValid = false;
+        }
+        if (serviceItems.length === 0) {
+            notSelectedItemMessage()
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    const clearOrderErrors = () => {
+        clientController.clearError();
+        paymentTypeController.clearError();
+    }
+
+    const onDeleteServiceItem = () => {
+        setLoadedAnswers([]);
+        setServiceItems(prev => prev.filter(item => item.id !== serviceItemId));
+        setAnswersData(prev => prev.filter(data => data.itemId !== serviceItemId));
+    }
+
+    const editServiceItem = (): boolean => {
+        if (!validateServiceItem()) return false;
+        const serviceItem = getServiceItem();
+        const answers = getAnswers();
+        setServiceItems(prev => prev.map(item => item.id === serviceItemId ? { ...serviceItem, id: item.id } : item));
+        setAnswersData(prev => prev.map(data => data.itemId === serviceItemId ? { ...data, answers: answers } : data));
+        return true;
+    }
+
+    const discartChanges = () => {
+        const serviceItem = serviceItems.find(item => item.id === serviceItemId);
+        if (serviceItem) {
+            initServiceItemData(serviceItem);
+            setLoadedAnswers(answersData.find(data => data.itemId === serviceItemId)?.answers || []);
+        }
+    }
+
+    const loadServiceItem = (id: string) => {
+        setServiceItemId(id);
+        setMode('edit');
+        const serviceItem = serviceItems.find(item => item.id === id);
+        if (serviceItem) {
+            initServiceItemData(serviceItem);
+            setLoadedAnswers(answersData.find(data => data.itemId === id)?.answers || []);
+        }
+
+    }
+
+    const initServiceItemData = (serviceItem: ServiceItem) => {
+        serviceTypeController.setValue(serviceItem.type ?? '')
+        serviceNameController.setSelectedValue(serviceItem.name ?? '');
+        priceController.setValue(serviceItem.basePrice?.toString() ?? '');
+        percentageController.percentContoller.setValue(serviceItem.paymentPercentage?.toFixed(2) ?? '');
+        employeePaymentsController.setEmployeePayments(serviceItem.payments.map(p => ({
+            employeeEmail: p.employeeId,
+            employeeName: p.employeeName ?? '',
+            paymentPercentage: p.percentage,
+            paymentType: p.paymentType ?? 'porcentaje'
+        })));
+        percentageController.setPrice(serviceItem.basePrice ?? 0);
+        employeePaymentsController.setTotalPayment(percentageController.value)
+        calendarController.selectDate(serviceItem.dateInfo.start, serviceItem.dateInfo.end ?? new Date());
+    }
+
+    const validateServiceItem = (): boolean => {
+        clearServiceItemError();
+        setAnswerError('');
+        let isValid = true;
+        if (serviceTypeController.value === '') {
+            serviceTypeController.setError('Debe seleccionar un tipo de servicio');
+            isValid = false;
+        }
+        if (serviceNameController.selectedValue === '') {
+            serviceNameController.setError('Debe seleccionar un nombre de servicio');
+            isValid = false;
+        }
+        if (priceController.value === '') {
+            priceController.setError('Debe ingresar un precio');
+            isValid = false;
+        }
+        if (employeePaymentsController.employeePayments.length === 0) {
+            employeePaymentsController.setError("Debe agregar al menos un empleado");
+            isValid = false;
+        }
+        if (calendarController.selectedDate === undefined) {
+            calendarController.calendarController.setError("Debe seleccionar una fecha");
+            isValid = false;
+        }
+        if (employeePaymentsController.employeePayments.reduce((acc, payment) => acc + (payment.paymentPercentage??0), 0) !== 100 && employeePaymentsController.employeePayments.filter(payment => payment.paymentType !== "salario").length > 0) {
+            employeePaymentsController.setError("La suma de los porcentajes de pago debe ser 100%");
+            isValid = false;
+        }
+        const service = services?.find(s => s.name === serviceNameController.selectedValue);
+        const price = parseFloat(priceController.value);
+        if (price < (service?.prices[0].minPrice ?? 0) || price > (service?.prices[service.prices.length - 1].maxPrice ?? Infinity)) {
+            priceController.setError("El precio se escapa del rango sugerido")
+            isValid = false;
+        }
+        const now = new Date();
+        const marginMs = 10 * 60 * 1000;
+        if (calendarController.selectedDate && calendarController.selectedDate.start.getTime() < now.getTime() + marginMs) {
+            calendarController.calendarController.setError("La fecha debe ser al menos 10 minutos en el futuro");
+            isValid = false;
+        }
+        if (!validateAnswers()) {
+            setAnswerError("Debe responder todas las preguntas del servicio");
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    const validateAnswers = (): boolean => {
+        let isValid = true
+        if (mode === 'create') {
+            newAnswers.forEach(a => {
+                if (a.type === 'text' && a.textAnswer?.answer?.trim() === '') {
+                    isValid = false;
+                }
+                if (a.type === 'image' && a.imageAnswer?.images?.length === 0) {
+                    isValid = false;
+                }
+                if (a.type === 'choiceText' && a.textChoiceAnswer?.selected?.trim() === '') {
+                    isValid = false;
+                }
+                if (a.type === 'choiceImage' && a.imageChoiceAnswer?.selected?.trim() === '') {
+                    isValid = false;
+                }
+            })
+        }
+        if (mode === 'edit') {
+            loadedAnswers.forEach(a => {
+                if (a.type === 'text' && a.textAnswer?.answer?.trim() === '') {
+                    isValid = false;
+                }
+                if (a.type === 'image' && a.imageAnswer?.images?.length === 0) {
+                    isValid = false;
+                }
+                if (a.type === 'choiceText' && a.textChoiceAnswer?.selected?.trim() === '') {
+                    isValid = false;
+                }
+                if (a.type === 'choiceImage' && a.imageChoiceAnswer?.selected?.trim() === '') {
+                    isValid = false;
+                }
+            })
+        }
+        return isValid;
+    }
+
+    const onChangePrice = (value: string) => {
+        priceController.setValue(value);
+        percentageController.setPrice(parseFloat(value) || 0);
+    }
+
+    useEffect(() => employeePaymentsController.setTotalPayment(percentageController.value), [percentageController.value])
+
+    const onSelectServiceType = async (value: string) => {
+        serviceTypeController.setValue(value);
+        const users = await userApi.filterUsers({ serviceCategory: value.toUpperCase() });
+        employeePaymentsController.setAllEmployees(users)
+        const services = await serviceApi.getByType(value.toUpperCase());
+        if (services) {
+            setServices(services)
+            serviceNameController.setValues(services.map(s => s.name));
+        }
+        else {
+            serviceNameController.setValues([])
+        }
+        serviceNameController.clearInput();
+        setNewAnswers([]);
+        if (mode === 'edit') {
+            setLoadedAnswers([]);
+        }
+        employeePaymentsController.clearInputs()
+    }
+
+    const onSelectServiceName = (value: string) => {
+        serviceNameController.setSelectedValue(value)
+        const selectedServicie = services?.find(s => s.name === value);
+        if (selectedServicie) {
+            const questions = selectedServicie.questions;
+            const answers: AnswerProps[] = questions.map(q => {
+                const type = mapType(q.inputType, q.choiceType ?? 'TEXT');
+                return {
+                    type: type,
+                    ...mapAnswer(q, type),
+                }
+            });
+            setNewAnswers(answers);
+        }
+    }
+
+    const generateAnswersProps = (): AnswerProps[] => {
+        let answers: AnswerProps[] = [];
+        if (mode === "create") {
+            answers = [...newAnswers]
+        }
+        if (mode === "edit") {
+            answers = loadedAnswers;
+        }
+        return answers.map(a => getAnswerProps(a))
+    }
+
+    const getAnswerProps = (answer: AnswerProps): AnswerProps => {
+        if (answer.type === 'text') {
+            return {
+                ...answer,
+                textAnswer: {
+                    question: answer.textAnswer?.question || '',
+                    answer: answer.textAnswer?.answer || '',
+                    setAnswer: (a: string) => writeTextAnswer(answer.textAnswer?.questionId || '', a),
+                }
+            }
+        }
+        if (answer.type === 'choiceText') {
+            return {
+                ...answer,
+                textChoiceAnswer: {
+                    question: answer.textChoiceAnswer?.question || '',
+                    options: answer.textChoiceAnswer?.options || [],
+                    selected: answer.textChoiceAnswer?.selected || '',
+                    setSelected: (selected: string) => selectTextChoiceAnswer(answer.textChoiceAnswer?.questionId || '', selected),
+                }
+            }
+        }
+        if (answer.type === 'choiceImage') {
+            return {
+                ...answer,
+                imageChoiceAnswer: {
+                    question: answer.imageChoiceAnswer?.question || '',
+                    options: answer.imageChoiceAnswer?.options || [],
+                    selected: answer.imageChoiceAnswer?.selected || '',
+                    setSelected: (selected: string) => selectImageChoiceAnswer(answer.imageChoiceAnswer?.questionId || '', selected),
+                }
+            }
+        }
+        if (answer.type === 'image') {
+            return {
+                ...answer,
+                imageAnswer: {
+                    question: answer.imageAnswer?.question || '',
+                    images: answer.imageAnswer?.images || [],
+                    setImages: (images: string[]) => selectImageAnswer(answer.imageAnswer?.questionId || '', images),
+                }
+            }
+        }
+        return answer;
+    }
+
+    const writeTextAnswer = (questionId: string, answer: string) => {
+        let answers: AnswerProps[] = [];
+        if (mode === 'create') {
+            answers = newAnswers.map(a => {
+                if (a.textAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        textAnswer: {
+                            question: a.textAnswer?.question || '',
+                            answer: answer,
+                            questionId: a.textAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            })
+            setNewAnswers(answers);
+        }
+        if (mode === 'edit') {
+            setLoadedAnswers(prev => prev.map(a => {
+                if (a.textAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        textAnswer: {
+                            question: a.textAnswer?.question || '',
+                            answer: answer,
+                            questionId: a.textAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            }));
+        }
+    }
+
+    const selectImageAnswer = (questionId: string, images: string[]) => {
+        if (mode === 'create') {
+            setNewAnswers(prev => prev.map(a => {
+                if (a.imageAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        imageAnswer: {
+                            question: a.imageAnswer?.question || '',
+                            images: images,
+                            questionId: a.imageAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            }));
+        }
+        if (mode === 'edit') {
+            setLoadedAnswers(prev => prev.map(a => {
+                if (a.imageAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        imageAnswer: {
+                            question: a.imageAnswer?.question || '',
+                            images: images,
+                            questionId: a.imageAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            }));
+        }
+    }
+
+    const selectTextChoiceAnswer = (questionId: string, selected: string) => {
+        let answers: AnswerProps[] = [];
+        if (mode === 'create') {
+            answers = newAnswers.map(a => {
+                if (a.textChoiceAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        textChoiceAnswer: {
+                            question: a.textChoiceAnswer?.question || '',
+                            options: a.textChoiceAnswer?.options || [],
+                            selected: selected,
+                            questionId: a.textChoiceAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            })
+            setNewAnswers(answers);
+        }
+        if (mode === 'edit') {
+            setLoadedAnswers(prev => prev.map(a => {
+                if (a.textChoiceAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        textChoiceAnswer: {
+                            question: a.textChoiceAnswer?.question || '',
+                            options: a.textChoiceAnswer?.options || [],
+                            selected: selected,
+                            questionId: a.textChoiceAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            }));
+        }
+    }
+
+    const selectImageChoiceAnswer = (questionId: string, selected: string) => {
+        let answers: AnswerProps[] = [];
+        if (mode === 'create') {
+            answers = newAnswers.map(a => {
+                if (a.imageChoiceAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        imageChoiceAnswer: {
+                            question: a.imageChoiceAnswer?.question || '',
+                            options: a.imageChoiceAnswer?.options || [],
+                            selected: selected,
+                            questionId: a.imageChoiceAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            })
+            setNewAnswers(answers);
+        }
+        if (mode === 'edit') {
+            setLoadedAnswers(prev => prev.map(a => {
+                if (a.imageChoiceAnswer?.questionId === questionId) {
+                    return {
+                        type: a.type,
+                        imageChoiceAnswer: {
+                            question: a.imageChoiceAnswer?.question || '',
+                            options: a.imageChoiceAnswer?.options || [],
+                            selected: selected,
+                            questionId: a.imageChoiceAnswer?.questionId || '',
+                        }
+                    }
+                }
+                return a;
+            }));
+        }
+    }
+
+    const mapType = (type: "TEXT" | "IMAGE" | "CHOICE", choiceType: "TEXT" | "IMAGE"): 'choiceImage' | 'choiceText' | 'text' | 'image' => {
+        if (type === "TEXT") return "text";
+        if (type === "IMAGE") return "image";
+        if (type === "CHOICE" && choiceType === "TEXT") return "choiceText";
+        return "choiceImage";
+    }
+
+    const mapAnswer = (question: Question, type: 'choiceImage' | 'choiceText' | 'text' | 'image',
+        answer?: string, images?: string[]
+    ) => {
+        switch (type) {
+            case 'text':
+                return {
+                    textAnswer: generateTextAnswer(question, answer)
+                }
+            case 'image':
+                return {
+                    imageAnswer: generateImageAnswer(question, images)
+                }
+            case 'choiceText':
+                return {
+                    textChoiceAnswer: generateTextChoiceAnswer(question, answer)
+                }
+            case 'choiceImage':
+                return {
+                    imageChoiceAnswer: generateImageChoiceAnswer(question, answer)
+                }
+        }
+    }
+
+    const generateTextAnswer = (question: Question, answer?: string): TextAnswerProps => {
+        return {
+            question: question.title,
+            questionId: question.id,
+            answer: answer ?? '',
+        }
+    }
+
+    const generateImageAnswer = (question: Question, images?: string[]): ImageAnswerProps => {
+        return {
+            question: question.title,
+            questionId: question.id,
+            images: images || [],
+        }
+    }
+
+    const generateTextChoiceAnswer = (question: Question, answer?: string): TextChoiceAnswerProps => {
+        return {
+            question: question.title,
+            questionId: question.id,
+            selected: answer ?? '',
+            options: question.choices ? question.choices.map(c => c.option) : [],
+        }
+    }
+
+    const generateImageChoiceAnswer = (question: Question, answer?: string): ImageChoiceAnswerProps => {
+        return {
+            question: question.title,
+            questionId: question.id,
+            selected: answer ?? '',
+            options: question.choices ? question.choices.map(c => {
+                return {
+                    value: c.option,
+                    image: c.image ? c.image : ''
+                }
+            }) : [],
+        }
+    }
+
+    return {
+        getCitaProps,
+        initServiceItem,
+        generateAnswersProps,
+        addServiceItem,
+        answerError,
+        getItems,
+        createOrder,
+        answersData,
+        onDeleteServiceItem,
+        editServiceItem,
+        serviceItems,
+        loadServiceItem,
+        mode,
+        discartChanges,
+        clientProps: clientController.getAutocompleteProps(),
+        paymentTypeProps: paymentTypeController.getProps(),
+        orderStatusProps: orderStatusController.getProps(),
+        orderPaymentStatusProps: orderPaymentStatusController.getProps(),
+        clientConfirmedProps: clientConfirmedController.getProps(),
+    }
+}
+
+const useCitaCalendar = () => {
+    const calendarController = useCalendar();
+    const [selectedDate, setSelectedDate] = useState<DateValue>();
+    const [otherDates, setOtherDates] = useState<DateValue[]>([]);
+
+    const addOtherDates = (dates: DateValue[]) => {
+        const newOtherDates = [...otherDates, ...dates.map(d => { return { ...d, color: 'gray' } })];
+        const joinedDates = joinSchedules(newOtherDates);
+        setOtherDates(joinedDates);
+        calendarController.setValues(joinedDates);
+    }
+
+    const setOthers = (dates: DateValue[]) => {
+        const newOtherDates = dates.map(d => { return { ...d, color: 'gray' } });
+        const joinedDates = joinSchedules(newOtherDates);
+        setOtherDates(joinedDates);
+        if (selectedDate) {
+            calendarController.setValues([...joinedDates, selectedDate]);
+        }
+        else {
+            calendarController.setValues(joinedDates);
+        }
+    }
+
+    const clearOtherDates = () => {
+        otherDates.forEach(d => {
+            calendarController.removeValue(d.start, d.end);
+        });
+        setOtherDates([]);
+    }
+
+    const selectDate = (start: Date, end: Date) => {
+        setSelectedDate({ start, end, color: '#F87171' });
+        calendarController.addValue(start, end, '#F87171');
+    }
+
+    const desSelectDate = () => {
+        if (selectedDate) {
+            calendarController.removeValue(selectedDate.start, selectedDate.end);
+            setSelectedDate(undefined);
+        }
+    }
+
+    const isSelectable = () => {
+        if (otherDates.length > 0) {
+            return selectedDate === undefined;
+        }
+        return calendarController.isEmpty()
     }
 
     const joinSchedules = (schedules: DateValue[]): DateValue[] => {
@@ -442,119 +838,32 @@ export const useCita = () => {
         return result;
     };
 
-    const createOrder = async () => {
-        validateOrder();
-        let progresStatus = progressControler.value.toUpperCase();
-        if (progresStatus === 'EN PROGRESO') {
-            progresStatus = 'EN_PROGRESO';
-        }
-        const order: CreateOrder = {
-            clientId: allUsers.find(user => user.email === clientEmailController.selectedValue)?.id ?? '',
-            status: {
-                status: orderStatusController.active ? 'CONFIRMADO' : 'NO_CONFIRMADO',
-                progressStatus: progresStatus as 'PENDIENTE' | 'EN_PROGRESO' | 'FINALIZADO',
-                paymentStatus: orderPaymentStatusController.active ? 'PAGADO' : 'PENDIENTE',
-                paymentType: paymentTypeController.value.toUpperCase() as 'EFECTIVO' | 'TARJETA'
-            }
-        }
-        const _order = await orderApi.createOrder(order)
-        if (!_order) return;
-        await addServiceItemsToOrder(_order.id);
-        successOrderCreatedMessage()
-        clearForm();
-    }
-
-    const addServiceItemsToOrder = async (orderId: string) => {
-        for (const item of serviceItems) {
-            item.orderId = orderId
-            const payments = item.payments.map(payment => {
-                return {
-                    employeeId: allEmployees.find(e => e.email === payment.employeeId)?.id ?? '',
-                    percentage: payment.percentage,
-                    employeeName: payment.employeeName,
-                    paymentType: payment.paymentType ?? 'porcentaje'
-                }
-            })
-            await orderApi.addServiceItem({
-                ...item,
-                payments: payments,
-            })
+    const getProps = (): CalendarInputProps => {
+        return {
+            values: calendarController.values,
+            onSelect: selectDate,
+            onRemove: desSelectDate,
+            selectable: isSelectable(),
+            error: calendarController.error,
         }
     }
 
-    const validateOrder = (): boolean => {
-        let isValid = true;
-        if (serviceItems.length === 0) {
-            notSelectedItemMessage();
-            isValid = false;
-        }
-        if (clientEmailController.selectedValue === "") {
-            clientEmailController.setError("Seleccione un cliente");
-            isValid = false;
-        }
-        if (paymentTypeController.value === "") {
-            paymentTypeController.setError("Seleccione un método de pago");
-            isValid = false;
-        }
-        if (progressControler.value === "") {
-            progressControler.setError("Seleccione un estado de progreso");
-            isValid = false;
-        }
-        return isValid;
-    }
-
-    const clearForm = () => {
-        clearErrors()
-        clientEmailController.clearInput();
-        paymentTypeController.clearInput();
-        progressControler.clearInput();
-        orderStatusController.setActive(false);
-        orderPaymentStatusController.setActive(false);
-        setServiceItems([]);
-        setSchedule([]);
-        setDiscardedSchedule([]);
-    }
-
-    const clearErrors = () => {
-        clientEmailController.clearError();
-        paymentTypeController.clearError();
-        progressControler.clearError();
+    const clearInput = () => {
+        calendarController.clearInput();
+        setSelectedDate(undefined);
+        setOtherDates([]);
     }
 
     return {
-        getCreateCitaProps,
-        initNewServiceItem: () => {
-            clearServiceItem();
-            clearServiceItemsErrors();
-            setMode('create');
-            serviceNameController.setValues([])
-            discartedSchedule.forEach(s => {
-                setSchedule(prev => prev.map(d => {
-                    if (d.employeeId === s.employeeId) {
-                        return {
-                            employeeId: d.employeeId,
-                            dateValues: [...d.dateValues, ...s.dateValues.map(v => {
-                                return {
-                                    start: v.start,
-                                    end: v.end,
-                                    color: 'gray'
-                                }
-                            })]
-                        }
-                    }
-                    return d;
-                }))
-            })
-            setDiscardedSchedule([]);
-        },
-        getItems,
-        initServiceItem,
-        serviceItems,
-        clientEmailProps: clientEmailController.getAutocompleteProps(),
-        paymentTypeProps: paymentTypeController.getProps(),
-        createOrder,
-        progressProps: progressControler.getProps(),
-        orderStatusProps: orderStatusController.getProps(),
-        orderPaymentStatusProps: orderPaymentStatusController.getProps(),
+        calendarController,
+        selectedDate,
+        otherDates,
+        addOtherDates,
+        selectDate,
+        desSelectDate,
+        clearInput,
+        getProps,
+        clearOtherDates,
+        setOthers
     }
 }

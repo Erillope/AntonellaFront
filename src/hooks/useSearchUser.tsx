@@ -23,7 +23,7 @@ export const useSearchUser = () => {
 
     useEffect(() => {
         const init = async () => {
-            const allUsers = await authApi.filterUsers({ orderBy: "name", orderDirection: "ASC" });
+            const allUsers = await authApi.filterUsers({});
             const allRoles = await roleApi.getRoles();
             const permissions = await permissionVerifier.getUserAccessPermissions();
             if (!permissions.read) {navigate('/')}

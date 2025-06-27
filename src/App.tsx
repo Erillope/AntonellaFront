@@ -25,11 +25,12 @@ import { CreateCita } from "./pages/CreateCita";
 import { CreateServiceForm } from "./pages/CreateServiceForm";
 import { ServiceInfoForm } from "./pages/ServiceInfoForm";
 import { SearchOrderItem } from "./pages/SearchOrderItem";
+import { CitaInfo } from "./pages/CitaInfo";
 
 function App() {
 
   return (
-    <Router>
+    <Router basename="/admin">
       <Routes>
 
         <Route element={<AuthLayout/>}>
@@ -61,6 +62,7 @@ function App() {
             <Route path="product/search/:id" element={<EditProduct/>}/>
             <Route path="citas/create/" element={<CreateCita/>}/>
             <Route path="citas/search/" element={<SearchOrderItem/>}/>
+            <Route path="citas/search/:id" element={<CitaInfo/>}/>
           </Route>
         </Route>
 

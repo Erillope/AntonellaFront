@@ -5,9 +5,11 @@ import { SelectInput } from "../components/inputs/SelectInput"
 import { DateInput } from "../components/inputs/DateInput"
 import { InputTextField2 } from "../components/inputs/InputTextField"
 import { SwitchInput } from "../components/inputs/SwitchInput"
+import { useNavigate } from "react-router-dom"
 
 
 export const SearchOrderItem = () => {
+    const navigate = useNavigate()
     const searchCitaController = useSearchCita()
 
     return (
@@ -27,7 +29,8 @@ export const SearchOrderItem = () => {
             </Box>
             <SwitchInput labelText="Mostrar solo citas no verificadas" {...searchCitaController.onlyVerifiedController}/>
             <Box paddingBottom={5}>
-                <OrderItemTable info={searchCitaController.ordersInfo} />
+                <OrderItemTable info={searchCitaController.ordersInfo} 
+                    onViewAction={(id: string) => navigate(id)}/>
             </Box>
             
         </Box>
