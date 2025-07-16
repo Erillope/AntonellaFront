@@ -11,7 +11,10 @@ import { JSX } from "react";
 export interface UserTableProps {
     width?: string;
     users?: User[];
+    page?: number;
+    onChangePage?: (page: number) => void;
     onViewAction?: (id: string) => void;
+    totalUsers?: number;
 }
 
 const headers: HeaderInfo[] = [
@@ -36,7 +39,9 @@ export function UserTable(props: UserTableProps) {
     return (
         <TableView headers={headers} width={props.width} rows={
             props.users?.map((user) => buildRow(user))
-        } />
+        } setPage={props.onChangePage} page={props.page}
+        totalRows={props.totalUsers}
+        />
     )
 }
 

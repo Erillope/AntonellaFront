@@ -26,11 +26,13 @@ import { CreateServiceForm } from "./pages/CreateServiceForm";
 import { ServiceInfoForm } from "./pages/ServiceInfoForm";
 import { SearchOrderItem } from "./pages/SearchOrderItem";
 import { CitaInfo } from "./pages/CitaInfo";
+import { Chats } from "./pages/Chats";
+import { CreateNotification } from "./pages/CreateNotification";
 
 function App() {
 
   return (
-    <Router basename="/admin">
+    <Router basename="/admin/">
       <Routes>
 
         <Route element={<AuthLayout/>}>
@@ -63,6 +65,8 @@ function App() {
             <Route path="citas/create/" element={<CreateCita/>}/>
             <Route path="citas/search/" element={<SearchOrderItem/>}/>
             <Route path="citas/search/:id" element={<CitaInfo/>}/>
+            <Route path="chats/" element={<Chats/>}/>
+            <Route path="notification/create/" element={<CreateNotification/>}/>
           </Route>
         </Route>
 

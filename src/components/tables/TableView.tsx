@@ -1,7 +1,7 @@
 import { Visibility } from "@mui/icons-material";
 import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { Pagination, PaginationItem } from "@mui/material";
-import React, { useEffect } from "react";
+import React from "react";
 import "../../styles/table.css";
 
 export interface RowComponent {
@@ -18,6 +18,10 @@ export interface TableViewProps {
     width?: string;
     rows?: RowComponent[];
     showPaginator?: boolean;
+    page?: number;
+    setPage?: (page: number) => void;
+    rowsPerPage?: number;
+    totalRows?: number;
 }
 
 export function TableView(props: TableViewProps) {
@@ -25,19 +29,18 @@ export function TableView(props: TableViewProps) {
         if (props.showPaginator === undefined) return true;
         return props.showPaginator;
     }
-    const [rowsPerPage, setRowsPerPage] = React.useState(showPaginator() ? 5 : props.rows?.length ?? 0);
-    const [page, setPage] = React.useState(0);
-    useEffect(() => setPage(0), [props.rows])
+    const rowsPerPage = showPaginator() ? props.rowsPerPage??5 : props.rows?.length ?? 0
 
     return (
-        <TableContainer component={Paper} sx={{ width: props.width ?? '100%', borderRadius: 5 }}>
+        <TableContainer component={Paper} sx={{ width: props.width ?? '100%', borderRadius: 5, overflowX: 'hidden' }}>
             <Table>
                 <TableHeader headers={props.headers} />
-                <TableViewBody rows={props.rows ?? []} page={page} rowsPerPage={rowsPerPage} colSpan={props.headers?.length}/>
+                <TableViewBody rows={props.rows ?? []} colSpan={props.headers?.length}/>
             </Table>
             {showPaginator() &&
-                <TablePaginator rowsLength={props.rows?.length ?? 0} page={page} setPage={setPage}
-                    rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage} />
+                <TablePaginator rowsLength={props.rows?.length ?? 0} page={props.page} setPage={props.setPage}
+                totalRows={props.totalRows}
+                rowsPerPage={rowsPerPage}/>
             }
         </TableContainer>
     )
@@ -63,19 +66,14 @@ function TableHeader(props: TableViewProps) {
 
 interface TableViewBodyProps {
     rows: RowComponent[];
-    page: number;
-    rowsPerPage: number;
     colSpan?: number;
     emptyMessage?: string;
 }
 
 function TableViewBody(props: TableViewBodyProps) {
-    const startElement = props.page * props.rowsPerPage;
-    const endElement = startElement + props.rowsPerPage;
-    const elements = props.rows.slice(startElement, endElement);
     return (
         <TableBody sx={{ backgroundColor: "#F3F3F3" }}>
-            {elements.map((row, index) => (
+            {props.rows.map((row, index) => (
                 <TableRow key={index}>
                     {row.cells.map((cell, cellIndex) => (
                         <TableCell key={cellIndex}>
@@ -86,7 +84,7 @@ function TableViewBody(props: TableViewBodyProps) {
                     ))}
                 </TableRow>
             ))}
-            {elements.length === 0 && (
+            {props.rows.length === 0 && (
                 <TableRow>
                     <TableCell colSpan={props.colSpan} style={{ textAlign: 'center', fontSize: 12}}>
                         {props.emptyMessage ?? "No hay elementos registrados"}
@@ -101,17 +99,20 @@ function TableViewBody(props: TableViewBodyProps) {
 interface TablePaginationProps {
     rowsLength: number;
     rowsPerPage: number;
-    page: number;
-    setPage: (page: number) => void;
-    setRowsPerPage: (rowsPerPage: number) => void;
+    page?: number;
+    setPage?: (page: number) => void;
+    totalRows?: number;
 }
 
 function TablePaginator(props: TablePaginationProps) {
+    const calculateTotalPages = (length: number) => {
+        return Math.ceil(length / props.rowsPerPage);
+    }
     return (
         <Pagination
-            count={props.rowsLength > 0 ? Math.ceil(props.rowsLength / props.rowsPerPage) : 1}
-            page={props.page + 1}
-            onChange={(_, page) => props.setPage(page - 1)}
+            count={props.totalRows ? calculateTotalPages(props.totalRows) : Math.ceil(props.rowsLength)}
+            page={(props.page??0) + 1}
+            onChange={(_, page) => props.setPage?.(page - 1)}
             variant="outlined"
             shape="rounded"
             siblingCount={1}

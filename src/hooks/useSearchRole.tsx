@@ -7,6 +7,8 @@ import { RoleData } from "../components/tables/RoleTable";
 export const useSearchRole = () => {
     const [allRoles, setAllRoles] = useState<RoleData[]>([]);
     const [roles, setRoles] = useState<RoleData[]>([]);
+    const [page, setPage] = useState(0);
+    const [totalRoles, setTotalRoles] = useState(0);
     const searchRoleController = useInputTextField()
     const roleApi = new RoleApi();
     const userApi = new AuthUserApi();
@@ -20,28 +22,42 @@ export const useSearchRole = () => {
                     id: role.id,
                     name: role.name,
                     accesses: role.accesses,
-                    numUsers: await userApi.getUsersByRole(role.name).then(users => users.length)
+                    numUsers: await userApi.filterUsers({role: role.name, onlyCount: true}).then((data) => data?.filteredCount?? 0)
                 }))
             );
             setAllRoles(rolesData);
-            setRoles(rolesData);
+            setRoles(rolesData.slice(0, 5));
+            setTotalRoles(rolesData.length);
         }
         init();
     }, [])
 
     const filterRole = () => {
+        setPage(0);
         if (searchRoleController.isEmpty()) {
-            setRoles(allRoles);
+            setRoles(allRoles.slice(0,5));
+            setTotalRoles(allRoles.length);
             return;
         }
         const filteredRoles = allRoles.filter((role) => role.name.toLowerCase().includes(searchRoleController.value.toLowerCase()));
         setRoles(filteredRoles);
+        setTotalRoles(filteredRoles.length);
     }
 
     useEffect(filterRole, [searchRoleController.value])
 
+    const onChangePage = (newPage: number) => {
+        setPage(newPage);
+        const offset = newPage * 5;
+        const paginatedRoles = allRoles.slice(offset, offset + 5);
+        setRoles(paginatedRoles);
+    }
+
     return {
         roles,
         searchRoleProps: searchRoleController.getProps(),
+        onChangePage,
+        page,
+        totalRoles,
     }
 }

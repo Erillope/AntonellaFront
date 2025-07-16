@@ -6,13 +6,13 @@ import { useNavigate } from "react-router-dom";
 
 export const SearchUser = () => {
     const navigate = useNavigate();
-    const { filteredUsers, filterUserProps } = useSearchUser();
+    const { filterUserProps, totalUsers, users, page, onChangePage } = useSearchUser();
     return (
         <Box display='flex' flexDirection='column' gap={5} width='90%'>
             <UserSearchFilters {...filterUserProps} />
             <Box paddingBottom={5}>
-                <UserTable users={filteredUsers}
-                    onViewAction={(userId: string) => navigate(`/user/search/${userId}`)} />
+                <UserTable users={users} onChangePage={onChangePage} totalUsers={totalUsers} page={page}
+                    onViewAction={(userId: string) => navigate(`/user/search/${userId}`)}/>
             </Box>
         </Box>
     );

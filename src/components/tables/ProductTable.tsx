@@ -15,6 +15,9 @@ const header: HeaderInfo[] = [
 interface ProductTableProps {
     products?: Product[];
     onViewAction?: (id: string) => void;
+    page?: number;
+    onChangePage?: (page: number) => void;
+    totalRows?: number;
 }
 
 export const ProductTable = (props: ProductTableProps) => {
@@ -32,6 +35,8 @@ export const ProductTable = (props: ProductTableProps) => {
     }
 
     return (
-        <TableView headers={header} rows={props.products?.map(buildRows)}/>
+        <TableView headers={header} rows={props.products?.map(buildRows)}
+        page={props.page} setPage={props.onChangePage} totalRows={props.totalRows}
+        />
     )
 }

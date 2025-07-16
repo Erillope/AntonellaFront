@@ -13,13 +13,16 @@ export interface RoleData {
 const headers: HeaderInfo[] = [
     { label: "Role", width: "20%" },
     { label: "Accesos", width: "60%" },
-    { label: "Num Usuarios", width: "10%" },
+    { label: "Num Usuarios", width: "20%" },
     { label: "Gestionar", width: "10%" }
 ]
 
 interface RoleTableProps {
     roles?: RoleData[];
     onViewAction?: (id: string) => void;
+    totalRoles?: number;
+    page?: number;
+    onChangePage?: (page: number) => void;
 }
 
 export const RoleTable = (props: RoleTableProps) => {
@@ -35,7 +38,9 @@ export const RoleTable = (props: RoleTableProps) => {
     }
 
     return (
-        <TableView headers={headers} rows={props.roles?.map(buildRow)}/>
+        <TableView headers={headers} rows={props.roles?.map(buildRow)}
+        totalRows={props.totalRoles} page={props.page} setPage={props.onChangePage}
+        />
     )
 }
 

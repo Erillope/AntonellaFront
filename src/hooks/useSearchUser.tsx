@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AuthUserApi, User } from "../api/user_api";
+import { AuthUserApi, FilterUserProps, User } from "../api/user_api";
 import { RoleApi } from "../api/role_api";
 import { useSelectInput } from "../components/inputs/SelectInput";
 import { useInputTextField } from "../components/inputs/InputTextField";
@@ -14,64 +14,67 @@ export const useSearchUser = () => {
     const phoneNumberController = useInputTextField();
     const dniController = useInputTextField();
     const roleControler = useSelectInput();
-
-    const [allUsers, setAllUsers] = useState<User[]>([]);
-    const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+    const [page, setPage] = useState<number>(0);
+    const [totalUsers, setTotalUsers] = useState<number>(0);
+    const [users, setUsers] = useState<User[]>([]);
     const authApi = new AuthUserApi();
     const permissionVerifier = new PermissionVerifier()
     const roleApi = new RoleApi();
 
     useEffect(() => {
         const init = async () => {
-            const allUsers = await authApi.filterUsers({});
+            const usersData = await authApi.filterUsers({limit: 5})
+            if (usersData) {
+                setTotalUsers(usersData.total);
+                setUsers(usersData.users);
+            }
             const allRoles = await roleApi.getRoles();
             const permissions = await permissionVerifier.getUserAccessPermissions();
             if (!permissions.read) {navigate('/')}
             roleControler.setValue("Todos");
             roleControler.setValues(["Todos", ...allRoles.map(role => role.name)]);
-            setAllUsers(allUsers);
-            setFilteredUsers(allUsers);
         }
         init();
     }, [])
 
-    const filterUsers = () => {
-        const _filteredUsers = allUsers.filter(user => includesName(user)).
-            filter(user => includesEmail(user)).
-            filter(user => includesPhoneNumber(user)).
-            filter(user => includesDni(user)).
-            filter(user => filterByRole(user))
-        setFilteredUsers(_filteredUsers);
+    const getFilterProps = (offset: number, limit: number): FilterUserProps => {
+        return {
+            offset,
+            limit,
+            name: nameController.isEmpty() ? undefined : nameController.value,
+            email: emailController.isEmpty() ? undefined : emailController.value,
+            phoneNumber: phoneNumberController.isEmpty() ? undefined : phoneNumberController.value,
+            dni: dniController.isEmpty() ? undefined : dniController.value,
+            role: roleControler.value === "Todos" ? undefined : roleControler.isEmpty() ? undefined : roleControler.value,
+        }
     }
 
-    useEffect(filterUsers, [nameController.value, emailController.value, phoneNumberController.value, dniController.value, roleControler.value])
-
-    const includesName = (user: User): boolean => {
-        if (nameController.isEmpty()) return true;
-        return user.name.toLowerCase().includes(nameController.value.toLowerCase())
+    const filter = async (): Promise<User[]> => {
+        const usersData = await authApi.filterUsers(getFilterProps(0, 5));
+        setPage(0)
+        if (usersData) {
+            setTotalUsers(usersData.filteredCount);
+            setUsers(usersData.users);
+            return usersData.users;
+        }
+        return [];
     }
 
-    const includesEmail = (user: User): boolean => {
-        if (emailController.isEmpty()) return true;
-        return user.email.toLowerCase().includes(emailController.value.toLowerCase())
+    const onChangePage = async (page: number) => {
+        const offset = page * 5;
+        const limit = 5;
+        const usersData = await authApi.filterUsers(getFilterProps(offset, limit));
+        setPage(page)
+        if (usersData) {
+            setTotalUsers(usersData.filteredCount);
+            setUsers(usersData.users);
+            return usersData.users;
+        }
+        return [];
     }
 
-    const includesPhoneNumber = (user: User): boolean => {
-        if (phoneNumberController.isEmpty()) return true;
-        return user.phoneNumber.toLowerCase().includes(phoneNumberController.value.toLowerCase())
-    }
+    useEffect(() => {filter()}, [nameController.value, emailController.value, phoneNumberController.value, dniController.value, roleControler.value])
 
-    const includesDni = (user: User): boolean => {
-        if (dniController.isEmpty()) return true;
-        return user.dni?.toLowerCase().includes(dniController.value.toLowerCase()) ?? false
-    }
-
-    const filterByRole = (user: User): boolean => {
-        if (roleControler.isEmpty()) return true;
-        if (roleControler.value === "Todos") return true;
-        if (!user.roles) return false;
-        return user.roles.some(role => role === roleControler.value)
-    }
 
     const getFilterUserProps = (): UserSearchFiltersProps => {
         return {
@@ -84,6 +87,10 @@ export const useSearchUser = () => {
     }
     return {
         filterUserProps: getFilterUserProps(),
-        filteredUsers
+        filter,
+        users,
+        totalUsers,
+        page,
+        onChangePage
     }
 }

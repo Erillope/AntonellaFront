@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom"
 
 export const SearchProduct = () => {
     const navigate = useNavigate()
-    const { nameProps, typeProps, startDateProps, endDateProps, products } = useSearchProduct()
+    const { nameProps, typeProps, startDateProps, endDateProps, products, page, onChangePage, totalFilteredProducts, totalProducts } = useSearchProduct()
 
     return (
         <Box width="90%" gap={5} display="flex" flexDirection="column">
@@ -24,9 +24,9 @@ export const SearchProduct = () => {
             </Box>
             <Box paddingBottom={5} display='flex' alignContent='flex-start' justifyContent='flex-start' flexDirection='column' width='100%' gap={1}>
                 <Typography fontSize={20} fontWeight='bold' color="black" width='30%'>
-                    Lista de productos {`(${products.length})`}
+                    Lista de productos {`(${totalProducts})`}
                 </Typography>
-                <ProductTable products={products}
+                <ProductTable products={products} page={page} onChangePage={onChangePage} totalRows={totalFilteredProducts}
                     onViewAction={(id: string) => navigate('/product/search/'+id)}/>
             </Box>
         </Box>

@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom"
 export const ServiceTypeInfo = () => {
     const { type } = useParams()
     const navigate = useNavigate()
-    const { services, subCategories } = useSearchService()
+    const { services, subCategories } = useSearchService({ category: type ?? '' })
     const subCategory = subCategories[type?.toUpperCase() ?? '']
     return (
         <Box width="90%" gap={2} display="flex" flexDirection="column">

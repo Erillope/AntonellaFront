@@ -47,7 +47,7 @@ export const useCita = (initId?: string) => {
 
     const init = async () => {
         serviceTypeController.setValues(movilCategories);
-        const clients = await userApi.filterUsers({ onlyClients: true });
+        const clients = await userApi.filterUsers({ onlyClients: true }).then(data => data?.users?? []);
         clientController.setValues(clients.map(c => c.name));
         paymentTypeController.setValues(['Efectivo', 'Tarjeta'])
         if (initId) {
@@ -222,7 +222,7 @@ export const useCita = (initId?: string) => {
 
     const createOrder = async () => {
         if (!validateOrder()) return;
-        const client = (await userApi.filterUsers({ exactName: clientController.selectedValue ?? '', onlyClients: true }))[0]
+        const client = (await userApi.filterUsers({ exactName: clientController.selectedValue ?? '', onlyClients: true }).then(data => data?.users??[]))[0]
         const order = await citaApi.createOrder({
             clientId: client.id,
             status: {
@@ -445,7 +445,7 @@ export const useCita = (initId?: string) => {
 
     const onSelectServiceType = async (value: string) => {
         serviceTypeController.setValue(value);
-        const users = await userApi.filterUsers({ serviceCategory: value.toUpperCase() });
+        const users = await userApi.filterUsers({ serviceCategory: value.toUpperCase() }).then(data => data?.users ?? []);
         employeePaymentsController.setAllEmployees(users)
         const services = await serviceApi.getByType(value.toUpperCase());
         if (services) {

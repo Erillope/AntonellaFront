@@ -1,6 +1,6 @@
 import { AbsctractApi } from "./abstract_api";
 import { API_URL } from "./config";
-import { toDate, removeHeaderFromImage, capitalizeFirstLetter, addDomainToUrl } from "./utils";
+import { toDate, removeHeaderFromImage, capitalizeFirstLetter, addDomainToUrl, toDateString } from "./utils";
 import axios from "axios";
 
 const productApiUrl = `${API_URL}product/`
@@ -47,6 +47,21 @@ export interface Product {
     status: string;
 }
 
+export interface ProductFilter {
+    name?: string;
+    type?: string;
+    startStockModifiedDate?: Date;
+    endStockModifiedDate?: Date;
+    limit?: number;
+    offset?: number;
+    onlyCount?: boolean;
+}
+
+export interface ProductFilterResponse {
+    total: number;
+    products: Product[];
+    filteredCount: number;
+}
 
 export class ProductApi extends AbsctractApi {
 
@@ -76,6 +91,22 @@ export class ProductApi extends AbsctractApi {
         try{
             const response = await axios.get(`${productApiUrl}`)
             return response.data.data.map((data: any) => this.map(data))
+        }
+        catch (error) {
+            this.catchError(error);
+        }
+    }
+
+    async filter(filter: ProductFilter): Promise<ProductFilterResponse | undefined> {
+        try{
+            const request = this.mapFilterRequest(filter)
+            const response = await axios.post(`${productApiUrl}filter/`, request)
+            const data = response.data.data
+            return {
+                total: data.total_count,
+                products: data.products.map((p: any) => this.map(p)),
+                filteredCount: data.filtered_count
+            }
         }
         catch (error) {
             this.catchError(error);
@@ -146,6 +177,18 @@ export class ProductApi extends AbsctractApi {
             stockModifiedDate: toDate(data.stock_modified_date),
             createdDate: toDate(data.created_date),
             status: data.status
+        }
+    }
+
+    private mapFilterRequest(filter: ProductFilter): any {
+        return {
+            name: filter.name,
+            service_type: filter.type?.toUpperCase(),
+            start_stock_modified_date: filter.startStockModifiedDate ? toDateString(filter.startStockModifiedDate) : undefined,
+            end_stock_modified_date: filter.endStockModifiedDate ? toDateString(filter.endStockModifiedDate) : undefined,
+            limit: filter.limit,
+            offset: filter.offset,
+            only_count: filter.onlyCount
         }
     }
 }

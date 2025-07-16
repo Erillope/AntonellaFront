@@ -63,4 +63,12 @@ export class PermissionVerifier {
             (await this.getUserPermissions(user, "PRODUCTOS")).empty &&
             (await this.getUserPermissions(user, "CITAS")).empty;
     }
+
+    async getChatAccessPermissions(): Promise<Permissions> {
+        return await this.getLoggedUserPermissions("CHATS");
+    }
+
+    async getNotificationAccessPermissions(): Promise<Permissions> {
+        return await this.getLoggedUserPermissions("NOTIFICACIONES");
+    }
 }

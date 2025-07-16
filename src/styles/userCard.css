@@ -1,0 +1,29 @@
+
+.userCard {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 16px;
+    background-color: #f3f3f3;
+    width: 100%;
+    margin: 8px auto;
+    height: 12%;
+    border-radius: 8px;
+}
+
+.userCard:hover {
+    background-color: #e0e0e0;
+    cursor: pointer;
+}
+
+.selectedUserCard {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 16px;
+    background-color: #e0e0e0;
+    width: 100%;
+    margin: 8px auto;
+    height: 12%;
+    border-radius: 8px;
+}

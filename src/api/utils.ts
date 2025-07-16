@@ -5,6 +5,11 @@ export const toDate = (date: string): Date => {
     return new Date(year, month - 1, day);
 }
 
+export const fromTimeStamp = (timestamp: string): Date => {
+    const cleanDateStr = timestamp.replace(/(\.\d{3})\d+/, '$1');
+    return new Date(cleanDateStr);
+}
+
 export const toDateString = (date: Date): string => {
     return date.toISOString().split('T')[0];
 }

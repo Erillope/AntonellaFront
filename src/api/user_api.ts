@@ -43,10 +43,21 @@ export interface CreateUserProps {
 export interface FilterUserProps {
     serviceCategory?: string;
     name?: string;
+    email?: string;
+    phoneNumber?: string;
+    dni?: string;
     exactName?: string;
     onlyClients?: boolean;
+    onlyCount?: boolean;
+    role?: string;
     offset?: number;
     limit?: number;
+}
+
+export interface UserFilterResponse {
+    total: number;
+    filteredCount: number;
+    users: User[];
 }
 
 export interface UpdateUserProps {
@@ -175,15 +186,20 @@ export class AuthUserApi extends AbsctractApi {
         return true;
     }
 
-    async filterUsers(filterData: FilterUserProps): Promise<User[]> {
+    async filterUsers(filterData: FilterUserProps): Promise<UserFilterResponse | undefined> {
         const request = this.mapFilterRequest(filterData);
         try {
             const response = await axios.post(userApiUrl+"filter/", request);
-            return response.data.data.map((user: any) => this.map(user));
+            const data = response.data.data;
+            return {
+                total: data.total,
+                filteredCount: data.filtered_count,
+                users: data.users.map((user: any) => this.map(user))
+            };
         }
         catch (error) {
             this.catchError(error);
-            return [];
+            return undefined;
         }
     }
 
@@ -195,17 +211,6 @@ export class AuthUserApi extends AbsctractApi {
         }
         catch (error) {
             this.catchError(error);
-        }
-    }
-
-    async getUsersByRole(role: string): Promise<User[]> {
-        try {
-            const response = await axios.get(userApiUrl+"role/", {params: {'role': role}});
-            return response.data.data.map((user: any) => this.map(user));
-        }
-        catch (error) {
-            this.catchError(error);
-            return [];
         }
     }
 
@@ -276,10 +281,15 @@ export class AuthUserApi extends AbsctractApi {
         return {
             'service_category': data.serviceCategory?.toUpperCase(),
             'name': data.name?.toUpperCase(),
+            'role': data.role,
             'exact_name': data.exactName,
             'only_clients': data.onlyClients ?? false,
+            'only_count': data.onlyCount ?? false,
             'offset': data.offset,
             'limit': data.limit,
+            'email': data.email,
+            'phone_number': data.phoneNumber,
+            'dni': data.dni,
         }
     }
 

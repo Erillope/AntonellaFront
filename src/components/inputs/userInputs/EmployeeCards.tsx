@@ -18,6 +18,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({ user }) => {
             width={'50%'}
             margin="8px auto"
             borderRadius="10px"
+            maxHeight={"50px"}
         >
             <Avatar
                 src={user?.photo ?? ''}
