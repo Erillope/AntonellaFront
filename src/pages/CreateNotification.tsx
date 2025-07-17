@@ -3,9 +3,9 @@ import { NotificationInputs } from "../components/inputs/notificationInputs/Noti
 import { useNotification } from "../hooks/useNotification"
 
 export const CreateNotification = () => {
-    const { getProps } = useNotification()
+    const { getProps, sendNotification } = useNotification()
     
-    return <ActionForm width="90%" handleSubmit={() => { }}>
+    return <ActionForm width="90%" handleSubmit={sendNotification}>
         <NotificationInputs {...getProps()}/>
     </ActionForm>
 }

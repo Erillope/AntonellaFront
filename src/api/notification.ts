@@ -17,7 +17,11 @@ export interface Notification {
 export class NotificationApi extends AbsctractApi {
     async sendNotification(notification: Notification): Promise<void> {
         const request = this.mapSendNotificationRequest(notification);
-        console.log(request)
+        try {
+            await axios.post(notificationApiUrl, request);
+        } catch (error) {
+            this.catchError(error);
+        }
     }
 
     private mapSendNotificationRequest(notification: Notification): any {
@@ -25,7 +29,7 @@ export class NotificationApi extends AbsctractApi {
             title: notification.title,
             body: notification.body,
             to: notification.to,
-            type: notification.type,
+            type: notification.type?.toUpperCase(),
             publish_date: notification.publishDate ? toDateTimeString(notification.publishDate) : undefined
         };
     }

@@ -14,7 +14,7 @@ export const NotificationInputs = (props: NotificationInputsProps) => {
         <Box display="flex" flexDirection="column" alignItems="center" width="100%" gap={2}>
             <Box display="flex" flexDirection="row" alignItems="center" width="100%" gap={2}>
                 <InputTextField2 labelText="Título" {...props.titleProps}/>
-                <SelectInput labelText="Tipo" {...props.typeProps}/>
+                <SelectInput labelText="Para" {...props.typeProps}/>
             </Box>
             <Box display="flex" flexDirection="row" alignItems="center" width="100%" gap={2}>
                 <InputTextField2 labelText="Cuerpo" rows={4} {...props.bodyProps}/>
