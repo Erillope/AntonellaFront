@@ -1,19 +1,21 @@
 import { Box } from "@mui/material"
 import { DateInput, DateInputProps, useDateInput } from "../DateInput"
 import { InputTextFieldProps, NumberInputField, useInputTextField } from "../InputTextField"
+import { useState } from "react";
 
 export interface NotificationDateProps {
     dateProps?: DateInputProps;
     hourProps?: InputTextFieldProps;
     minutesProps?: InputTextFieldProps;
+    disabled?: boolean;
 }
 
 export const NotificationDate = (props: NotificationDateProps) => {
     return <Box display="flex" flexDirection="column" alignItems="center" width="100%" gap={2}>
-        <DateInput labelText="Fecha" {...props.dateProps}/>
+        <DateInput labelText="Fecha" {...props.dateProps} disabled={props.disabled}/>
         <Box display="flex" flexDirection="row" alignItems="center" width="100%" gap={2}>
-            <NumberInputField labelText="Hora" {...props.hourProps}/>
-            <NumberInputField labelText="Minutos" {...props.minutesProps}/>
+            <NumberInputField labelText="Hora" {...props.hourProps} disabled={props.disabled}/>
+            <NumberInputField labelText="Minutos" {...props.minutesProps} disabled={props.disabled}/>
         </Box>
     </Box>
 }
@@ -23,6 +25,7 @@ export const useNotificationDate = () => {
     const dateController = useDateInput()
     const hourController = useInputTextField()
     const minutesController = useInputTextField()
+    const [disabled, setDisabled] = useState(false);
 
     const getDate = (): Date => {
         const date = dateController.value;
@@ -35,13 +38,27 @@ export const useNotificationDate = () => {
 
     const validate = (): boolean => {
         dateController.clearError();
+        let isValid = true;
+        if (dateController.value === null) {
+            dateController.setError("La fecha es obligatoria");
+            isValid = false;
+        }
+        if (hourController.isEmpty()) {
+            hourController.setError("La hora es obligatoria");
+            isValid = false;
+        }
+        if (minutesController.isEmpty()) {
+            minutesController.setError("Los minutos son obligatorios");
+            isValid = false;
+        }
+        if (!isValid) return false;
         const date = getDate();
         const now = new Date();
         if (date < now) {
             dateController.setError("La fecha y hora de publicación debe ser futura");
-            return false;
+            isValid = false;
         }
-        return true;
+        return isValid;
     }
     
     const clearError = () => {
@@ -60,7 +77,8 @@ export const useNotificationDate = () => {
         return {
             dateProps: dateController.getProps(),
             hourProps: hourController.getProps(),
-            minutesProps: minutesController.getProps()
+            minutesProps: minutesController.getProps(),
+            disabled: disabled
         }
     }
 
@@ -72,6 +90,8 @@ export const useNotificationDate = () => {
         validate,
         clearError,
         clearInputs,
-        getProps
+        getProps,
+        disabled,
+        setDisabled
     }
 }

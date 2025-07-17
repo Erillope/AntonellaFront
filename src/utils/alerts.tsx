@@ -273,3 +273,9 @@ export const successOrderCreatedMessage = () => {
     const message = "La orden ha sido creada exitosamente.";
     showAlert({message, title, type: 'ok'});
 }
+
+export const successNotificationCreatedMessage = () => {
+    const title = "Notificación creada";
+    const message = "La notificación ha sido creada exitosamente.";
+    showAlert({message, title, type: 'ok'});
+}
