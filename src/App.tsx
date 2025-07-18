@@ -29,6 +29,7 @@ import { CitaInfo } from "./pages/CitaInfo";
 import { Chats } from "./pages/Chats";
 import { CreateNotification } from "./pages/CreateNotification";
 import { SearchNotification } from "./pages/SearchNotification";
+import { NotificationInfo } from "./pages/NotificationInfo";
 
 function App() {
 
@@ -69,6 +70,7 @@ function App() {
             <Route path="chats/" element={<Chats/>}/>
             <Route path="notification/create/" element={<CreateNotification/>}/>
             <Route path="notification/search/" element={<SearchNotification/>}/>
+            <Route path="notification/search/:id" element={<NotificationInfo/>}/>
           </Route>
         </Route>
 

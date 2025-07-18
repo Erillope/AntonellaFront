@@ -15,7 +15,7 @@ export const NotificationDate = (props: NotificationDateProps) => {
         <DateInput labelText="Fecha" {...props.dateProps} disabled={props.disabled}/>
         <Box display="flex" flexDirection="row" alignItems="center" width="100%" gap={2}>
             <NumberInputField labelText="Hora" {...props.hourProps} disabled={props.disabled}/>
-            <NumberInputField labelText="Minutos" {...props.minutesProps} disabled={props.disabled}/>
+            <NumberInputField labelText="Minuto" {...props.minutesProps} disabled={props.disabled}/>
         </Box>
     </Box>
 }
@@ -49,6 +49,13 @@ export const useNotificationDate = () => {
         }
         if (minutesController.isEmpty()) {
             minutesController.setError("Los minutos son obligatorios");
+            isValid = false;
+        }
+        if (minutesController.value && (parseInt(minutesController.value) < 0 || parseInt(minutesController.value) > 59)) {
+            minutesController.setError("Debería ser entre 0 y 59");
+        }
+        if (hourController.value && (parseInt(hourController.value) < 0 || parseInt(hourController.value) > 23)) {
+            hourController.setError("Debería ser entre 0 y 23");
             isValid = false;
         }
         if (!isValid) return false;
