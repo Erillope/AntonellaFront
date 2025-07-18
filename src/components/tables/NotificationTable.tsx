@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material"
 import { HeaderInfo, ManageActionCell, RowComponent, TableView } from "./TableView"
 import { Notification } from "../../api/notification"
-import { capitalizeFirstLetter, toDateString, toTimeString } from "../../api/utils"
+import { toDateString, toTimeString } from "../../api/utils"
 
 const headers: HeaderInfo[] = [
     { label: 'Título', width: '30%' },

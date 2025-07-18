@@ -1,7 +1,7 @@
 import { AbsctractApi } from "./abstract_api";
 import { API_URL } from "./config";
 import axios from "axios";
-import { capitalizeFirstLetter, fromDayTimeString, fromTimeStamp } from "./utils";
+import { capitalizeFirstLetter, fromTimeStamp } from "./utils";
 
 const notificationApiUrl = `${API_URL}notification/`;
 
